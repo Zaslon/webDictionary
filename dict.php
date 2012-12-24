@@ -1,4 +1,12 @@
 <?php echo '<' . '?xml version="1.0" encoding="utf-8"?' . '>'; ?>
+<?php
+//エスケープしてprintする関数．
+function print_h($str)
+{
+    print htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+}
+?>
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="ja" xml:lang="ja" dir="ltr">
 <head>
@@ -19,8 +27,9 @@
 		<a class="menu" href="http://starlightensign.com">ホームへ戻る</a>
 	</div>
 	<div class="dictVer">
-		<p>オンライン辞書 ver:1.1.0</p>
+		<p>オンライン辞書 ver:1.2.0</p>
 		<?php
+		date_default_timezone_set('Asia/Tokyo');
 		$mod = filemtime("dicData.xml");
 		print "<p>辞書更新日:".date("Y/m/d",$mod)."</p>";
 		?>
@@ -31,8 +40,8 @@
 	$checked_3 = "";
 	$checked_4 = "";
 	
-	if((isset($_POST["type"])) && ($_POST["type"] != "")) {
-		switch($_POST["type"]) {
+	if((isset($_GET["type"])) && ($_GET["type"] != "")) {
+		switch($_GET["type"]) {
 			case "word":
 			$checked_1 = "checked";
 			break;
@@ -52,94 +61,157 @@
 	}
 	?>
 	
-	<form action="#" method="POST">
+	<form action="" method="GET">
 		<input type="text" name="keyBox">
-		<input type="radio" name="type" value="word" <?php echo $checked_1; ?>>見出し語検索
-		<input type="radio" name="type" value="trans" <?php echo $checked_2; ?>>訳語検索
-		<input type="radio" name="type" value="ex" <?php echo $checked_3; ?>>用例検索
-		<input type="radio" name="type" value="all" <?php echo $checked_4; ?>>全文検索
 		<input type="submit" name="submit" value="検索">
+		<input type="radio" name="type" value="word" <?php echo $checked_1; ?>><p>見出し語検索</p>
+		<input type="radio" name="type" value="trans" <?php echo $checked_2; ?>><p>訳語検索</p>
+		<input type="radio" name="type" value="ex" <?php echo $checked_3; ?>><p>用例検索</p>
+		<input type="radio" name="type" value="all" <?php echo $checked_4; ?>><p>全文検索</p>
+		<input type="hidden" name="page" value="1">
 	</form>
 	</div>
 
 	<div id="main">
 	<?php
-//keyBoxに入力されているときのみ，$keyWordに代入
-		if (isset($_POST['keyBox'])){
-			$keyWord = htmlspecialchars($_POST["keyBox"]);//タグやスクリプトのを不活性化
+	$target = "";
+	$hitAmount = 0;
+	$data = "";
+	$keyWord = "";
+	$totalPages = 0;
+	//keyBoxに入力されているときのみ，$keyWordに代入
+		if (isset($_GET['keyBox'])){
+		//数字が入力されていたら$keyWordは空になる．
+			if (preg_match("/^.*[0-9].*/", $_GET['keyBox'])) {
+				print "検索ワードに数字を入力しないでください．";
+			} else {
+			$keyWord = $_GET["keyBox"];
 			$keyWord = strtolower($keyWord);//小文字にする
+			}
 		}
+		//$keyWordが空なら警告を表示して終了する．
 		if(empty($keyWord)){
-			echo "検索ワードを入力してください．";
+			print "検索ワードを入力してください．";
 	    }else{
-//検索対象を取得
-		    $target = $_POST["type"];
-			$hitAmount = 0;
-			$data = "";
-/* xmlファイルを読み込む */
-			$xml = new SimpleXMLElement("dicData.xml",0,true);
-			$data_arr = $xml->record;
-//$data_arrはrecordノードの集合体なので，各ループにおける$rowはword,trans,exノードからなる単語データとなる
-			foreach ($data_arr as $row) {
-//各配列の[-1]はあるループにおけるrecordの要素の値，つまり一単語分を抽出している
-				$word[-1] =$row->word;
-				$word[-1] = strtolower($word[-1]);//検索時のみ小文字化．表示に影響しない．
-				$trans[-1] = $row->trans;
-				$ex[-1] = $row->ex;
-//allが検索対象の場合の処理
-				if($target=='all') {
-//全要素中に$keyWordと一致する部分が無い場合，何も返さない．
-					if(strstr($word[-1],$keyWord) == false && strstr($trans[-1],$keyWord) == false && strstr($ex[-1],$keyWord) == false){
+			//検索対象を取得
+			if (!($_GET["type"]=='word' || $_GET["type"]=='trans' || $_GET["type"]=='ex' || $_GET["type"]=='all')) {
+				print '検索対象指定が不正です．';
+				exit();
+			}else{
+			    $target = $_GET["type"];
+				/* xmlファイルを読み込む */
+				$xml = new SimpleXMLElement("dicData.xml",0,true);
+				$data_arr = $xml->record;
+				//$data_arrはrecordノードの集合体なので，各ループにおける$rowはword,trans,exノードからなる単語データとなる
+				foreach ($data_arr as $row) {
+					//各配列の[-1]はあるループにおけるrecordの要素の値，つまり一単語分を抽出している
+					$word[-1] =$row->word;
+					$word[-1] = strtolower($word[-1]);//検索時のみ小文字化．表示に影響しない．
+					$trans[-1] = $row->trans;
+					$ex[-1] = $row->ex;
+					//allが検索対象の場合の処理
+					if($target=='all') {
+					//全要素中に$keyWordと一致する部分が無い場合，何も返さない．
+						if(strstr($word[-1],$keyWord) == false && strstr($trans[-1],$keyWord) == false && strstr($ex[-1],$keyWord) == false){
+						}else{
+						    $word[$hitAmount] =$row->word;
+						    $trans[$hitAmount] =$row->trans;
+						    $ex[$hitAmount] =$row->ex;
+							//訳語の"【"，ex部の”．”の前に改行タグを挿入
+						    $trans[$hitAmount] = str_replace("【" , "<br />【" , $trans[$hitAmount]);
+							//$ex[$hitAmount] = str_replace("【" , "<br />【" , $ex[$hitAmount]);
+						    $ex[$hitAmount] = str_replace("．" , "．<br />" , $ex[$hitAmount]);
+							//最初の"【"の前には改行タグは必要ないので，各要素を最初の"【"以降のみにする
+							//もし"【"をひとつも含まない時は，この処理を行うと空白になってしまうので，それを阻止する．
+							if(strstr($trans[$hitAmount],"【") == true) {$trans[$hitAmount] = strstr($trans[$hitAmount],"【");}
+							if(strstr($ex[$hitAmount],"【") == true){$ex[$hitAmount] = strstr($ex[$hitAmount],"【");}
+						    $hitAmount ++;
+						}
 					}else{
-					    $word[$hitAmount] =$row->word;
-					    $trans[$hitAmount] =$row->trans;
-					    $ex[$hitAmount] =$row->ex;
-//訳語の"【"，ex部の”．”の前に改行タグを挿入
-					    $trans[$hitAmount] = str_replace("【" , "<br />【" , $trans[$hitAmount]);
-						//$ex[$hitAmount] = str_replace("【" , "<br />【" , $ex[$hitAmount]);
-					    $ex[$hitAmount] = str_replace("．" , "．<br />" , $ex[$hitAmount]);
-//最初の"【"の前には改行タグは必要ないので，各要素を最初の"【"以降のみにする
-//もし"【"をひとつも含まない時は，この処理を行うと空白になってしまうので，それを阻止する．
-						if(strstr($trans[$hitAmount],"【") == true) {$trans[$hitAmount] = strstr($trans[$hitAmount],"【");}
-						if(strstr($ex[$hitAmount],"【") == true){$ex[$hitAmount] = strstr($ex[$hitAmount],"【");}
-					    $hitAmount ++;
-					}
-				}else{
-//検索対象部中に$keyWordと一致する部分が無い場合，何も返さない．
-					if(strstr(${$target}[-1],$keyWord) == false){
-//検索対象部中に$keyWordと一致する部分がある場合，その単語を表示用の$dataに格納する．
-					}else{
-					    $word[$hitAmount] =$row->word;
-					    $trans[$hitAmount] =$row->trans;
-					    $ex[$hitAmount] =$row->ex;
-//訳語の"【"，ex部の”．”の前に改行タグを挿入
-					    $trans[$hitAmount] = str_replace("【" , "<br />【" , $trans[$hitAmount]);
-					    $ex[$hitAmount] = str_replace("．" , "．<br />" , $ex[$hitAmount]);
-//最初の"【"の前には改行タグは必要ないので，各要素を最初の"【"以降のみにする
-//もし"【"をひとつも含まない時は，この処理を行うと空白になってしまうので，それを阻止する．
-						if(strstr($trans[$hitAmount],"【") == true) {$trans[$hitAmount] = strstr($trans[$hitAmount],"【");}
-						if(strstr($ex[$hitAmount],"【") == true){$ex[$hitAmount] = strstr($ex[$hitAmount],"【");}
-					    $hitAmount ++;
+						//検索対象部中に$keyWordと一致する部分が無い場合，何も返さない．
+						if(strstr(${$target}[-1],$keyWord) == false){
+						//検索対象部中に$keyWordと一致する部分がある場合，その単語を表示用の$dataに格納する．
+						}else{
+						    $word[$hitAmount] =$row->word;
+						    $trans[$hitAmount] =$row->trans;
+						    $ex[$hitAmount] =$row->ex;
+							//訳語の"【"，ex部の”．”の前に改行タグを挿入
+						    $trans[$hitAmount] = str_replace("【" , "<br />【" , $trans[$hitAmount]);
+						    $ex[$hitAmount] = str_replace("．" , "．<br />" , $ex[$hitAmount]);
+							//最初の"【"の前には改行タグは必要ないので，各要素を最初の"【"以降のみにする
+							//もし"【"をひとつも含まない時は，この処理を行うと空白になってしまうので，それを阻止する．
+							if(strstr($trans[$hitAmount],"【") == true) {$trans[$hitAmount] = strstr($trans[$hitAmount],"【");}
+							if(strstr($ex[$hitAmount],"【") == true){$ex[$hitAmount] = strstr($ex[$hitAmount],"【");}
+						    $hitAmount ++;
+						}
 					}
 				}
 			}
-			
-			print "<p>検索結果：".$hitAmount."件(最大表示数50件)</p>";
-			echo '<table class=\"dict\"><tr><td>単語</td><td>訳</td><td>語法・用例等</td></tr>';
-			$i = 0;
-			while($i < 50 && $i < $hitAmount) {
-				echo '<tr>';
-				echo '<td>' , $word[$i] , '</td>';
-				echo '<td>' , $trans[$i] , '</td>';
-				echo '<td>' , $ex[$i] , '</td>';
-				echo '</tr>';
-				$i ++;
+			print('<p>');
+			if (!preg_match("/^[0-9]+$/", $_GET['page'])) {
+				print ('ページ指定が不正です．');
+				exit();
+			}else{
+				$currentPageID = $_GET["page"];
+				$i = (20*($currentPageID-1)+1);
+				if($hitAmount==0){
+					print_h($keyWord.'での検索結果：0件');
+				}else{
+					print_h($keyWord.'での検索結果：'.$hitAmount."件(".$i."から".($i+19)."件目)");
+				}
+				print("</p>");
+				print('<table class=\"dict\"><tr><td>単語</td><td>訳</td><td>語法・用例等</td></tr>');
+				while ( $i < (20*$currentPageID+1) && $i <= $hitAmount) {
+					print('<tr><td>');
+					print_h($word[($i-1)]);
+					print('</td><td>');
+					//<br />が含まれるためエスケープしない．
+					print($trans[($i-1)]);
+					print('</td><td>');
+					//<br />が含まれるためエスケープしない．
+					print($ex[($i-1)]);
+					print('</td></tr>');
+					$i ++;
+				}
+				print('</table>');
 			}
-			echo "</table>";
 		}
+	print('<ul class="navigation">');
+	if (20<$hitAmount) {
+		$totalPages = ceil($hitAmount/20);
+		$i = 1;
+		if ($currentPageID!=1){
+			print '<li><a href=dict.php?keyBox=';
+			print_h($keyWord);
+			print '&type=';
+			print_h($target);
+			print '&page=1>&lt;&lt;</a></li>';
+		}
+		while ($i <= $totalPages) {
+			print '<li><a href=dict.php?keyBox=';
+			print_h($keyWord);
+			print '&type=';
+			print_h($target);
+			print '&page=';
+			print_h($i);
+			print '>';
+			print_h($i);
+			print '</a></li>';
+			$i++;
+		}
+		if ($currentPageID!=$totalPages) {
+			print '<li><a href=dict.php?keyBox=';
+			print_h($keyWord);
+			print '&type=';
+			print_h($target);
+			print '&page=';
+			print_h($currentPageID+1);
+			print '>&gt;&gt;</a></li>';
+		}
+	}else{
+	}
+	print('</ul>');
 	?>
-	
-
 	
 	</div>
 	<div id="footer">

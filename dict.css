@@ -1,4 +1,4 @@
-﻿/*
+/*
 Theme Name: Red and Yellow
 Theme URI: NULL
 Description: 旧ページのデザインをWordPress3.0用に改造した物
@@ -64,6 +64,23 @@ form {
 	margin:3px;
 	padding-bottom:0.5em;
 	width:90%;
+	}
+	
+form p{
+	display:inline;
+	}
+	
+ul.navigation {
+	font-size:120%;
+	list-style-type:none;
+	text-align:left;
+	width:90%;
+	}
+	
+ul.navigation li {
+	margin-right:3px;
+	margin-left:3px;
+	display:inline;
 	}
 	
 h1 {
