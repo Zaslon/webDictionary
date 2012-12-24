@@ -1,0 +1,184 @@
+﻿/*
+Theme Name: Red and Yellow
+Theme URI: NULL
+Description: 旧ページのデザインをWordPress3.0用に改造した物
+Version: 1.0
+Author: Zaslon
+Author URI: http://starlightensign.com
+*/
+
+
+/* 全体の設定 */
+
+body{
+	min-width:500px;
+	color:#fff;
+	height: 100%;
+	margin : 20px auto 50px;
+	padding : 0;
+	line-height : 120%;
+	background-color : #111;
+	font-family:"Verdana","Arial","ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","メイリオ","Meiryo",sans-serif;
+	font-size : 14px;
+	overflow-y:scroll;
+	}
+
+.dictVer {
+	margin:5px;
+	text-align:right;
+	width: 30%;
+	margin-right:3em;
+	margin-left:auto;
+	font-size:80%;
+	color:#ddd;
+}
+
+.dictVer p{text-align:right;}
+
+#menu {
+	font-size:150%;
+	line-height:150%;
+	text-align:center;
+	border-top:1px #ffd800 solid;
+	border-bottom:1px #ffd800 solid;
+	}
+a.menu {
+	color:white;
+	text-decoration:none;
+	}
+	
+a.menu:hover {
+	text-decoration:underline;
+	}
+
+p {
+	text-align:left;
+	text-indent:1em;
+	margin:auto;
+	width:95%;
+	}
+	
+form {
+	text-align:left;
+	text-indent:1em;
+	margin:3px;
+	padding-bottom:0.5em;
+	width:90%;
+	}
+	
+h1 {
+	margin-left:0.5em;
+	font-size:200%;
+	line-height:160%;
+}
+
+h1 a{text-decoration:none;}
+	
+h2 {
+	font-size:130%;
+	margin:1em 1em 0.2em;
+	width: 80%;
+	background-color:#eeeeee;
+	border: solid;
+	border-color: #773300;
+	border-width: 0 0 1px 5px;
+	padding : 0 0 0 0.5em;
+	text-align : left;
+	line-height : 120%;
+	}
+	
+h3 {
+	margin:1em 1em 0.2em;
+	width: 70%;
+	border: solid;
+	border-color:#730000;
+	border-width: 0 0 1px;
+	padding : 0 0 0 0.5em;
+	font-size : 110%;
+	text-align : left;
+	line-height : 100%;
+	}
+	
+h4 {
+	margin:1em 1em 0.2em;
+	width: 60%;
+	border-width: 0 0 1px;
+	padding : 0 0 0 0.5em;
+	font-size : 110%;
+	text-align : left;
+	line-height : 100%;
+	}
+	
+h5 {
+	margin:1em 1em 0.2em;
+	width: 60%;
+	border-width: 0 0 1px;
+	padding : 0 0 0 0.5em;
+	font-size : 110%;
+	text-align : left;
+	line-height : 100%;
+	}
+	
+h6 {
+	margin:1em 1em 0.2em;
+	width: 60%;
+	border-width: 0 0 1px;
+	padding : 0 0 0 0.5em;
+	font-size : 110%;
+	text-align : left;
+	line-height : 100%;
+	}
+
+.all {
+	width : 95%;
+	margin: auto;
+	color : #111;
+	}
+
+table {
+	color : black;
+	border-collapse:collapse;
+	width : 95%;
+	margin : 20px auto;
+	border : solid 2px #808080;
+	}
+
+tr:nth-child(2n+1){
+	background-color:#eee;
+}
+
+tr:nth-child(1){
+	color:white;
+	background-color:#111;
+}
+
+td {
+	border : solid 1px #808080;
+	padding : 2px 15px;
+	}
+
+#header {
+	padding : 0;
+	margin-bottom:5px;
+	color : #ffd800;
+	background-color : #730000;
+	}
+
+#footer {
+	clear:both;
+	background-color : #fffaf0;
+	line-height :120% ;
+	}
+	
+#footer p {
+	text-align:center;
+	}
+
+#main {
+	margin-bottom:5px;
+	padding-left:10px;
+	padding-right: 10px;
+	padding-top : 10px;
+	padding-bottom : 20px;
+	background-color : #fffaf0;
+	}
