@@ -5,6 +5,8 @@ function print_h($str)
 {
     print htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
+/* xmlファイルを読み込む */
+$xml = new SimpleXMLElement("dicData.xml",0,true);
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -27,11 +29,12 @@ function print_h($str)
 		<a class="menu" href="http://starlightensign.com">ホームへ戻る</a>
 	</div>
 	<div class="dictVer">
-		<p>オンライン辞書 ver:1.2.0</p>
+		<p>オンライン辞書 ver:1.2.1</p>
 		<?php
 		date_default_timezone_set('Asia/Tokyo');
 		$mod = filemtime("dicData.xml");
-		print "<p>辞書更新日:".date("Y/m/d",$mod)."</p>";
+		print "<p>辞書更新日:".date("Y/m/d",$mod)."<br />";
+		print "単語数：".$xml->count()."</p>";
 		?>
 	</div>
 	<?php
@@ -56,8 +59,8 @@ function print_h($str)
 			break;
 		}
 	}else{
-		//デフォルトで見出し語検索を選択
-		$checked_1 = "checked";
+		//デフォルトで訳語検索を選択
+		$checked_2 = "checked";
 	}
 	?>
 	
@@ -99,8 +102,6 @@ function print_h($str)
 				exit();
 			}else{
 			    $target = $_GET["type"];
-				/* xmlファイルを読み込む */
-				$xml = new SimpleXMLElement("dicData.xml",0,true);
 				$data_arr = $xml->record;
 				//$data_arrはrecordノードの集合体なので，各ループにおける$rowはword,trans,exノードからなる単語データとなる
 				foreach ($data_arr as $row) {
@@ -155,9 +156,9 @@ function print_h($str)
 				$currentPageID = $_GET["page"];
 				$i = (20*($currentPageID-1)+1);
 				if($hitAmount==0){
-					print_h($keyWord.'での検索結果：0件');
+					print_h($keyWord.' での検索結果：0件');
 				}else{
-					print_h($keyWord.'での検索結果：'.$hitAmount."件(".$i."から".($i+19)."件目)");
+					print_h($keyWord.' での検索結果：'.$hitAmount."件(".$i."から".($i+19)."件目)");
 				}
 				print("</p>");
 				print('<table class=\"dict\"><tr><td>単語</td><td>訳</td><td>語法・用例等</td></tr>');
