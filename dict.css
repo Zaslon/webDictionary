@@ -42,7 +42,7 @@ body{
 	}
 
 .dictVer {
-	margin:5px auto 0;
+	margin: 0.3em 10px;
 	text-align:right;
 	margin-right:5px;
 	margin-left:auto;
@@ -59,7 +59,7 @@ body{
 }
 
 #menu {
-	margin:0 5px;
+	margin:0 10px;
 	font-size:125%;
 	line-height:1.5;
 	text-align:center;
@@ -91,7 +91,7 @@ p {
 	
 form {
 	text-align: left;
-    margin: 10px;
+    margin: 0 10px;
 	padding: 10px;
 	padding-bottom: 0.2em;
 	}
@@ -113,8 +113,6 @@ ul.navigation {
 	}
 	
 ul.navigation li {
-    /* margin-right: 3px; */
-    /* margin-left: 3px; */
     background-color: #eee;
     float: left;
     min-width: 50px;
@@ -123,6 +121,11 @@ ul.navigation li {
     border-radius: 3px;
     margin: 5px;
     text-align: center;
+	}
+	
+li.currentPage {
+	color: #aaa !important;
+	border-color: #eee !important;
 	}
 	
 ul.navigation li a{
@@ -198,7 +201,7 @@ h6 {
 	}
 
 #footer {
-	margin:0 5px;
+	margin:0 10px;
 	border-top:1px solid #ccc;
 	clear:both;
 	line-height :1.2 ;
@@ -224,6 +227,7 @@ input{
 	
 ul.wordEntry {
 	padding: 10px;
+	padding-top: 0 ;
     list-style: none;
     border-bottom: #ccc 1px solid;
 }
@@ -245,6 +249,7 @@ span.wordRelation {
 }
 
 span.wordId {
+	margin-left: 0.5em ;
     border: none !important;
     color: #ccc;
     font-size: 50%;
@@ -256,8 +261,6 @@ li.wordForm {
     font-weight: bold;
     padding-bottom: 0.2em;
 }
-
-
 
 @media screen and (max-width: 600px) {
 	
