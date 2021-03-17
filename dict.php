@@ -312,8 +312,9 @@ $json = json_decode($json,true);
 				print '<span class="wordContentTitle">' . $singleContent["title"] . '</span>' . $singleContent["text"] . '</li>';
 			}
 			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
+				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，検索語を全て+で接続した形に変換
 				print '<li><span class="wordRelation">' . $singleRelation["title"] . '</span>';
-				makeLinkStarter($singleRelation["entry"]["form"],$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
+				makeLinkStarter($conForm,$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
 				print $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
 				print '</li>';
 			}
