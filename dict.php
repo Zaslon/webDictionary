@@ -17,6 +17,22 @@ function perfectHit($haystack, $needle){
     return $haystack == $needle;
 }
 
+//指定を取り込んだリンク生成
+function makeLinkStarter($word, $type, $mode, $page = 1){
+	print '<a href=dict.php?keyBox=';
+	print_h($word);
+	print '&type=';
+	print_h($type);
+	if((isset($_GET["Idf"])) && ($_GET["Idf"] != "")){
+		print '&Idf=true';
+	}
+	print '&mode=';
+	print_h($mode);
+	print '&page=';
+	print_h($page);
+	print '>';
+}
+
 //json読み込み
 $json = file_get_contents($fname);
 $json = mb_convert_encoding($json, 'UTF8', 'ASCII,JIS,UTF-8,EUC-JP,SJIS-WIN');
@@ -48,11 +64,10 @@ $json = json_decode($json,true);
 		<li><a class="menu" href="https://zaslon.info/idyer">ホームへ戻る</a></li>
 	</ul>
 	<div class="dictVer">
-		<p>オンライン辞書 ver:1.4.3</p>
 		<?php
 		date_default_timezone_set('Asia/Tokyo');
-		$mod = filemtime($fname);
-		print "<p>辞書更新日:".date("Y/m/d",$mod)."<br />";
+		print "<p>プログラム更新日：".date("Y/m/d",filemtime(__FILE__))."</p>";
+		print "<p>辞書更新日：".date("Y/m/d",filemtime($fname))."<br />";
 		print "単語数：".count($json["words"])."</p>";
 		?>
 	</div>
@@ -283,7 +298,8 @@ $json = json_decode($json,true);
 			}
 			foreach ($json["words"][$hitWordIds[$i]]["relations"] as $singleRelation){
 				print '<li><span class="wordRelation">' . $singleRelation["title"] . '</span>';
-				print '<a href=dict.php?keyBox=' . $singleRelation["entry"]["form"] . '&type=word&mode=perf&page=1>' . $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
+				makeLinkStarter($singleRelation["entry"]["form"],$_GET["type"], $_GET["mode"]);
+				print $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
 				print '</li>';
 			}
 			print '</ul>';
@@ -298,20 +314,6 @@ $json = json_decode($json,true);
 		$totalPages = ceil($hitAmount/$wordNumPerPage);
 		$i = 1;
 		$conWord =  implode ("+", $keyWords);//リンク作成のため，検索語を全て+で接続した形に変換
-		$mode = $_GET["mode"];
-//		if ($currentPageID!=1){
-//			print '<li><a href=dict.php?keyBox=';
-//			print_h($conWord);
-//			print '&type=';
-//			print_h($target);
-//			if((isset($_GET["Idf"])) && ($_GET["Idf"] != ""))
-//			{
-//				print '&Idf=true';
-//			}
-//			print '&mode=';
-//			print_h($mode);
-//			print '&page=1>&lt;&lt;</a></li>';
-//		}
 		while ($i <= $totalPages) {
 			print '<li';
 			if ($_GET["page"] == $i){
@@ -319,18 +321,7 @@ $json = json_decode($json,true);
 			}
 			print '>';
 			if ($_GET["page"] != $i){
-				print '<a href=dict.php?keyBox=';
-				print_h($conWord);
-				print '&type=';
-				print_h($target);
-				if((isset($_GET["Idf"])) && ($_GET["Idf"] != "")){
-					print '&Idf=true';
-				}
-				print '&mode=';
-				print_h($mode);
-				print '&page=';
-				print_h($i);
-				print '>';
+				makeLinkStarter($conWord,$_GET["type"],$_GET["mode"], $i);
 				print_h($i);
 				print '</a>';
 			}else{
@@ -339,21 +330,6 @@ $json = json_decode($json,true);
 			print '</li>';
 			$i++;
 		}
-//		if ($currentPageID!=$totalPages) {
-//			print '<li><a href=dict.php?keyBox=';
-//			print_h($conWord);
-//			print '&type=';
-//			print_h($target);
-//			if((isset($_GET["Idf"])) && ($_GET["Idf"] != ""))
-//			{
-//				print '&Idf=true';
-//			}
-//			print '&mode=';
-//			print_h($mode);
-//			print '&page=';
-//			print_h($currentPageID+1);
-//			print '>&gt;&gt;</a></li>';
-//		}
 	}else{
 	}
 	print('</ul>');
