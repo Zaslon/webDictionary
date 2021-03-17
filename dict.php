@@ -44,10 +44,11 @@ $json = json_decode($json,true);
 	
 	<h1>イジェール語 オンライン辞書</h1>
 	<ul id="menu">
+		<li><a class="menu" href="https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/">凡例</a></li>
 		<li><a class="menu" href="https://zaslon.info/idyer">ホームへ戻る</a></li>
 	</ul>
 	<div class="dictVer">
-		<p>オンライン辞書 ver:1.4.2</p>
+		<p>オンライン辞書 ver:1.4.3</p>
 		<?php
 		date_default_timezone_set('Asia/Tokyo');
 		$mod = filemtime($fname);
@@ -260,12 +261,12 @@ $json = json_decode($json,true);
 		//ここに検索結果の繰り返し表示を入れる。
 			print '<ul class="wordEntry">';
 			if((isset($_GET["Idf"])) && ($_GET["Idf"] != "")) {
-				print '<li class="wordForm"><span class="idyerin">' . $json["words"][$hitWordIds[$i]-1]["entry"]["form"] . '</span>';
+				print '<li class="wordForm"><span class="idyerin">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"] . '</span>';
 			}else{
-				print '<li class="wordForm">' . $json["words"][$hitWordIds[$i]-1]["entry"]["form"];
+				print '<li class="wordForm">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"];
 			}
 			print '<span class="wordId">#'. $hitWordIds[$i] . '</span></li>';
-			foreach ($json["words"][$hitWordIds[$i]-1]["translations"] as $singleTranslation){
+			foreach ($json["words"][$hitEntryIds[$i]]["translations"] as $singleTranslation){
 				print '<li><span class="wordTitle">' . $singleTranslation["title"] . '</span>';
 				foreach ($singleTranslation["forms"] as $singleTranslationForm){
 					print $singleTranslationForm;
@@ -276,7 +277,7 @@ $json = json_decode($json,true);
 				}
 				print '</li>';
 			}
-			foreach ($json["words"][$hitWordIds[$i]-1]["contents"] as $singleContent){
+			foreach ($json["words"][$hitEntryIds[$i]]["contents"] as $singleContent){
 				print '<li clas="wordContents">';
 				print '<span class="wordContentTitle">' . $singleContent["title"] . '</span>' . $singleContent["text"] . '</li>';
 			}
