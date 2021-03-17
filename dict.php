@@ -18,7 +18,7 @@ function perfectHit($haystack, $needle){
 }
 
 //指定を取り込んだリンク生成
-function makeLinkStarter($word, $type, $mode, $page = 1){
+function makeLinkStarter($word, $type, $mode, $page = 1,$id = false){
 	print '<a href=dict.php?keyBox=';
 	print_h($word);
 	print '&type=';
@@ -30,6 +30,9 @@ function makeLinkStarter($word, $type, $mode, $page = 1){
 	print_h($mode);
 	print '&page=';
 	print_h($page);
+	if ($id){
+		print '&id=' . $id;
+	}
 	print '>';
 }
 
@@ -167,48 +170,40 @@ $json = json_decode($json,true);
 //			}
 		}
 	}
+
 	//ここから検索部。検索の結果を格納する。
 	if(empty($keyWords[0])){
 		print "<p>検索ワードを入力してください。</p>";//$keyWordsが空なら警告を表示して終了する．
     }else{
-	//検索対象を取得
-		if (!($_GET["type"]=='word' || $_GET["type"]=='trans' || $_GET["type"]=='both' || $_GET["type"]=='all')) {
-			$_SET["type"] = 'both';
-		}
-	//ここに検索して、内容をarrayに格納する処理を入れる。
-	    $target = $_GET["type"];
-		foreach ($json["words"] as $entryId =>$singleEntry){
-			$isHit= 0;		//すべての検索語にヒットする場合のみisHitが1になる
-			$wordId = $singleEntry["entry"]["id"];
-			switch ($target){
-				case "word":
-					foreach ($keyWords as $eachKey){
-						if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
-							$isHit = 1;
-							break 1;
-						}
-					}
-				break;
-				case "trans":
-					foreach ($keyWords as $eachKey){
-						foreach ($singleEntry["translations"] as $singleTranslation){
-							foreach ($singleTranslation["forms"] as $singleTranslationForm){
-								if ($func($singleTranslationForm,$eachKey) !== false){
-									$isHit = 1;
-									break 3;
-								}
+    	//全てに優先してid指定時の表示を行う。
+		if((isset($_GET["id"])) && ($_GET["id"] != "")) {
+			$hitWordIds[] = $_GET["id"];
+			foreach ($json["words"] as $entryId => $singleEntry){
+				if ($singleEntry["entry"]["id"] == $_GET["id"]){
+					$hitEntryIds[]= $entryId;
+					break 1;
+				}
+			}
+		}else{
+	    	//検索対象を取得
+			if (!($_GET["type"]=='word' || $_GET["type"]=='trans' || $_GET["type"]=='both' || $_GET["type"]=='all')) {
+				$_SET["type"] = 'both';
+			}
+			//ここに検索して、内容をarrayに格納する処理を入れる。
+		    $target = $_GET["type"];
+			foreach ($json["words"] as $entryId =>$singleEntry){
+				$isHit= 0;		//すべての検索語にヒットする場合のみisHitが1になる
+				$wordId = $singleEntry["entry"]["id"];
+				switch ($target){
+					case "word":
+						foreach ($keyWords as $eachKey){
+							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
+								$isHit = 1;
+								break 1;
 							}
 						}
-					}
-				break;
-				case "both":
-					foreach ($keyWords as $eachKey){
-						if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
-							$isHit = 1;
-							break 1;
-						}
-					}
-					if ($isHit == 0){
+					break;
+					case "trans":
 						foreach ($keyWords as $eachKey){
 							foreach ($singleEntry["translations"] as $singleTranslation){
 								foreach ($singleTranslation["forms"] as $singleTranslationForm){
@@ -219,42 +214,62 @@ $json = json_decode($json,true);
 								}
 							}
 						}
-					}
-				break;
-				case "all":
-					foreach ($keyWords as $eachKey){
-						if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
-							$isHit = 1;
-							break 1;
-						}
-					}
-					if ($isHit == 0){
+					break;
+					case "both":
 						foreach ($keyWords as $eachKey){
-							foreach ($singleEntry["translations"] as $singleTranslation){
-								foreach ($singleTranslation["forms"] as $singleTranslationForm){
-									if ($func($singleTranslationForm,$eachKey) !== false){
-										$isHit = 1;
-										break 3;
-									}
-								}
+							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
+								$isHit = 1;
+								break 1;
 							}
 						}
 						if ($isHit == 0){
 							foreach ($keyWords as $eachKey){
-								foreach ($singleEntry["contents"] as $singleContent){
-									if ($func($singleContent["text"],$eachKey) !== false){
-										$isHit = 1;
-										break 2;
+								foreach ($singleEntry["translations"] as $singleTranslation){
+									foreach ($singleTranslation["forms"] as $singleTranslationForm){
+										if ($func($singleTranslationForm,$eachKey) !== false){
+											$isHit = 1;
+											break 3;
+										}
 									}
 								}
 							}
 						}
-					}
-				break;
-			}
-			if($isHit == 1) {
-				$hitWordIds[] = $wordId;
-				$hitEntryIds[]= $entryId;
+					break;
+					case "all":
+						foreach ($keyWords as $eachKey){
+							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
+								$isHit = 1;
+								break 1;
+							}
+						}
+						if ($isHit == 0){
+							foreach ($keyWords as $eachKey){
+								foreach ($singleEntry["translations"] as $singleTranslation){
+									foreach ($singleTranslation["forms"] as $singleTranslationForm){
+										if ($func($singleTranslationForm,$eachKey) !== false){
+											$isHit = 1;
+											break 3;
+										}
+									}
+								}
+							}
+							if ($isHit == 0){
+								foreach ($keyWords as $eachKey){
+									foreach ($singleEntry["contents"] as $singleContent){
+										if ($func($singleContent["text"],$eachKey) !== false){
+											$isHit = 1;
+											break 2;
+										}
+									}
+								}
+							}
+						}
+					break;
+				}
+				if($isHit == 1) {
+					$hitWordIds[] = $wordId;
+					$hitEntryIds[]= $entryId;
+				}
 			}
 		}
 		//ここから表示部
@@ -271,7 +286,7 @@ $json = json_decode($json,true);
 			print_h($_GET["keyBox"].' での検索結果：'.$hitAmount."件(".($i+1)."から".min($i+$wordNumPerPage,$hitAmount)."件目)");
 		}
 		print("</p>");
-
+	
 		while ( $i < ($wordNumPerPage*$currentPageID) && $i < $hitAmount) {
 		//ここに検索結果の繰り返し表示を入れる。
 			print '<ul class="wordEntry">';
@@ -296,9 +311,9 @@ $json = json_decode($json,true);
 				print '<li clas="wordContents">';
 				print '<span class="wordContentTitle">' . $singleContent["title"] . '</span>' . $singleContent["text"] . '</li>';
 			}
-			foreach ($json["words"][$hitWordIds[$i]]["relations"] as $singleRelation){
+			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
 				print '<li><span class="wordRelation">' . $singleRelation["title"] . '</span>';
-				makeLinkStarter($singleRelation["entry"]["form"],$_GET["type"], $_GET["mode"]);
+				makeLinkStarter($singleRelation["entry"]["form"],$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
 				print $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
 				print '</li>';
 			}
@@ -306,7 +321,8 @@ $json = json_decode($json,true);
 			$i++;
 		}
 	}
-	
+
+
 	//ページ送り機能
 
 	print('<ul class="navigation">');
