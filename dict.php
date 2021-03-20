@@ -14,6 +14,8 @@ function startsWith($haystack, $needle){
 
 //完全一致検索
 function perfectHit($haystack, $needle){
+	$haystack = mb_strtolower($haystack,'UTF-8');//検索の便宜のため小文字にする
+	$needle = mb_strtolower($needle,'UTF-8');//検索の便宜のため小文字にする
     return $haystack == $needle;
 }
 
@@ -168,9 +170,6 @@ $json = json_decode($json,true);
 			$keyWords = preg_replace('/\s\s+/u', ' ', $keyWords);//スペース2つ以上であれば，1つに削減
 			$keyWords = explode(' ',$keyWords);//スペースで区切られた検索語を分離して配列に格納
 			$i = 0;
-//			foreach ($keyWords as $i =>$eachKey) {
-//				$keyWords[$i] = mb_strtolower($keyWords[$i],'UTF-8');//検索の便宜のため小文字にする
-//			}
 		}
 	}
 
