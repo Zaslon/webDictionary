@@ -168,6 +168,7 @@ $json = json_decode($json,true);
 		} else {
 			$keyWords = preg_replace('/[　]/u', ' ', $_GET["keyBox"]);//全角スペースを半角スペースに変換
 			$keyWords = preg_replace('/\s\s+/u', ' ', $keyWords);//スペース2つ以上であれば，1つに削減
+			$keyWords = preg_replace('/[^a-zA-Z\']/u', '', $keyWords);//アルファベットと変音記号以外を削除
 			$keyWords = explode(' ',$keyWords);//スペースで区切られた検索語を分離して配列に格納
 			$i = 0;
 		}
@@ -196,6 +197,7 @@ $json = json_decode($json,true);
 			foreach ($json["words"] as $entryId =>$singleEntry){
 				$isHit= 0;		//すべての検索語にヒットする場合のみisHitが1になる
 				$wordId = $singleEntry["entry"]["id"];
+				$singleEntry["entry"]["form"] = preg_replace('/[^a-zA-Z\']/u', '', $singleEntry["entry"]["form"]);//アルファベットと変音記号以外を削除
 				switch ($target){
 					case "word":
 						foreach ($keyWords as $eachKey){
