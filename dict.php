@@ -19,6 +19,12 @@ function perfectHit($haystack, $needle){
     return $haystack == $needle;
 }
 
+//変音記号以外の記号を削除
+function deleteNonIdyerinCharacters($string){
+	$string = preg_replace('/[-\(\)\#]/u', '', $string);
+	return $string;
+}
+
 //指定を取り込んだリンク生成
 function makeLinkStarter($word, $type, $mode, $page = 1,$id = false){
 	print '<a href=dict.php?keyBox=';
@@ -168,7 +174,7 @@ $json = json_decode($json,true);
 		} else {
 			$keyWords = preg_replace('/[　]/u', ' ', $_GET["keyBox"]);//全角スペースを半角スペースに変換
 			$keyWords = preg_replace('/\s\s+/u', ' ', $keyWords);//スペース2つ以上であれば，1つに削減
-			$keyWords = preg_replace('/[^a-zA-Z\']/u', '', $keyWords);//アルファベットと変音記号以外を削除
+			$keyWords = deleteNonIdyerinCharacters($keyWords);
 			$keyWords = explode(' ',$keyWords);//スペースで区切られた検索語を分離して配列に格納
 			$i = 0;
 		}
@@ -197,7 +203,7 @@ $json = json_decode($json,true);
 			foreach ($json["words"] as $entryId =>$singleEntry){
 				$isHit= 0;		//すべての検索語にヒットする場合のみisHitが1になる
 				$wordId = $singleEntry["entry"]["id"];
-				$singleEntry["entry"]["form"] = preg_replace('/[^a-zA-Z\']/u', '', $singleEntry["entry"]["form"]);//アルファベットと変音記号以外を削除
+				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
 				switch ($target){
 					case "word":
 						foreach ($keyWords as $eachKey){
