@@ -311,7 +311,7 @@ $json = json_decode($json,true);
 				print '</li>';
 			}
 			foreach ($json["words"][$hitEntryIds[$i]]["contents"] as $singleContent){
-				print '<li clas="wordContents">';
+				print '<li class="wordContents">';
 				print '<span class="wordContentTitle">' . $singleContent["title"] . '</span>' . $singleContent["text"] . '</li>';
 			}
 			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
