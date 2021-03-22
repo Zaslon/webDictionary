@@ -370,7 +370,7 @@ $json = json_decode($json,true);
                 print '</li>';
 			}
 			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
-				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，検索語を全て+で接続した形に変換
+				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，スペースを全て+で接続した形に変換
 				print '<li><span class="wordRelation">' . $singleRelation["title"] . '</span>';
 				makeLinkStarter($conForm,$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
 				print $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
@@ -388,7 +388,7 @@ $json = json_decode($json,true);
 	if ($wordNumPerPage<$hitAmount) {
 		$totalPages = ceil($hitAmount/$wordNumPerPage);
 		$i = 1;
-		$conWord =  implode ("+", $keyWords);//リンク作成のため，検索語を全て+で接続した形に変換
+		$conWord =  implode ("+", $keyWords);//リンク作成のため，スペースを全て+で接続した形に変換
 		while ($i <= $totalPages) {
 			print '<li';
 			if ($_GET["page"] == $i){
