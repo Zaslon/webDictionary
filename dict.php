@@ -324,7 +324,51 @@ $json = json_decode($json,true);
 			}
 			foreach ($json["words"][$hitEntryIds[$i]]["contents"] as $singleContent){
 				print '<li class="wordContents">';
-				print '<span class="wordContentTitle">' . $singleContent["title"] . '</span>' . $singleContent["text"] . '</li>';
+				print '<span class="wordContentTitle">' . $singleContent["title"] . '</span>';
+                if ($singleContent["title"] != "語源"){
+                    print $singleContent["text"];
+                }else{
+                	$text = '';
+                	$isNextLink = true;
+                	$singleContent["text"] = preg_split ('/([:\/*>+|])/u', $singleContent["text"], -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+                	foreach ($singleContent["text"] as $index => $singleContentText){
+                		if ($isNextLink == false){
+                			$isLink = false;
+                			$isNextLink = true;
+                		}else{
+	                		$isLink = true;
+	                	}
+                		//「.」を文字列に含むとき
+                		if (stripos($singleContentText, '.') != false){
+                			$isLink = false;
+                			print '1';
+                		//文字列が日本語を含むとき
+                		}elseif (strlen($singleContentText) != mb_strlen($singleContentText)){
+                			$isLink = false;
+                		//文字列がデリミタで、次に影響を及ぼさないもののとき
+                		}elseif (preg_match ('/[:\/>+]/u', $singleContentText) == 1){
+                			$isLink = false;
+                		//文字列がデリミタで、次に影響を及ぼすもののとき
+                		}elseif (preg_match ('/[*|]/u', $singleContentText) == 1){
+                			$isLink = false;
+                			$isNextLink = false;
+                		//右端以外のとき、ひとつ右を見る
+                		}elseif ($index+1 < count($singleContent["text"])){
+                			if (preg_match ('/[:\/]/u', $singleContent["text"][$index+1]) == 1){ 
+                				$isLink = false;
+                			}
+                		}
+                		//表示生成部
+                		if ($isLink){
+                			makeLinkStarter($singleContentText,'both', 'fwd', 1);
+               				print $singleContentText . '</a>';
+                		}else{
+                			$isLink = true;
+                			print $singleContentText;
+                		}
+                	}
+                }
+                print '</li>';
 			}
 			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
 				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，検索語を全て+で接続した形に変換
