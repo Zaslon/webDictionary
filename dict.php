@@ -369,13 +369,22 @@ $json = json_decode($json,true);
                 }
                 print '</li>';
 			}
+
+			$relationTitles = array();
 			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
+				if (array_search($singleRelation["title"],$relationTitles) === false){
+					print '<li class="wordRelation"><span class="wordRelation">' . $singleRelation["title"] . '</span>';
+					$relationTitles[] = $singleRelation["title"];
+				}
 				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，スペースを全て+で接続した形に変換
-				print '<li><span class="wordRelation">' . $singleRelation["title"] . '</span>';
 				makeLinkStarter($conForm,$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
 				print $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
-				print '</li>';
+//				if ($singleRelation !== end($json["words"][$hitEntryIds[$i]]["relations"])){
+//					//最後のとき以外に「, 」を追加
+//					print ', ';
+//				}
 			}
+			print '</li>';
 			print '</ul>';
 			$i++;
 		}
