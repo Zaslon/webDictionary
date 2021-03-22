@@ -12,6 +12,11 @@ function startsWith($haystack, $needle){
     return stripos($haystack, $needle, 0) === 0;
 }
 
+//最後尾文字チェック
+function endsWith($haystack, $needle){
+    return strripos($haystack, $needle, 0) === (strlen($haystack)-1);
+}
+
 //完全一致検索
 function perfectHit($haystack, $needle){
 	$haystack = mb_strtolower($haystack,'UTF-8');//検索の便宜のため小文字にする
