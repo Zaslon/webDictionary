@@ -341,7 +341,6 @@ $json = json_decode($json,true);
                 		//「.」を文字列に含むとき
                 		if (stripos($singleContentText, '.') != false){
                 			$isLink = false;
-                			print '1';
                 		//文字列が日本語を含むとき
                 		}elseif (strlen($singleContentText) != mb_strlen($singleContentText)){
                 			$isLink = false;
