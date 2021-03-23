@@ -9,12 +9,12 @@ function print_h($str)
 
 //前方一致検索
 function startsWith($haystack, $needle){
-    return stripos($haystack, $needle, 0) === 0;
+    return mb_stripos($haystack, $needle, 0) === 0;
 }
 
 //最後尾文字チェック
 function endsWith($haystack, $needle){
-    return strripos($haystack, $needle, 0) === (strlen($haystack)-1);
+    return mb_strripos($haystack, $needle, 0) === (strlen($haystack)-1);
 }
 
 //完全一致検索
@@ -22,6 +22,12 @@ function perfectHit($haystack, $needle){
 	$haystack = mb_strtolower($haystack,'UTF-8');//検索の便宜のため小文字にする
 	$needle = mb_strtolower($needle,'UTF-8');//検索の便宜のため小文字にする
     return $haystack == $needle;
+}
+
+//訳語検索用に)以左の文字列を消去する
+function deleteSymbolsForTrans($string){
+	$string = preg_replace('/.+[)）]/u', '', $string);
+	return $string;
 }
 
 //変音記号以外の記号を削除
@@ -222,7 +228,7 @@ $json = json_decode($json,true);
 						foreach ($keyWords as $eachKey){
 							foreach ($singleEntry["translations"] as $singleTranslation){
 								foreach ($singleTranslation["forms"] as $singleTranslationForm){
-									if ($func($singleTranslationForm,$eachKey) !== false){
+									if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
 										$isHit = 1;
 										break 3;
 									}
@@ -241,7 +247,7 @@ $json = json_decode($json,true);
 							foreach ($keyWords as $eachKey){
 								foreach ($singleEntry["translations"] as $singleTranslation){
 									foreach ($singleTranslation["forms"] as $singleTranslationForm){
-										if ($func($singleTranslationForm,$eachKey) !== false){
+										if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
 											$isHit = 1;
 											break 3;
 										}
