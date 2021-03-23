@@ -12,7 +12,7 @@ Author URI: https://zaslon.info
 @font-face {
 	font-family: 'Fazik';
 	src:url('Fazik-regular.woff') format('woff'),
-	url('Fazik-regular.otf') format('opentype');
+	url('Fazik-regular.ttf') format('truetype');
 	}
 	
 .idyerin {
