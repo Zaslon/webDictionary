@@ -2,7 +2,6 @@
 Theme Name: dict.css
 Theme URI: NULL
 Description: 辞書用に変更
-Version: 1.1
 Author: Zaslon
 Author URI: https://zaslon.info
 */
@@ -12,8 +11,7 @@ Author URI: https://zaslon.info
 
 @font-face {
 	font-family: 'Fazik';
-	src:url('Fazik-regular.eot?') format('oldIE'),
-	url('Fazik-regular.woff') format('woff'),
+	src:url('Fazik-regular.woff') format('woff'),
 	url('Fazik-regular.otf') format('opentype');
 	}
 	
