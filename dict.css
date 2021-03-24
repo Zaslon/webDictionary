@@ -18,6 +18,7 @@ Author URI: https://zaslon.info
 .idyerin {
 	font-family:'Fazik';
 	font-size: 120%;
+	max-height:100%;
 	}
 
 a {
@@ -31,6 +32,7 @@ body{
 	padding : 0;
 	line-height : 1.3;
 	font-size : 14px;
+	max-height:100%;
 	background-color : #E5E5E0;
 	font-family:"ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","メイリオ","Meiryo",sans-serif;
 	letter-spacing: 1px;
@@ -45,6 +47,7 @@ body{
 	margin-right:5px;
 	margin-left:auto;
 	font-size:80%;
+	max-height:100%;
 }
 
 .dictVer p{
@@ -59,6 +62,7 @@ body{
 #menu {
 	margin:0 10px;
 	font-size:125%;
+	max-height:100%;
 	line-height:1.5;
 	text-align:center;
 	border-top:1px #CCC solid;
@@ -85,6 +89,7 @@ p {
 	text-align:left;
 	text-indent:1em;
 	margin:auto;
+	max-height:100%;
 	}
 	
 form {
@@ -100,6 +105,7 @@ form p{
 	
 ul.navigation {
 	font-size: 120%;
+	max-height:100%;
 	list-style-type: none;
 	text-align: left;
 	margin-left: 10px;
@@ -140,6 +146,7 @@ h1 {
 	margin-top:0;
 	margin-left:0.5em;
 	font-size:200%;
+	max-height:100%;
 	line-height:160%;
 }
 
@@ -147,6 +154,7 @@ h1 a{text-decoration:none;}
 	
 h2 {
 	font-size:130%;
+	max-height:100%;
 	margin:1em 1em 0.2em;
 	width: 80%;
 	background-color:#eeeeee;
@@ -166,6 +174,7 @@ h3 {
 	border-width: 0 0 1px;
 	padding : 0 0 0 0.5em;
 	font-size : 110%;
+	max-height:100%;
 	text-align : left;
 	line-height : 100%;
 	}
@@ -178,6 +187,7 @@ h6 {
 	border-width: 0 0 1px;
 	padding : 0 0 0 0.5em;
 	font-size : 110%;
+	max-height:100%;
 	text-align : left;
 	line-height : 100%;
 	}
@@ -228,6 +238,7 @@ ul.wordEntry {
 	padding-top: 0 ;
     list-style: none;
     border-bottom: #ccc 1px solid;
+	max-height:100%;
 }
 
 span.wordTitle,
@@ -251,11 +262,13 @@ span.wordId {
     border: none !important;
     color: #ccc;
     font-size: 50%;
+	max-height:100%;
     font-weight: normal;
 }
 
 li.wordForm {
     font-size: 150%;
+	max-height:100%;
     font-weight: bold;
     padding-bottom: 0.2em;
 }
