@@ -89,8 +89,8 @@ p {
 	
 form {
 	text-align: left;
-    margin: 0 10px;
-	padding: 10px;
+	margin: 0 10px;
+//	padding: 10px;
 	padding-bottom: 0.2em;
 	}
 	
@@ -290,7 +290,7 @@ li.wordForm {
 	input[type="checkbox"] {
 	float:left;
 	clear:both;
-	margin-left:24%;
+	margin-left:15%;
 	}
 	
 	input[type="text"]{
@@ -305,6 +305,6 @@ li.wordForm {
 	
 	label{
 	float:left;
-	margin-left:24%;
+	margin-left:15%;
 		}
 }
