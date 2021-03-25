@@ -258,7 +258,7 @@ span.wordRelation {
 }
 
 span.wordId {
-	margin-left: 0 1em 0 0.2em ;
+	margin: 0 1em 0 0.2em ;
     border: none !important;
     color: #ccc;
     font-size: 50%;
