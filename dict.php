@@ -267,7 +267,7 @@ $json = json_decode($json,true);
 							foreach ($keyWords as $eachKey){
 								foreach ($singleEntry["translations"] as $singleTranslation){
 									foreach ($singleTranslation["forms"] as $singleTranslationForm){
-										if ($func($singleTranslationForm,$eachKey) !== false){
+										if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
 											$isHit = 1;
 											break 3;
 										}
