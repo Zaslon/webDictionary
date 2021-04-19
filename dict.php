@@ -24,13 +24,13 @@ function perfectHit($haystack, $needle){
     return $haystack == $needle;
 }
 
-//訳語検索用に)以左の文字列を消去する
+//訳語部の検索用に)と】以左の文字列を消去する
 function deleteSymbolsForTrans($string){
-	$string = preg_replace('/.+[)）]/u', '', $string);
+	$string = preg_replace('/.+[)）】]/u', '', $string);
 	return $string;
 }
 
-//変音記号以外の記号を削除
+//見出し語部の変音記号以外の記号を削除
 function deleteNonIdyerinCharacters($string){
 	$string = preg_replace('/[-\(\)\#]/u', '', $string);
 	return $string;
