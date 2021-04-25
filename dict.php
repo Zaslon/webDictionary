@@ -1,6 +1,5 @@
 <?php echo '<' . '?xml version="1.0" encoding="utf-8"?' . '>'; ?>
 <?php
-$fname = 'idyer.json';
 //エスケープしてprintする関数
 function print_h($str)
 {
@@ -56,6 +55,7 @@ function makeLinkStarter($word, $type, $mode, $page = 1,$id = false){
 }
 
 //json読み込み
+$fname = 'idyer.json';
 $json = file_get_contents($fname);
 $json = mb_convert_encoding($json, 'UTF8', 'ASCII,JIS,UTF-8,EUC-JP,SJIS-WIN');
 $json = json_decode($json,true);
