@@ -215,17 +215,15 @@ $json = json_decode($json,true);
 				$isHit= 0;		//すべての検索語にヒットする場合のみisHitが1になる
 				$wordId = $singleEntry["entry"]["id"];
 				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
-				switch ($target){
-					case "word":
-						foreach ($keyWords as $eachKey){
+				foreach ($keyWords as $eachKey){
+					switch ($target){
+						case "word":
 							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
 								$isHit = 1;
 								break 1;
 							}
-						}
-					break;
-					case "trans":
-						foreach ($keyWords as $eachKey){
+						break;
+						case "trans":
 							foreach ($singleEntry["translations"] as $singleTranslation){
 								foreach ($singleTranslation["forms"] as $singleTranslationForm){
 									if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
@@ -234,48 +232,38 @@ $json = json_decode($json,true);
 									}
 								}
 							}
-						}
-					break;
-					case "both":
-						foreach ($keyWords as $eachKey){
+						break;
+						case "both":
 							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
 								$isHit = 1;
 								break 1;
-							}
-						}
-						if ($isHit == 0){
-							foreach ($keyWords as $eachKey){
-								foreach ($singleEntry["translations"] as $singleTranslation){
-									foreach ($singleTranslation["forms"] as $singleTranslationForm){
-										if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
-											$isHit = 1;
-											break 3;
-										}
-									}
-								}
-							}
-						}
-					break;
-					case "all":
-						foreach ($keyWords as $eachKey){
-							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
-								$isHit = 1;
-								break 1;
-							}
-						}
-						if ($isHit == 0){
-							foreach ($keyWords as $eachKey){
-								foreach ($singleEntry["translations"] as $singleTranslation){
-									foreach ($singleTranslation["forms"] as $singleTranslationForm){
-										if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
-											$isHit = 1;
-											break 3;
-										}
-									}
-								}
 							}
 							if ($isHit == 0){
-								foreach ($keyWords as $eachKey){
+								foreach ($singleEntry["translations"] as $singleTranslation){
+									foreach ($singleTranslation["forms"] as $singleTranslationForm){
+										if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
+											$isHit = 1;
+											break 3;
+										}
+									}
+								}
+							}
+						break;
+						case "all":
+							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
+								$isHit = 1;
+								break 1;
+							}
+							if ($isHit == 0){
+								foreach ($singleEntry["translations"] as $singleTranslation){
+									foreach ($singleTranslation["forms"] as $singleTranslationForm){
+										if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
+											$isHit = 1;
+											break 3;
+										}
+									}
+								}
+								if ($isHit == 0){
 									foreach ($singleEntry["contents"] as $singleContent){
 										if ($func($singleContent["text"],$eachKey) !== false){
 											$isHit = 1;
@@ -284,8 +272,8 @@ $json = json_decode($json,true);
 									}
 								}
 							}
-						}
-					break;
+						break;
+					}
 				}
 				if($isHit == 1) {
 					$hitWordIds[] = $wordId;
