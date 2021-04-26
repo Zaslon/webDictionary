@@ -54,12 +54,16 @@ function makeLinkStarter($word, $type, $mode, $page = 1,$id = false){
 	print '>';
 }
 
+//変化型テーブル読み込み
+$fname = 'affixTable.csv';
+$affixTable = new SplFileObject($fname);
+$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv
+
 //json読み込み
 $fname = 'idyer.json';
 $json = file_get_contents($fname);
 $json = mb_convert_encoding($json, 'UTF8', 'ASCII,JIS,UTF-8,EUC-JP,SJIS-WIN');
 $json = json_decode($json,true);
-
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -212,9 +216,21 @@ $json = json_decode($json,true);
 			//ここに検索して、内容をarrayに格納する処理を入れる。
 		    $target = $_GET["type"];
 			foreach ($json["words"] as $entryId =>$singleEntry){
-				$isHit= 0;		//すべての検索語にヒットする場合のみisHitが1になる
 				$wordId = $singleEntry["entry"]["id"];
 				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
+				$isHit= 0;		//いずれかの検索語にヒットする場合にisHitが1になる
+			
+				//辞書のデータに対して接辞テーブルとの該当を調べる
+				$singleEntry["entry"]["form"];
+				foreach ($affixTable as $index =>$singleAffix){
+					foreach ($singleEntry["translations"] as $singleTranslation){
+						if ($singleTranslation["title"] == $singleAffix[0]) {
+						//ここに接辞の対象となる品詞と訳の品詞が一致したときの挙動を書く。このままだと同じ単語に複数の訳語がある場合、同じ品詞なので複数回ヒットする。
+						}
+					}
+				}
+				
+			
 				foreach ($keyWords as $eachKey){
 					switch ($target){
 						case "word":
