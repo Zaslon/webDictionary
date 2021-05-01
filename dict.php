@@ -218,29 +218,40 @@ $json = json_decode($json,true);
 			foreach ($json["words"] as $entryId =>$singleEntry){
 				$wordId = $singleEntry["entry"]["id"];
 				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
-				$isHit= 0;		//いずれかの検索語にヒットする場合にisHitが1になる
+				$wordForm = $singleEntry["entry"]["form"];
+				$isHit= 0;	//いずれかの検索語にヒットする場合にisHitが1になる
 				
 				//辞書のデータに対して接辞テーブルとの該当を調べる
-				foreach ($affixTable as $index =>$singleAffix){
-					foreach ($singleEntry["translations"] as $singleTranslation){
-						if ($singleTranslation["title"] == $singleAffix[0]) {
-							//ここに接辞の対象となる品詞と訳の品詞が一致したときの挙動を書く。このままだと同じ単語に複数の訳語がある場合、同じ品詞なので複数回ヒットする。
-							if (startsWith($singleAffix[1], "-")) {
-								//接尾辞
-							}elseif (endsWith($singleAffix[1], "-")){
-								//接頭辞
-							}else{
-								//接周辞
+				foreach ($affixTable as $index => $singleAffix){
+					//if ($singleEntry["translations"][0]["title"] == $singleAffix[0]) {
+					//イジェール語では同じ単語が複数の品詞を持つことはないので、はじめの要素がヒットすれば良い。
+					//同形の別単語は別の単語として登録する方針であるため。
+						if (startsWith($singleAffix[1], "-")) {
+							$text = $wordForm . substr($singleAffix[1], 1);
+							//接尾辞
+							if ($keyWords[0] == $text){
+								print '<p class="suggest">もしかして、';
+								print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . ":" . $singleEntry["translations"][0]["forms"][0];
+								print '</a> の '. $singleAffix[2] . ' ? </p>';
 							}
-							break 1; //イジェール語では同じ単語が複数の品詞を持つことはないので、どれかがヒットしたらforeachは抜けて良い。
+						}elseif (endsWith($singleAffix[1], "-")){
+							$text = substr($singleAffix[1], 0, strlen($singleAffix[1])-1) . $wordForm;
+							//接頭辞
+							if ($keyWords[0] == $text){
+								print '<p class="suggest">もしかして、';
+								print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . ":" . $singleEntry["translations"][0]["forms"][0];
+								print '</a> の '. $singleAffix[2] . ' ? </p>';
+							}
+						}elseif (stripos($singleAffix[1], "-") !== false){
+							//接周辞
 						}
-					}
+					//}
 				}
 				
 				foreach ($keyWords as $eachKey){
 					switch ($target){
 						case "word":
-							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
+							if ($func($wordForm,$eachKey) !== false){
 								$isHit = 1;
 								break 1;
 							}
@@ -256,7 +267,7 @@ $json = json_decode($json,true);
 							}
 						break;
 						case "both":
-							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
+							if ($func($wordForm,$eachKey) !== false){
 								$isHit = 1;
 								break 1;
 							}
@@ -272,7 +283,7 @@ $json = json_decode($json,true);
 							}
 						break;
 						case "all":
-							if ($func($singleEntry["entry"]["form"],$eachKey) !== false){
+							if ($func($wordForm,$eachKey) !== false){
 								$isHit = 1;
 								break 1;
 							}
