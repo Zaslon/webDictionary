@@ -219,18 +219,24 @@ $json = json_decode($json,true);
 				$wordId = $singleEntry["entry"]["id"];
 				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
 				$isHit= 0;		//いずれかの検索語にヒットする場合にisHitが1になる
-			
+				
 				//辞書のデータに対して接辞テーブルとの該当を調べる
-				$singleEntry["entry"]["form"];
 				foreach ($affixTable as $index =>$singleAffix){
 					foreach ($singleEntry["translations"] as $singleTranslation){
 						if ($singleTranslation["title"] == $singleAffix[0]) {
-						//ここに接辞の対象となる品詞と訳の品詞が一致したときの挙動を書く。このままだと同じ単語に複数の訳語がある場合、同じ品詞なので複数回ヒットする。
+							//ここに接辞の対象となる品詞と訳の品詞が一致したときの挙動を書く。このままだと同じ単語に複数の訳語がある場合、同じ品詞なので複数回ヒットする。
+							if (startsWith($singleAffix[1], "-")) {
+								//接尾辞
+							}elseif (endsWith($singleAffix[1], "-")){
+								//接頭辞
+							}else{
+								//接周辞
+							}
+							break 1; //イジェール語では同じ単語が複数の品詞を持つことはないので、どれかがヒットしたらforeachは抜けて良い。
 						}
 					}
 				}
 				
-			
 				foreach ($keyWords as $eachKey){
 					switch ($target){
 						case "word":
