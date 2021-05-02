@@ -227,6 +227,15 @@ $json = json_decode($json,true);
 					//イジェール語では同じ単語が複数の品詞を持つことはないので、はじめの要素がヒットすれば良い。
 					//同形の別単語は別の単語として登録する方針であるため。
 						if (startsWith($singleAffix[1], "-")) {
+							
+							
+							$affixSpliteds = preg_split('/\((.)\)/u', $singleAffix[1], -1, PREG_SPLIT_DELIM_CAPTURE);
+							if ($affixSpliteds !== false) {
+								
+							}
+							
+							
+							
 							$text = $wordForm . substr($singleAffix[1], 1);
 							//接尾辞
 							if ($keyWords[0] == $text){
