@@ -93,10 +93,13 @@ body{
 
 p {
 	text-align:left;
-	text-indent:1em;
 	margin:auto;
 	max-height:100%;
 	}
+	
+#main p{
+	padding: 0 10px;
+}
 	
 form {
 	text-align: left;
