@@ -218,7 +218,7 @@ $json = json_decode($json,true);
 				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
 				$wordForm = $singleEntry["entry"]["form"];
 				$isHit= 0;	//いずれかの検索語にヒットする場合にisHitが1になる
-				
+/*				
 				//辞書のデータに対して接辞テーブルとの該当を調べる
 				foreach ($affixTable as $index => $singleAffix){
 					//if ($singleEntry["translations"][0]["title"] == $singleAffix[0]) {
@@ -238,23 +238,23 @@ $json = json_decode($json,true);
 							//接尾辞
 							if ($keyWords[0] == $text){
 								print '<p class="suggest">もしかして、';
-								print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . ":" . $singleEntry["translations"][0]["forms"][0];
-								print '</a> の '. $singleAffix[2] . ' ? </p>';
+								print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
+								print 'の '. $singleAffix[2] . ' ? </p>';
 							}
 						}elseif (endsWith($singleAffix[1], "-")){
 							$text = substr($singleAffix[1], 0, strlen($singleAffix[1])-1) . $wordForm;
 							//接頭辞
 							if ($keyWords[0] == $text){
 								print '<p class="suggest">もしかして、';
-								print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . ":" . $singleEntry["translations"][0]["forms"][0];
-								print '</a> の '. $singleAffix[2] . ' ? </p>';
+								print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
+								print 'の '. $singleAffix[2] . ' ? </p>';
 							}
 						}elseif (stripos($singleAffix[1], "-") !== false){
 							//接周辞
 						}
 					//}
 				}
-				
+*/				
 				foreach ($keyWords as $eachKey){
 					switch ($target){
 						case "word":
