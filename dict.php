@@ -57,7 +57,7 @@ function makeLinkStarter($word, $type, $mode, $page = 1,$id = false){
 //変化型テーブル読み込み
 $fname = 'affixTable.csv';
 $affixTable = new SplFileObject($fname);
-$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv
+$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv、[3]削除する末尾（空もあり）
 
 //json読み込み
 $fname = 'idyer.json';
