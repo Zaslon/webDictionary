@@ -61,6 +61,10 @@ body{
 	color:#ccc;
 }
 
+.buttonAndLabel{
+	display: inline-block;
+}
+
 #menu {
 	margin:0 10px;
 	font-size:125%;
@@ -96,7 +100,6 @@ p {
 	
 form {
 	text-align: left;
-	margin: 0 10px;
 	padding: 10px;
 	padding-bottom: 0.2em;
 	}
@@ -206,7 +209,10 @@ h6 {
 	}
 
 #header {
-	padding : 0;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top : 0;
+	padding-bottom : 0;
 	margin-bottom:5px;
 	}
 
@@ -220,19 +226,20 @@ h6 {
 	
 #footer p {
 	text-align:center;
+	line-height: 1.4;
 	}
 
 #main {
-	margin-bottom:5px;
+	padding-bottom:5px;
 	padding-left:10px;
 	padding-right: 10px;
 	padding-top : 10px;
-/*	padding-bottom : 20px;*/
 	clear:both;
 	}
 
 input{
 	font-family:inherit;
+	margin-right:0.2em;
 	}
 	
 ul.wordEntry {
@@ -275,6 +282,7 @@ li.wordForm {
 	padding-bottom: 0.2em;
 }
 
+/*
 @media screen and (max-width: 600px) {
 	
 	#main{
@@ -288,10 +296,20 @@ li.wordForm {
 	border-left:none;
 	}
 
-	
 }
+*/
 
 @media screen and (max-width: 500px) {
+	#header,
+	#main {
+	padding-left:0.3em;
+	padding-right:0.3em;
+	}
+	
+	#footer {
+	margin:0 0.3em;
+	}
+	
 	h1{
 	font-size:150%;
 	margin-bottom:0;
@@ -300,26 +318,23 @@ li.wordForm {
 	#menu {
 	font-size:100%;
 	}
-
-	input[type="radio"],
-	input[type="checkbox"] {
-	float:left;
-	clear:both;
-	margin-left:15%;
+	
+	.all{
+	width:100%;
+	border-right:none;
+	border-left:none;
 	}
 	
 	input[type="text"]{
 	float:left;
 	width:48%;
+	margin-right:0;
 	}
 	
 	input[type="submit"]{
 	float:right;
 	width:48%;
+	margin-right:0;
 	}
-	
-	label{
-	float:left;
-	margin-left:15%;
-		}
+
 }
