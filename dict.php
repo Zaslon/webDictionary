@@ -1,19 +1,26 @@
 <?php echo '<' . '?xml version="1.0" encoding="utf-8"?' . '>'; ?>
 <?php
 //エスケープしてprintする関数
-function print_h($str)
-{
+function print_h($str){
     print htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
 
 //前方一致検索
 function startsWith($haystack, $needle){
-    return mb_stripos($haystack, $needle, 0) === 0;
+	if ($needle){
+		return mb_stripos($haystack, $needle, 0) === 0;
+	}else{
+		return false;
+	}
 }
 
 //最後尾文字チェック
 function endsWith($haystack, $needle){
-    return mb_strripos($haystack, $needle, 0) === (strlen($haystack)-1);
+	if ($needle){
+		return substr($haystack, -strlen($needle)) === $needle;
+	}else{
+		return false;
+	}
 }
 
 //完全一致検索
@@ -54,10 +61,24 @@ function makeLinkStarter($word, $type, $mode, $page = 1,$id = false){
 	print '>';
 }
 
+//頭文字の連濁
+function initialVoicing($string) {
+	$pattern = array('/^h/u','/^k/u','/^s/u','/^t/u','/^c/u','/^p/u','/^f/u');
+	$replacement = array('g','g','z','d',"d'",'b','v');
+	return preg_replace($pattern, $replacement, $string);
+}
+
+//頭文字の連濁を戻す
+function initialUnvoicing($string) {
+	$replacement = array('/^h/u','/^k/u','/^s/u','/^t/u','/^c/u','/^p/u','/^f/u');
+	$pattern = array('g','g','z','d',"d'",'b','v');
+	return preg_replace($pattern, $replacement, $string);
+}
+
 //変化型テーブル読み込み
 $fname = 'affixTable.csv';
 $affixTable = new SplFileObject($fname);
-$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv、[3]削除する末尾（空もあり）
+$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv
 
 //json読み込み
 $fname = 'idyer.json';
@@ -114,16 +135,19 @@ $json = json_decode($json,true);
 		switch($_GET["type"]) {
 			case "word":
 				$checked_1 = "checked";
-			break;
+				break;
 			case "trans":
 				$checked_2 = "checked";
-			break;
+				break;
 			case "both":
 				$checked_3 = "checked";
-			break;
+				break;
 			case "all":
 				$checked_4 = "checked";
-			break;
+				break;
+			default:
+				$checked_3 = "checked";
+				break;
 		}
 	}else{
 		//デフォルトで両方検索を選択
@@ -141,15 +165,20 @@ $json = json_decode($json,true);
 			case "prt":
 				$checked_6 = "checked";
 				$func = "stripos";
-			break;
+				break;
 			case "fwd":
-				$checked_7 = "checked";
+				// $checked_7 = "checked"; 本来はこの表記だが、前方一致モードで検索された次の検索時は部分一致を選択するようにする
+				$checked_6 = "checked";
 				$func = "startsWith";
-			break;
+				break;
 			case "perf":
 				$checked_8 = "checked";
 				$func = "perfectHit";
-			break;
+				break;
+			default:
+				$checked_6 = "checked";
+				$func = "stripos";
+				break;
 		}
 	}else{
 		//デフォルトで部分一致を選択
@@ -211,6 +240,9 @@ $json = json_decode($json,true);
 			if (!($_GET["type"]=='word' || $_GET["type"]=='trans' || $_GET["type"]=='both' || $_GET["type"]=='all')) {
 				$_SET["type"] = 'both';
 			}
+			if (!($_GET["mode"]=='fwd' || $_GET["mode"]=='prt' || $_GET["mode"]=='perf')) {
+				$_SET["mode"] = 'prt';
+			}
 			//ここに検索して、内容をarrayに格納する処理を入れる。
 		    $target = $_GET["type"];
 			foreach ($json["words"] as $entryId =>$singleEntry){
@@ -218,43 +250,68 @@ $json = json_decode($json,true);
 				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
 				$wordForm = $singleEntry["entry"]["form"];
 				$isHit= 0;	//いずれかの検索語にヒットする場合にisHitが1になる
-/*				
-				//辞書のデータに対して接辞テーブルとの該当を調べる
-				foreach ($affixTable as $index => $singleAffix){
-					//if ($singleEntry["translations"][0]["title"] == $singleAffix[0]) {
-					//イジェール語では同じ単語が複数の品詞を持つことはないので、はじめの要素がヒットすれば良い。
-					//同形の別単語は別の単語として登録する方針であるため。
-						if (startsWith($singleAffix[1], "-")) {
-							
-							
-							$affixSpliteds = preg_split('/\((.)\)/u', $singleAffix[1], -1, PREG_SPLIT_DELIM_CAPTURE);
-							if ($affixSpliteds !== false) {
-								
-							}
-							
-							
-							
-							$text = $wordForm . substr($singleAffix[1], 1);
-							//接尾辞
-							if ($keyWords[0] == $text){
-								print '<p class="suggest">もしかして、';
-								print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
-								print 'の '. $singleAffix[2] . ' ? </p>';
-							}
-						}elseif (endsWith($singleAffix[1], "-")){
-							$text = substr($singleAffix[1], 0, strlen($singleAffix[1])-1) . $wordForm;
-							//接頭辞
-							if ($keyWords[0] == $text){
-								print '<p class="suggest">もしかして、';
-								print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
-								print 'の '. $singleAffix[2] . ' ? </p>';
-							}
-						}elseif (stripos($singleAffix[1], "-") !== false){
-							//接周辞
-						}
-					//}
+				
+				////////////////ここから接辞サジェスト機能
+				$wordFormForPreffixs = array();
+				$texts = array();
+				
+				//動詞の場合、接尾辞はeを外した形を語幹としているので、それにあわせる。
+				if (endsWith($singleEntry["translations"][0]["title"],"動詞")) {
+					$wordFormForSuffix = substr($wordForm, 0, strlen($wordForm)-1);
+				}else{
+					$wordFormForSuffix = $wordForm;
 				}
-*/				
+				//記述詞の場合、末尾の(i)nを外した形に対しての派生があるので、それをチェックする。
+				if (endsWith($singleEntry["translations"][0]["title"],"記述詞")) {
+					if (endsWith($wordForm, 'in')){
+						$wordFormForPreffixs[1] = substr($wordForm, 0, strlen($wordForm)-2);
+					}
+					$wordFormForPreffixs[0] = substr($wordForm, 0, strlen($wordForm)-1);
+				}else{
+					$wordFormForPreffixs[0] = $wordForm;
+				}
+				
+				//辞書のデータに対して接辞テーブルとの該当を調べる
+				foreach ($affixTable as $singleAffix){ //カッコつき接辞のカッコ内を取り出した文字列
+					
+					$singleAffixWithoutBracket = preg_replace('/\(.*?\)/u', '', $singleAffix[1]); //カッコつき接辞のカッコ内をカッコごとなくした形
+					if (preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1]) == 1) {
+						preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1], $singleAffixCharBetweenBracket);
+						$singleAffixCharBetweenBracket = $singleAffixCharBetweenBracket[0];
+					}else{
+						$singleAffixCharBetweenBracket = '';
+					} 
+					$singleAffixWithBracket = preg_replace('/[\(\)]/u', '', $singleAffix[1]); //カッコつき接辞のカッコを外した形
+					
+					if (startsWith($singleAffix[1], "-")) { //接尾辞
+						if (endsWith($wordForm, $singleAffixCharBetweenBracket)){//カッコ内の文字で終わる単語の場合
+							$texts[0] = $wordFormForSuffix . substr($singleAffixWithoutBracket, 1);
+						}else{
+							$texts[0] = $wordFormForSuffix . substr($singleAffixWithBracket, 1);
+						}
+					}elseif (endsWith($singleAffix[1], "-")){ //接頭辞
+						foreach ($wordFormForPreffixs as $index => $singleWordFormForPreffix){
+							if (startsWith($wordForm, $singleAffixCharBetweenBracket)){//カッコ内の文字で始まる単語の場合
+								$texts[$index] = substr($singleAffixWithoutBracket, 0, strlen($singleAffixWithoutBracket)-1) . initialVoicing($singleWordFormForPreffix);
+							}else{
+								$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . initialVoicing($singleWordFormForPreffix);
+							}
+						}
+					}elseif (stripos($singleAffix[1], "-") !== false){
+						//接周辞：今の所存在しない
+					}
+					foreach ($texts as $singleText) {
+						if ($keyWords[0] == $singleText && endsWith($singleEntry["translations"][0]["title"], $singleAffix[0])){
+							print '<p class="suggest">もしかして、';
+							print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
+							print 'の '. $singleAffix[2] . ' ? </p>';
+						}
+					}
+				}
+				/////////ここまで接辞サジェスト機能
+				
+				//検索部
+				$wordForm = $singleEntry["entry"]["form"];
 				foreach ($keyWords as $eachKey){
 					switch ($target){
 						case "word":
@@ -262,7 +319,7 @@ $json = json_decode($json,true);
 								$isHit = 1;
 								break 1;
 							}
-						break;
+							break;
 						case "trans":
 							foreach ($singleEntry["translations"] as $singleTranslation){
 								foreach ($singleTranslation["forms"] as $singleTranslationForm){
@@ -272,7 +329,7 @@ $json = json_decode($json,true);
 									}
 								}
 							}
-						break;
+							break;
 						case "both":
 							if ($func($wordForm,$eachKey) !== false){
 								$isHit = 1;
@@ -288,7 +345,7 @@ $json = json_decode($json,true);
 									}
 								}
 							}
-						break;
+							break;
 						case "all":
 							if ($func($wordForm,$eachKey) !== false){
 								$isHit = 1;
@@ -312,7 +369,7 @@ $json = json_decode($json,true);
 									}
 								}
 							}
-						break;
+							break;
 					}
 				}
 				if($isHit == 1) {
@@ -324,7 +381,7 @@ $json = json_decode($json,true);
 		//ここから表示部
 		$currentPageID = $_GET['page'];
 		$hitAmount = count($hitWordIds);
-		print('<p>');		
+		print('<p class="result">');		
 		if (!preg_match("/^[0-9]+$/", $_GET['page'])) {
 			$currentPageID = 1;	//ページIDに数字以外を入力された場合、強制的に1とする。
 		}
@@ -359,49 +416,49 @@ $json = json_decode($json,true);
 			foreach ($json["words"][$hitEntryIds[$i]]["contents"] as $singleContent){
 				print '<li class="wordContents">';
 				print '<span class="wordContentTitle">' . $singleContent["title"] . '</span>';
-                if ($singleContent["title"] != "語源"){
-                    print $singleContent["text"];
-                }else{
-                	$text = '';
-                	$isNextLink = true;
-                	$singleContent["text"] = preg_split ('/([:\/*>+|])/u', $singleContent["text"], -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
-                	foreach ($singleContent["text"] as $index => $singleContentText){
-                		if ($isNextLink == false){
-                			$isLink = false;
-                			$isNextLink = true;
-                		}else{
-	                		$isLink = true;
-	                	}
-                		//「.」を文字列に含むとき
-                		if (stripos($singleContentText, '.') != false){
-                			$isLink = false;
-                		//文字列が日本語を含むとき
-                		}elseif (strlen($singleContentText) != mb_strlen($singleContentText)){
-                			$isLink = false;
-                		//文字列がデリミタで、次に影響を及ぼさないもののとき
-                		}elseif (preg_match ('/[:\/>+]/u', $singleContentText) == 1){
-                			$isLink = false;
-                		//文字列がデリミタで、次に影響を及ぼすもののとき
-                		}elseif (preg_match ('/[*|]/u', $singleContentText) == 1){
-                			$isLink = false;
-                			$isNextLink = false;
-                		//右端以外のとき、ひとつ右を見る
-                		}elseif ($index+1 < count($singleContent["text"])){
-                			if (preg_match ('/[:\/]/u', $singleContent["text"][$index+1]) == 1){ 
-                				$isLink = false;
-                			}
-                		}
-                		//表示生成部
-                		if ($isLink){
-                			makeLinkStarter($singleContentText,'both', 'fwd', 1);
-               				print $singleContentText . '</a>';
-                		}else{
-                			$isLink = true;
-                			print $singleContentText;
-                		}
-                	}
-                }
-                print '</li>';
+				if ($singleContent["title"] != "語源"){
+				    print $singleContent["text"];
+				}else{
+					$text = '';
+					$isNextLink = true;
+					$singleContent["text"] = preg_split ('/([:\/*>+|])/u', $singleContent["text"], -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+					foreach ($singleContent["text"] as $index => $singleContentText){
+						if ($isNextLink == false){
+							$isLink = false;
+							$isNextLink = true;
+						}else{
+				    		$isLink = true;
+				    	}
+						//「.」を文字列に含むとき
+						if (stripos($singleContentText, '.') != false){
+							$isLink = false;
+						//文字列が日本語を含むとき
+						}elseif (strlen($singleContentText) != mb_strlen($singleContentText)){
+							$isLink = false;
+						//文字列がデリミタで、次に影響を及ぼさないもののとき
+						}elseif (preg_match ('/[:\/>+]/u', $singleContentText) == 1){
+							$isLink = false;
+						//文字列がデリミタで、次に影響を及ぼすもののとき
+						}elseif (preg_match ('/[*|]/u', $singleContentText) == 1){
+							$isLink = false;
+							$isNextLink = false;
+						//右端以外のとき、ひとつ右を見る
+						}elseif ($index+1 < count($singleContent["text"])){
+							if (preg_match ('/[:\/]/u', $singleContent["text"][$index+1]) == 1){ 
+								$isLink = false;
+							}
+						}
+						//表示生成部
+						if ($isLink){
+							makeLinkStarter($singleContentText,'both', 'fwd', 1);
+							print $singleContentText . '</a>';
+						}else{
+							$isLink = true;
+							print $singleContentText;
+						}
+					}
+				}
+				print '</li>';
 			}
 
 			$relationTitles = array();
