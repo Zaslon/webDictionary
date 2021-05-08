@@ -183,13 +183,13 @@ $json = json_decode($json,true);
 				$texts = array();
 				
 				//動詞の場合、接尾辞はeを外した形を語幹としているので、それにあわせる。
-				if (endsWith($singleEntry["translations"][0]["title"],"動詞")) {
+				if (mb_stripos($singleEntry["translations"][0]["title"],"動詞") !== false) {
 					$wordFormForSuffix = substr($wordForm, 0, strlen($wordForm)-1);
 				}else{
 					$wordFormForSuffix = $wordForm;
 				}
 				//記述詞の場合、末尾の(i)nを外した形に対しての派生があるので、それをチェックする。
-				if (endsWith($singleEntry["translations"][0]["title"],"記述詞")) {
+				if (mb_stripos($singleEntry["translations"][0]["title"],"記述詞") !== false) {
 					if (endsWith($wordForm, 'in')){
 						$wordFormForPreffixs[1] = substr($wordForm, 0, strlen($wordForm)-2);
 					}
@@ -228,7 +228,7 @@ $json = json_decode($json,true);
 						//接周辞：今の所存在しない
 					}
 					foreach ($texts as $singleText) {
-						if ($keyWords[0] == $singleText && endsWith($singleEntry["translations"][0]["title"], $singleAffix[0])){
+						if ($keyWords[0] == $singleText && mb_stripos($singleEntry["translations"][0]["title"], $singleAffix[0])!== false){
 							print '<p class="suggest">もしかして、';
 							print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
 							print 'の '. $singleAffix[2] . ' ? </p>';
