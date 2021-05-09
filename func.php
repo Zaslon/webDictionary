@@ -1,7 +1,7 @@
 <?php
-//エスケープしてprintする関数
-function print_h($str){
-    print htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+//エスケープしてechoする関数
+function echo_h($str){
+    echo htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
 
 //前方一致検索
@@ -26,7 +26,7 @@ function endsWith($haystack, $needle){
 function perfectHit($haystack, $needle){
 	$haystack = mb_strtolower($haystack,'UTF-8');//検索の便宜のため小文字にする
 	$needle = mb_strtolower($needle,'UTF-8');//検索の便宜のため小文字にする
-    return $haystack == $needle;
+    return $haystack === $needle;
 }
 
 //訳語部の検索用に)と】以左の文字列を消去する
@@ -43,21 +43,21 @@ function deleteNonIdyerinCharacters($string){
 
 //指定を取り込んだリンク生成
 function makeLinkStarter($word, $type, $mode, $page = 1,$id = false){
-	print '<a href=dict.php?keyBox=';
-	print_h($word);
-	print '&type=';
-	print_h($type);
+	echo '<a href=dict.php?keyBox=';
+	echo_h($word);
+	echo '&type=';
+	echo_h($type);
 	if((isset($_GET["Idf"])) && ($_GET["Idf"] != "")){
-		print '&Idf=true';
+		echo '&Idf=true';
 	}
-	print '&mode=';
-	print_h($mode);
-	print '&page=';
-	print_h($page);
+	echo '&mode=';
+	echo_h($mode);
+	echo '&page=';
+	echo_h($page);
 	if ($id){
-		print '&id=' . $id;
+		echo '&id=' . $id;
 	}
-	print '>';
+	echo '>';
 }
 
 //頭文字の連濁
@@ -72,4 +72,71 @@ function initialUnvoicing($string) {
 	$replacement = array('/^h/u','/^k/u','/^s/u','/^t/u','/^c/u','/^p/u','/^f/u');
 	$pattern = array('g','g','z','d',"d'",'b','v');
 	return preg_replace($pattern, $replacement, $string);
+}
+
+//アルファベットのみで構成されているかの判定
+function isDoublebyte($string) {
+	return strlen($string) !== mb_strlen($string);
+}
+
+//
+function isHit($singleEntry, $needle, $type, $mode){
+	$func = setFunc($mode);
+	switch ($type){
+		case "word":
+			return $func($singleEntry["entry"]["form"],$needle);
+			break;
+		case "trans":
+			foreach ($singleEntry["translations"] as $singleTranslation){
+				foreach ($singleTranslation["forms"] as $singleTranslationForm){
+					if ($func(deleteSymbolsForTrans($singleTranslationForm),$needle) !== false){
+						return true;
+					}
+				}
+			}
+			break;
+		case "both":
+			if ($func($singleEntry["entry"]["form"],$needle) !== false){
+				return true;
+			}
+			foreach ($singleEntry["translations"] as $singleTranslation){
+				foreach ($singleTranslation["forms"] as $singleTranslationForm){
+					if ($func(deleteSymbolsForTrans($singleTranslationForm),$needle) !== false){
+						return true;
+					}
+				}
+			}
+			break;
+		case "all":
+			if ($func($singleEntry["entry"]["form"],$needle) !== false){
+				return true;
+			}
+			foreach ($singleEntry["translations"] as $singleTranslation){
+				foreach ($singleTranslation["forms"] as $singleTranslationForm){
+					if ($func(deleteSymbolsForTrans($singleTranslationForm),$needle) !== false){
+						return true;
+					}
+				}
+				foreach ($singleEntry["contents"] as $singleContent){
+					if ($func($singleContent["text"],$needle) !== false){
+						return true;
+					}
+				}
+			}
+			break;
+	}
+}
+
+//func関数を指定する
+function setFunc($mode){
+	switch($mode){
+		case "prt":
+			return "stripos";
+		case "fwd":
+			return "startsWith";
+		case "perf":
+			return "endsWith";
+		default:
+			return "stripos";
+	}
 }

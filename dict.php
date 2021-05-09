@@ -43,9 +43,9 @@ $json = json_decode($json,true);
 	<div class="dictVer">
 		<?php
 		date_default_timezone_set('Asia/Tokyo');
-		print "<p>プログラム更新日：".date("Y/m/d",filemtime(__FILE__))."</p>";
-		print "<p>辞書更新日：".date("Y/m/d",filemtime($fname))."<br />";
-		print "単語数：".count($json["words"])."</p>";
+		echo "<p>プログラム更新日：".date("Y/m/d",filemtime(__FILE__))."</p>";
+		echo "<p>辞書更新日：".date("Y/m/d",filemtime($fname))."<br />";
+		echo "単語数：".count($json["words"])."</p>";
 		?>
 	</div>
 	<?php
@@ -58,8 +58,19 @@ $json = json_decode($json,true);
 	$checked_7 = "";
 	$checked_8 = "";
 	
-	if((isset($_GET["type"])) && ($_GET["type"] != "")) {
-		switch($_GET["type"]) {
+	//スーパーグローバル関数の処理。
+	//返り値：
+	//文字列 or false
+	
+	$type = ((isset($_GET["type"])) && ($_GET["type"] !== "")) ? $_GET["type"] :false;
+	$mode = ((isset($_GET["mode"])) && ($_GET["mode"] !== "")) ? $_GET["mode"] :false;
+	$idf = ((isset($_GET["Idf"])) && ($_GET["Idf"] !== "")) ? true  :false;
+	$keyBox = ((isset($_GET["keyBox"])) && ($_GET["keyBox"] !== "")) ? $_GET["keyBox"]  :false;
+	$id = (isset($_GET["id"])) && ($_GET["id"] !== "") ? (int)$_GET["id"] :false;
+	$page = ((isset($_GET["page"])) && ($_GET["page"] !== "") && (preg_match("/^[0-9]+$/", $_GET["page"]))) ? (int)$_GET["page"] : 1; //ページIDに数字以外を入力された場合、強制的に1とする。
+	
+	if($type) {
+		switch($type) {
 			case "word":
 				$checked_1 = "checked";
 				break;
@@ -79,37 +90,35 @@ $json = json_decode($json,true);
 	}else{
 		//デフォルトで両方検索を選択
 		$checked_3 = "checked";
+		$type = "both";
 	}
 	
-	if((isset($_GET["Idf"])) && ($_GET["Idf"] != "")) {
+	if($idf) {
 		$checked_5 = "checked";
 	}else{
 		//デフォルトで空欄
 	}
 	
-	if((isset($_GET["mode"])) && ($_GET["mode"] != "")) {
-		switch($_GET["mode"]) {
+	if($mode) {
+		switch($mode) {
 			case "prt":
 				$checked_6 = "checked";
-				$func = "stripos";
 				break;
 			case "fwd":
 				// $checked_7 = "checked"; 本来はこの表記だが、前方一致モードで検索された次の検索時は部分一致を選択するようにする
 				$checked_6 = "checked";
-				$func = "startsWith";
 				break;
 			case "perf":
 				$checked_8 = "checked";
-				$func = "perfectHit";
 				break;
 			default:
 				$checked_6 = "checked";
-				$func = "stripos";
 				break;
 		}
 	}else{
 		//デフォルトで部分一致を選択
 		$checked_6 = "checked";
+		$mode = "prt";
 	}
 	?>
 	
@@ -128,7 +137,7 @@ $json = json_decode($json,true);
 
 	<div id="main">
 	<?php
-	$target = "";	//タイプ指定
+	$func = $mode ? setFunc($mode): "stripos";
 	$hitWordIds = array();
 	$hitEntryIds = array();
 	$hitAmount =0;
@@ -136,47 +145,37 @@ $json = json_decode($json,true);
 	$totalPages = 0;
 	$wordNumPerPage = 40;
 	//keyBoxに入力されているときのみ，$keyWordsに代入
-	if (isset($_GET['keyBox'])){
+	if ($keyBox){
 	//数字が一部にでも含まれていたら$keyWordsは空になる．
-		if (preg_match("/^.*[0-9].*/", $_GET['keyBox'])) {
-			print "<p>検索ワードに数字を入力しないでください。数字を検索する場合は漢数字で入力してください。</p>";
+		if (preg_match("/^.*[0-9].*/", $keyBox)) {
+			echo "<p>検索ワードに数字を入力しないでください。数字を検索する場合は漢数字で入力してください。</p>";
 		} else {
 			$keyWords = preg_replace('/[　]/u', ' ', $_GET["keyBox"]);//全角スペースを半角スペースに変換
 			$keyWords = preg_replace('/\s\s+/u', ' ', $keyWords);//スペース2つ以上であれば，1つに削減
 			$keyWords = deleteNonIdyerinCharacters($keyWords);
 			$keyWords = explode(' ',$keyWords);//スペースで区切られた検索語を分離して配列に格納
-			$i = 0;
 		}
 	}
 
 	//ここから検索部。検索の結果を格納する。
 	if(empty($keyWords[0])){
-		print "<p>検索ワードを入力してください。</p>";//$keyWordsが空なら警告を表示して終了する．
+		echo "<p>検索ワードを入力してください。</p>";//$keyWordsが空なら警告を表示して終了する．
     }else{
     	//全てに優先してid指定時の表示を行う。
-		if((isset($_GET["id"])) && ($_GET["id"] != "")) {
-			$hitWordIds[] = $_GET["id"];
+		if($id) {
+			$hitWordIds[] = $id;
 			foreach ($json["words"] as $entryId => $singleEntry){
-				if ($singleEntry["entry"]["id"] == $_GET["id"]){
+				if ($singleEntry["entry"]["id"] === $id){
 					$hitEntryIds[]= $entryId;
 					break 1;
 				}
 			}
 		}else{
-	    	//検索対象を取得
-			if (!($_GET["type"]=='word' || $_GET["type"]=='trans' || $_GET["type"]=='both' || $_GET["type"]=='all')) {
-				$_SET["type"] = 'both';
-			}
-			if (!($_GET["mode"]=='fwd' || $_GET["mode"]=='prt' || $_GET["mode"]=='perf')) {
-				$_SET["mode"] = 'prt';
-			}
 			//ここに検索して、内容をarrayに格納する処理を入れる。
-		    $target = $_GET["type"];
 			foreach ($json["words"] as $entryId =>$singleEntry){
 				$wordId = $singleEntry["entry"]["id"];
 				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
 				$wordForm = $singleEntry["entry"]["form"];
-				$isHit= 0;	//いずれかの検索語にヒットする場合にisHitが1になる
 				
 				////////////////ここから接辞サジェスト機能
 				$wordFormForPreffixs = array();
@@ -202,7 +201,7 @@ $json = json_decode($json,true);
 				foreach ($affixTable as $singleAffix){
 					
 					$singleAffixWithoutBracket = preg_replace('/\(.*?\)/u', '', $singleAffix[1]); //カッコつき接辞のカッコ内をカッコごとなくした形
-					if (preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1]) == 1) {
+					if (preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1]) === 1) {
 						preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1], $singleAffixCharBetweenBracket);
 						$singleAffixCharBetweenBracket = $singleAffixCharBetweenBracket[0]; //カッコつき接辞のカッコ内を取り出した文字列
 					}else{
@@ -228,182 +227,120 @@ $json = json_decode($json,true);
 						//接周辞：今の所存在しない
 					}
 					foreach ($texts as $singleText) {
-						if ($keyWords[0] == $singleText && mb_stripos($singleEntry["translations"][0]["title"], $singleAffix[0])!== false){
-							print '<p class="suggest">もしかして、';
-							print makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
-							print 'の '. $singleAffix[2] . ' ? </p>';
+						if ($keyWords[0] === $singleText && mb_stripos($singleEntry["translations"][0]["title"], $singleAffix[0])!== false){
+							echo '<p class="suggest">もしかして、';
+							echo makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
+							echo 'の '. $singleAffix[2] . ' ? </p>';
 						}
 					}
 				}
 				/////////ここまで接辞サジェスト機能
 				
 				//検索部
-				$wordForm = $singleEntry["entry"]["form"];
 				foreach ($keyWords as $eachKey){
-					switch ($target){
-						case "word":
-							if ($func($wordForm,$eachKey) !== false){
-								$isHit = 1;
-								break 1;
-							}
-							break;
-						case "trans":
-							foreach ($singleEntry["translations"] as $singleTranslation){
-								foreach ($singleTranslation["forms"] as $singleTranslationForm){
-									if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
-										$isHit = 1;
-										break 3;
-									}
-								}
-							}
-							break;
-						case "both":
-							if ($func($wordForm,$eachKey) !== false){
-								$isHit = 1;
-								break 1;
-							}
-							if ($isHit == 0){
-								foreach ($singleEntry["translations"] as $singleTranslation){
-									foreach ($singleTranslation["forms"] as $singleTranslationForm){
-										if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
-											$isHit = 1;
-											break 3;
-										}
-									}
-								}
-							}
-							break;
-						case "all":
-							if ($func($wordForm,$eachKey) !== false){
-								$isHit = 1;
-								break 1;
-							}
-							if ($isHit == 0){
-								foreach ($singleEntry["translations"] as $singleTranslation){
-									foreach ($singleTranslation["forms"] as $singleTranslationForm){
-										if ($func(deleteSymbolsForTrans($singleTranslationForm),$eachKey) !== false){
-											$isHit = 1;
-											break 3;
-										}
-									}
-								}
-								if ($isHit == 0){
-									foreach ($singleEntry["contents"] as $singleContent){
-										if ($func($singleContent["text"],$eachKey) !== false){
-											$isHit = 1;
-											break 2;
-										}
-									}
-								}
-							}
-							break;
+					if(isHit($singleEntry, $eachKey, $type, $mode)) {
+						$hitWordIds[] = $wordId;
+						$hitEntryIds[]= $entryId;
 					}
 				}
-				if($isHit == 1) {
-					$hitWordIds[] = $wordId;
-					$hitEntryIds[]= $entryId;
-				}
 			}
 		}
+		
 		//ここから表示部
-		$currentPageID = $_GET['page'];
 		$hitAmount = count($hitWordIds);
-		print('<p class="result">');		
-		if (!preg_match("/^[0-9]+$/", $_GET['page'])) {
-			$currentPageID = 1;	//ページIDに数字以外を入力された場合、強制的に1とする。
-		}
-		$i = $wordNumPerPage*($currentPageID-1);
-		if($hitAmount==0){
-			print_h($_GET["keyBox"].' での検索結果：0件');
+		echo('<p class="result">');		
+		$i = $wordNumPerPage*($page-1);
+		if($hitAmount === 0){
+			echo_h($_GET["keyBox"].' での検索結果：0件');
 		}else{
-			print_h($_GET["keyBox"].' での検索結果：'.$hitAmount."件(".($i+1)."から".min($i+$wordNumPerPage,$hitAmount)."件目)");
+			echo_h($_GET["keyBox"].' での検索結果：'.$hitAmount."件(".($i+1)."から".min($i+$wordNumPerPage,$hitAmount)."件目)");
 		}
-		print("</p>");
+		echo("</p>");
 	
-		while ( $i < ($wordNumPerPage*$currentPageID) && $i < $hitAmount) {
+		while ( $i < ($wordNumPerPage*$page) && $i < $hitAmount) {
 		//ここに検索結果の繰り返し表示を入れる。
-			print '<ul class="wordEntry">';
-			if((isset($_GET["Idf"])) && ($_GET["Idf"] != "")) {
-				print '<li class="wordForm"><span class="idyerin">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"] . '</span>';
+			echo '<ul class="wordEntry">';
+			if($idf) {
+				echo '<li class="wordForm"><span class="idyerin">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"] . '</span>';
 			}else{
-				print '<li class="wordForm">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"];
+				echo '<li class="wordForm">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"];
 			}
-			print '<span class="wordId">#'. $hitWordIds[$i] . '</span></li>';
+			echo '<span class="wordId">#'. $hitWordIds[$i] . '</span></li>';
 			foreach ($json["words"][$hitEntryIds[$i]]["translations"] as $singleTranslation){
-				print '<li><span class="wordTitle">' . $singleTranslation["title"] . '</span>';
+				echo '<li><span class="wordTitle">' . $singleTranslation["title"] . '</span>';
 				foreach ($singleTranslation["forms"] as $singleTranslationForm){
-					print $singleTranslationForm;
+					echo $singleTranslationForm;
 					if ($singleTranslationForm !== end($singleTranslation["forms"])){
 						//最後のとき以外に「、」を追加
-						print '、';
+						echo '、';
 					}
 				}
-				print '</li>';
+				echo '</li>';
 			}
 			foreach ($json["words"][$hitEntryIds[$i]]["contents"] as $singleContent){
-				print '<li class="wordContents">';
-				print '<span class="wordContentTitle">' . $singleContent["title"] . '</span>';
-				if ($singleContent["title"] != "語源"){
-				    print $singleContent["text"];
+				echo '<li class="wordContents">';
+				echo '<span class="wordContentTitle">' . $singleContent["title"] . '</span>';
+				if ($singleContent["title"] !== "語源"){
+				    echo $singleContent["text"];
 				}else{
 					$text = '';
 					$isNextLink = true;
 					$singleContent["text"] = preg_split ('/([:\/*>+|])/u', $singleContent["text"], -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 					foreach ($singleContent["text"] as $index => $singleContentText){
-						if ($isNextLink == false){
+						if ($isNextLink === false){
 							$isLink = false;
 							$isNextLink = true;
 						}else{
 				    		$isLink = true;
 				    	}
 						//「.」を文字列に含むとき
-						if (stripos($singleContentText, '.') != false){
+						if (stripos($singleContentText, '.') !== false){
 							$isLink = false;
 						//文字列が日本語を含むとき
-						}elseif (strlen($singleContentText) != mb_strlen($singleContentText)){
+						}elseif (isDoublebyte($singleContentText)){
 							$isLink = false;
 						//文字列がデリミタで、次に影響を及ぼさないもののとき
-						}elseif (preg_match ('/[:\/>+]/u', $singleContentText) == 1){
+						}elseif (preg_match ('/[:\/>+]/u', $singleContentText) === 1){
 							$isLink = false;
 						//文字列がデリミタで、次に影響を及ぼすもののとき
-						}elseif (preg_match ('/[*|]/u', $singleContentText) == 1){
+						}elseif (preg_match ('/[*|]/u', $singleContentText) === 1){
 							$isLink = false;
 							$isNextLink = false;
 						//右端以外のとき、ひとつ右を見る
 						}elseif ($index+1 < count($singleContent["text"])){
-							if (preg_match ('/[:\/]/u', $singleContent["text"][$index+1]) == 1){ 
+							if (preg_match ('/[:\/]/u', $singleContent["text"][$index+1]) === 1){ 
 								$isLink = false;
 							}
 						}
 						//表示生成部
 						if ($isLink){
 							makeLinkStarter($singleContentText,'both', 'fwd', 1);
-							print $singleContentText . '</a>';
+							echo $singleContentText . '</a>';
 						}else{
 							$isLink = true;
-							print $singleContentText;
+							echo $singleContentText;
 						}
 					}
 				}
-				print '</li>';
+				echo '</li>';
 			}
 
 			$relationTitles = array();
 			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
 				if (array_search($singleRelation["title"],$relationTitles) === false){
-					print '<li class="wordRelation"><span class="wordRelation">' . $singleRelation["title"] . '</span>';
+					echo '<li class="wordRelation"><span class="wordRelation">' . $singleRelation["title"] . '</span>';
 					$relationTitles[] = $singleRelation["title"];
 				}
 				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，スペースを全て+で接続した形に変換
 				makeLinkStarter($conForm,$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
-				print $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
+				echo $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
 //				if ($singleRelation !== end($json["words"][$hitEntryIds[$i]]["relations"])){
 //					//最後のとき以外に「, 」を追加
-//					print ', ';
+//					echo ', ';
 //				}
 			}
-			print '</li>';
-			print '</ul>';
+			echo '</li>';
+			echo '</ul>';
 			$i++;
 		}
 	}
@@ -411,30 +348,30 @@ $json = json_decode($json,true);
 
 	//ページ送り機能
 
-	print('<ul class="navigation">');
+	echo('<ul class="navigation">');
 	if ($wordNumPerPage<$hitAmount) {
 		$totalPages = ceil($hitAmount/$wordNumPerPage);
 		$i = 1;
 		$conWord =  implode ("+", $keyWords);//リンク作成のため，スペースを全て+で接続した形に変換
 		while ($i <= $totalPages) {
-			print '<li';
-			if ($_GET["page"] == $i){
-				print ' class=currentPage';
+			echo '<li';
+			if ($page === $i){
+				echo ' class=currentPage';
 			}
-			print '>';
-			if ($_GET["page"] != $i){
-				makeLinkStarter($conWord,$_GET["type"],$_GET["mode"], $i);
-				print_h($i);
-				print '</a>';
+			echo '>';
+			if ($page !== $i){
+				makeLinkStarter($conWord, $type, $mode, $i);
+				echo_h($i);
+				echo '</a>';
 			}else{
-				print_h($i);
+				echo_h($i);
 			}
-			print '</li>';
+			echo '</li>';
 			$i++;
 		}
 	}else{
 	}
-	print('</ul>');
+	echo('</ul>');
 	?>
 	
 	</div>
