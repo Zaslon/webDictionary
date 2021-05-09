@@ -29,6 +29,16 @@ function perfectHit($haystack, $needle){
     return $haystack === $needle;
 }
 
+//母音で始まるかをチェック
+function startsWithVowel($haystack){
+	return (bool)preg_match('/^[eaoiu]/u', $haystack);
+}
+
+//母音で終わるかチェック
+function endsWithVowel($haystack){
+	return (bool)preg_match('/[eaoiu]$/u', $haystack);
+}
+
 //訳語部の検索用に)と】以左の文字列を消去する
 function deleteSymbolsForTrans($string){
 	$string = preg_replace('/.+[)）】]/u', '', $string);

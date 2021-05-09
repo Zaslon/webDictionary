@@ -210,14 +210,14 @@ $json = json_decode($json,true);
 					$singleAffixWithBracket = preg_replace('/[\(\)]/u', '', $singleAffix[1]); //カッコつき接辞のカッコを外した形
 					
 					if (startsWith($singleAffix[1], "-")) { //接尾辞
-						if (endsWith($wordForm, $singleAffixCharBetweenBracket)){//カッコ内の文字で終わる単語の場合
+						if (endsWithVowel($wordForm)){//母音で終わる単語の場合
 							$texts[0] = $wordFormForSuffix . substr($singleAffixWithoutBracket, 1);
 						}else{
 							$texts[0] = $wordFormForSuffix . substr($singleAffixWithBracket, 1);
 						}
 					}elseif (endsWith($singleAffix[1], "-")){ //接頭辞
 						foreach ($wordFormForPreffixs as $index => $singleWordFormForPreffix){
-							if (startsWith($wordForm, $singleAffixCharBetweenBracket)){//カッコ内の文字で始まる単語の場合
+							if (startsWithVowel($wordForm)){//母音で始まる単語の場合
 								$texts[$index] = substr($singleAffixWithoutBracket, 0, strlen($singleAffixWithoutBracket)-1) . initialVoicing($singleWordFormForPreffix);
 							}else{
 								$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . initialVoicing($singleWordFormForPreffix);
