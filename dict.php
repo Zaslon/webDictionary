@@ -85,6 +85,7 @@ $json = json_decode($json,true);
 				break;
 			default:
 				$checked_3 = "checked";
+				$type = "both";
 				break;
 		}
 	}else{
@@ -113,6 +114,7 @@ $json = json_decode($json,true);
 				break;
 			default:
 				$checked_6 = "checked";
+				$mode = "prt";
 				break;
 		}
 	}else{
