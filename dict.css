@@ -61,6 +61,10 @@ body{
 	color:#ccc;
 }
 
+.textAndSubmit{
+	display: inline-block;
+}
+
 .buttonAndLabel{
 	display: inline-block;
 }
@@ -336,6 +340,10 @@ li.wordForm {
 	width:100%;
 	border-right:none;
 	border-left:none;
+	}
+	
+	.textAndSubmit{
+	width:100%;
 	}
 	
 	input[type="text"]{

@@ -122,7 +122,8 @@ $json = json_decode($json,true);
 	}
 	?>
 	
-	<form action="" method="GET"><input type="text" name="keyBox"><input type="submit" name="submit" value="検索">
+	<form action="" method="GET">
+		<div class='textAndSubmit'><input type="text" name="keyBox"><input type="submit" name="submit" value="検索"></div>
 <!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c1" value="word" <?php echo $checked_1; ?>><label for="c1">見出し語検索</label></div> -->
 <!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c2" value="trans" <?php echo $checked_2; ?>><label for="c2">訳語検索</label></div> -->
 		<div class='buttonAndLabel'><input type="radio" name="type" id="c3" value="both" <?php echo $checked_3; ?>><label for="c3">見出し語・訳語検索</label></div>
