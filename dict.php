@@ -271,10 +271,17 @@ $json = json_decode($json,true);
 			echo '<span class="wordId">#'. $hitWordIds[$i] . '</span></li>';
 			
 			$previousTitle = '';
-			foreach ($json["words"][$hitEntryIds[$i]]["translations"] as $singleTranslation){
-				if ($previousTitle !== $singleTranslation["title"]) {
-					echo '<li><span class="wordTitle">' . $singleTranslation["title"] . '</span>';
+			echo '<li>';
+			foreach ($json["words"][$hitEntryIds[$i]]["translations"] as $index => $singleTranslation){
+				if ($index === 0){
+					echo '<span class="wordTitle">' . $singleTranslation["title"] . '</span>';
 					echo '<ol>';
+				}else{
+					if ($previousTitle !== $singleTranslation["title"]) {
+						echo '</ol>';
+						echo '<span class="wordTitle">' . $singleTranslation["title"] . '</span>';
+						echo '<ol>';
+					}
 				}
 				$previousTitle = $singleTranslation["title"];
 				echo '<li>';
