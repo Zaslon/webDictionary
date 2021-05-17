@@ -269,8 +269,15 @@ $json = json_decode($json,true);
 				echo '<li class="wordForm">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"];
 			}
 			echo '<span class="wordId">#'. $hitWordIds[$i] . '</span></li>';
+			
+			$previousTitle = '';
 			foreach ($json["words"][$hitEntryIds[$i]]["translations"] as $singleTranslation){
-				echo '<li><span class="wordTitle">' . $singleTranslation["title"] . '</span>';
+				if ($previousTitle !== $singleTranslation["title"]) {
+					echo '<li><span class="wordTitle">' . $singleTranslation["title"] . '</span>';
+					echo '<ol>';
+				}
+				$previousTitle = $singleTranslation["title"];
+				echo '<li>';
 				foreach ($singleTranslation["forms"] as $singleTranslationForm){
 					echo $singleTranslationForm;
 					if ($singleTranslationForm !== end($singleTranslation["forms"])){
@@ -280,10 +287,13 @@ $json = json_decode($json,true);
 				}
 				echo '</li>';
 			}
+			echo '</ol>';
+			
 			foreach ($json["words"][$hitEntryIds[$i]]["contents"] as $singleContent){
 				echo '<li class="wordContents">';
 				echo '<span class="wordContentTitle">' . $singleContent["title"] . '</span>';
 				if ($singleContent["title"] !== "語源"){
+				echo '</br>';
 				    echo $singleContent["text"];
 				}else{
 					$text = '';
