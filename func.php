@@ -122,9 +122,18 @@ function isHit($singleEntry, $needle, $type, $mode){
 				return true;
 			}
 			foreach ($singleEntry["translations"] as $singleTranslation){
+				if ($func($singleTranslation["title"],$needle) !== false){
+					return true;
+				}
 				foreach ($singleTranslation["forms"] as $singleTranslationForm){
-					if ($func(deleteSymbolsForTrans($singleTranslationForm),$needle) !== false){
-						return true;
+					if ($type === 'all'){
+						if ($func($singleTranslationForm,$needle) !== false){
+							return true;//全文検索のときは記号も含めて検索する
+						}
+					}else{
+						if ($func(deleteSymbolsForTrans($singleTranslationForm),$needle) !== false){
+							return true;
+						}
 					}
 				}
 				foreach ($singleEntry["contents"] as $singleContent){

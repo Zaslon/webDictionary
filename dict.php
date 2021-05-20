@@ -75,7 +75,8 @@ $json = json_decode($json,true);
 				$checked_1 = "checked";
 				break;
 			case "trans":
-				$checked_2 = "checked";
+				// $checked_2 = "checked"; 本来はこの表記だが、訳語検索モードで検索された次の検索時は両方モードを選択するようにする
+				$checked_3 = "checked";
 				break;
 			case "both":
 				$checked_3 = "checked";
