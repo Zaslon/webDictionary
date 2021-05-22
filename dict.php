@@ -5,7 +5,7 @@ require 'func.php';
 //変化型テーブル読み込み
 $fname = 'affixTable.csv';
 $affixTable = new SplFileObject($fname);
-$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv
+$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv、[3]ある場合は特殊処理の記載
 
 //json読み込み
 $fname = 'idyer.json';
@@ -222,9 +222,13 @@ $json = json_decode($json,true);
 					}elseif (endsWith($singleAffix[1], "-")){ //接頭辞
 						foreach ($wordFormForPreffixs as $index => $singleWordFormForPreffix){
 							if (startsWithVowel($wordForm)){//母音で始まる単語の場合
-								$texts[$index] = substr($singleAffixWithoutBracket, 0, strlen($singleAffixWithoutBracket)-1) . initialVoicing($singleWordFormForPreffix);
+									$texts[$index] = substr($singleAffixWithoutBracket, 0, strlen($singleAffixWithoutBracket)-1) . initialVoicing($singleWordFormForPreffix);
 							}else{
-								$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . initialVoicing($singleWordFormForPreffix);
+								if (isset($singleAffix[3]) && $singleAffix[3] === 'NO_VOICING'){
+									$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . $singleWordFormForPreffix;
+								}else{
+									$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . initialVoicing($singleWordFormForPreffix);
+								}
 							}
 						}
 					}elseif (stripos($singleAffix[1], "-") !== false){
