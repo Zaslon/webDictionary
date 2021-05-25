@@ -146,6 +146,71 @@ function isHit($singleEntry, $needle, $type, $mode){
 	}
 }
 
+//接辞サジェスト機能
+function makeDerivationTable($singleEntry, $affixTable){
+	$wordForm = $singleEntry["entry"]["form"];
+	$wordFormForPreffixs = array();
+	$texts = array();
+	
+	//動詞の場合、接尾辞はeを外した形を語幹としているので、それにあわせる。
+	if (mb_stripos($singleEntry["translations"][0]["title"],"動詞") !== false) {
+		$wordFormForSuffix = substr($wordForm, 0, strlen($wordForm)-1);
+	}else{
+		$wordFormForSuffix = $wordForm;
+	}
+	//記述詞の場合、末尾の(i)nを外した形に対しての派生があるので、それをチェックする。
+	if (mb_stripos($singleEntry["translations"][0]["title"],"記述詞") !== false) {
+		if (endsWith($wordForm, 'in')){
+			$wordFormForPreffixs[1] = substr($wordForm, 0, strlen($wordForm)-2);
+		}
+		$wordFormForPreffixs[0] = substr($wordForm, 0, strlen($wordForm)-1);
+	}else{
+		$wordFormForPreffixs[0] = $wordForm;
+	}
+	
+	//辞書のデータに対して接辞テーブルとの該当を調べる
+	$returnTable = array();
+	foreach ($affixTable as $i => $singleAffix){
+		
+		$singleAffixWithoutBracket = preg_replace('/\(.*?\)/u', '', $singleAffix[1]); //カッコつき接辞のカッコ内をカッコごとなくした形
+		if (preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1]) === 1) {
+			preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1], $singleAffixCharBetweenBracket);
+			$singleAffixCharBetweenBracket = $singleAffixCharBetweenBracket[0]; //カッコつき接辞のカッコ内を取り出した文字列
+		}else{
+			$singleAffixCharBetweenBracket = "";
+		} 
+		$singleAffixWithBracket = preg_replace('/[\(\)]/u', '', $singleAffix[1]); //カッコつき接辞のカッコを外した形
+		
+		if (startsWith($singleAffix[1], "-")) { //接尾辞
+			if (endsWithVowel($wordForm)){//母音で終わる単語の場合
+				$texts[0] = $wordFormForSuffix . substr($singleAffixWithoutBracket, 1);
+			}else{
+				$texts[0] = $wordFormForSuffix . substr($singleAffixWithBracket, 1);
+			}
+		}elseif (endsWith($singleAffix[1], "-")){ //接頭辞
+			foreach ($wordFormForPreffixs as $index => $singleWordFormForPreffix){
+				if (startsWithVowel($wordForm)){//母音で始まる単語の場合
+						$texts[$index] = substr($singleAffixWithoutBracket, 0, strlen($singleAffixWithoutBracket)-1) . initialVoicing($singleWordFormForPreffix);
+				}else{
+					if (isset($singleAffix[3]) && $singleAffix[3] === 'NO_VOICING'){
+						$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . $singleWordFormForPreffix;
+					}else{
+						$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . initialVoicing($singleWordFormForPreffix);
+					}
+				}
+			}
+		}elseif (stripos($singleAffix[1], "-") !== false){
+			//接周辞：今の所存在しない
+		}
+		foreach ($texts as $singleText){
+			$returnTable[$i][] = $singleAffix[0];
+			$returnTable[$i][] = $singleText;
+			$returnTable[$i][] = $singleAffix[2];
+		}
+	}
+	return $returnTable;
+}
+
 //func関数を指定する
 function setFunc($mode){
 	switch($mode){

@@ -156,7 +156,9 @@ $json = json_decode($json,true);
 		} else {
 			$keyWords = preg_replace('/[　]/u', ' ', $_GET["keyBox"]);//全角スペースを半角スペースに変換
 			$keyWords = preg_replace('/\s\s+/u', ' ', $keyWords);//スペース2つ以上であれば，1つに削減
-			$keyWords = deleteNonIdyerinCharacters($keyWords);
+			if ($type !== 'all'){
+				$keyWords = deleteNonIdyerinCharacters($keyWords);
+			}
 			$keyWords = explode(' ',$keyWords);//スペースで区切られた検索語を分離して配列に格納
 		}
 	}
@@ -182,71 +184,18 @@ $json = json_decode($json,true);
 				$wordForm = $singleEntry["entry"]["form"];
 				
 				////////////////ここから接辞サジェスト機能
-				$wordFormForPreffixs = array();
-				$texts = array();
-				
-				//動詞の場合、接尾辞はeを外した形を語幹としているので、それにあわせる。
-				if (mb_stripos($singleEntry["translations"][0]["title"],"動詞") !== false) {
-					$wordFormForSuffix = substr($wordForm, 0, strlen($wordForm)-1);
-				}else{
-					$wordFormForSuffix = $wordForm;
-				}
-				//記述詞の場合、末尾の(i)nを外した形に対しての派生があるので、それをチェックする。
-				if (mb_stripos($singleEntry["translations"][0]["title"],"記述詞") !== false) {
-					if (endsWith($wordForm, 'in')){
-						$wordFormForPreffixs[1] = substr($wordForm, 0, strlen($wordForm)-2);
-					}
-					$wordFormForPreffixs[0] = substr($wordForm, 0, strlen($wordForm)-1);
-				}else{
-					$wordFormForPreffixs[0] = $wordForm;
-				}
-				
-				//辞書のデータに対して接辞テーブルとの該当を調べる
-				foreach ($affixTable as $singleAffix){
-					
-					$singleAffixWithoutBracket = preg_replace('/\(.*?\)/u', '', $singleAffix[1]); //カッコつき接辞のカッコ内をカッコごとなくした形
-					if (preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1]) === 1) {
-						preg_match('/(?<=\().*?(?=\))/u',$singleAffix[1], $singleAffixCharBetweenBracket);
-						$singleAffixCharBetweenBracket = $singleAffixCharBetweenBracket[0]; //カッコつき接辞のカッコ内を取り出した文字列
-					}else{
-						$singleAffixCharBetweenBracket = '';
-					} 
-					$singleAffixWithBracket = preg_replace('/[\(\)]/u', '', $singleAffix[1]); //カッコつき接辞のカッコを外した形
-					
-					if (startsWith($singleAffix[1], "-")) { //接尾辞
-						if (endsWithVowel($wordForm)){//母音で終わる単語の場合
-							$texts[0] = $wordFormForSuffix . substr($singleAffixWithoutBracket, 1);
-						}else{
-							$texts[0] = $wordFormForSuffix . substr($singleAffixWithBracket, 1);
-						}
-					}elseif (endsWith($singleAffix[1], "-")){ //接頭辞
-						foreach ($wordFormForPreffixs as $index => $singleWordFormForPreffix){
-							if (startsWithVowel($wordForm)){//母音で始まる単語の場合
-									$texts[$index] = substr($singleAffixWithoutBracket, 0, strlen($singleAffixWithoutBracket)-1) . initialVoicing($singleWordFormForPreffix);
-							}else{
-								if (isset($singleAffix[3]) && $singleAffix[3] === 'NO_VOICING'){
-									$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . $singleWordFormForPreffix;
-								}else{
-									$texts[$index] = substr($singleAffixWithBracket, 0, strlen($singleAffixWithBracket)-1) . initialVoicing($singleWordFormForPreffix);
-								}
-							}
-						}
-					}elseif (stripos($singleAffix[1], "-") !== false){
-						//接周辞：今の所存在しない
-					}
-					foreach ($texts as $singleText) {
-						if ($keyWords[0] === $singleText && mb_stripos($singleEntry["translations"][0]["title"], $singleAffix[0])!== false){
-							echo '<p class="suggest">もしかして、';
-							echo makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
-							echo 'の '. $singleAffix[2] . ' ? </p>';
-						}
+				$deviationTable = makeDerivationTable($singleEntry, $affixTable);
+				foreach ($deviationTable as $singleDeviation) {
+					if ($keyWords[0] === $singleDeviation[1] && mb_stripos($singleEntry["translations"][0]["title"], $singleDeviation[0])!== false){
+						echo '<p class="suggest">もしかして、';
+						echo makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
+						echo 'の '. $singleDeviation[2] . ' ? </p>';
 					}
 				}
-				/////////ここまで接辞サジェスト機能
 				
 				//検索部
-				foreach ($keyWords as $eachKey){
-					if(isHit($singleEntry, $eachKey, $type, $mode)) {
+				foreach ($keyWords as $singleKey){
+					if(isHit($singleEntry, $singleKey, $type, $mode)) {
 						$hitWordIds[] = $wordId;
 						$hitEntryIds[]= $entryId;
 					}
