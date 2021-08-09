@@ -126,7 +126,7 @@ $json = json_decode($json,true);
 	?>
 	
 	<form action="" method="GET">
-		<div class='textAndSubmit'><input type="text" name="keyBox"><input type="submit" name="submit" value="検索"></div>
+		<div class='textAndSubmit'><input type="text" name="keyBox"><input type="submit" name="submit" id="btn" value="検索"></div>
 <!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c1" value="word" <?php echo $checked_1; ?>><label for="c1">見出し語検索</label></div> -->
 <!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c2" value="trans" <?php echo $checked_2; ?>><label for="c2">訳語検索</label></div> -->
 		<div class='buttonAndLabel'><input type="radio" name="type" id="c3" value="both" <?php echo $checked_3; ?>><label for="c3">見出し語・訳語検索</label></div>
@@ -217,11 +217,7 @@ $json = json_decode($json,true);
 		while ( $i < ($wordNumPerPage*$page) && $i < $hitAmount) {
 		//ここに検索結果の繰り返し表示を入れる。
 			echo '<ul class="wordEntry">';
-			if($idf) {
-				echo '<li class="wordForm"><span class="idyerin">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"] . '</span>';
-			}else{
-				echo '<li class="wordForm">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"];
-			}
+			echo '<li class="wordForm">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"];
 			echo '<span class="wordId">#'. $hitWordIds[$i] . '</span></li>';
 			
 			$previousTitle = '';
@@ -353,5 +349,6 @@ $json = json_decode($json,true);
 		<p>&copy; 2010-<?php echo date('Y'); ?> Zaslon</p>
 	</div>
 </div>
+<script src="script.js"></script>
 </body>
 </html>

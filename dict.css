@@ -16,11 +16,6 @@ Author URI: https://zaslon.info
 	url('Fazik-regular.ttf') format('truetype');
 	}
 	
-.idyerin {
-	font-family:'Fazik';
-	font-size: 120%;
-	max-height:100%;
-	}
 
 a {
 	color: black;
@@ -36,7 +31,6 @@ body{
 	max-height:100%;
 	background-color : #E5E5E0;
 	font-family:"ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","メイリオ","Meiryo",sans-serif;
-	letter-spacing: 1px;
 	overflow-x:scroll;
 	overflow-y:scroll;
 	-webkit-text-size-adjust: 100%;
