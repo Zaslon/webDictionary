@@ -217,7 +217,7 @@ $json = json_decode($json,true);
 		while ( $i < ($wordNumPerPage*$page) && $i < $hitAmount) {
 		//ここに検索結果の繰り返し表示を入れる。
 			echo '<ul class="wordEntry">';
-			echo '<li class="wordForm">' , $json["words"][$hitEntryIds[$i]]["entry"]["form"];
+			echo '<li class="wordForm" title="' , $json["words"][$hitEntryIds[$i]]["entry"]["form"], '">' , $json["words"][$hitEntryIds[$i]]["entry"]["form"];
 			echo '<span class="wordId">#', $hitWordIds[$i] , '</span></li>';
 			
 			$previousTitle = '';
