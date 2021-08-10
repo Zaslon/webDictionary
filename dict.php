@@ -1,4 +1,4 @@
-<?php echo '<' . '?xml version="1.0" encoding="utf-8"?' . '>'; ?>
+<?php echo '<' , '?xml version="1.0" encoding="utf-8"?' , '>'; ?>
 <?php
 require 'func.php';
 
@@ -43,9 +43,9 @@ $json = json_decode($json,true);
 	<div class="dictVer">
 		<?php
 		date_default_timezone_set('Asia/Tokyo');
-		echo "<p>プログラム更新日：".date("Y/m/d",filemtime(__FILE__))."</p>";
-		echo "<p>辞書更新日：".date("Y/m/d",filemtime($fname))."<br />";
-		echo "単語数：".count($json["words"])."</p>";
+		echo "<p>プログラム更新日：",date("Y/m/d",filemtime(__FILE__)),"</p>";
+		echo "<p>辞書更新日：",date("Y/m/d",filemtime($fname)),"<br />";
+		echo "単語数：",count($json["words"]),"</p>";
 		?>
 	</div>
 	<?php
@@ -188,8 +188,8 @@ $json = json_decode($json,true);
 				foreach ($deviationTable as $singleDeviation) {
 					if ($keyWords[0] === $singleDeviation[1] && mb_stripos($singleEntry["translations"][0]["title"], $singleDeviation[0])!== false){
 						echo '<p class="suggest">もしかして、';
-						echo makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) . $wordForm . '</a><span class=wordId>#' . $wordId . '</span>';
-						echo 'の '. $singleDeviation[2] . ' ? </p>';
+						echo makeLinkStarter($wordForm, $_GET["type"], $_GET["mode"],1,$wordId) , $wordForm , '</a><span class=wordId>#' , $wordId , '</span>';
+						echo 'の ', $singleDeviation[2] , ' ? </p>';
 					}
 				}
 				
@@ -217,19 +217,19 @@ $json = json_decode($json,true);
 		while ( $i < ($wordNumPerPage*$page) && $i < $hitAmount) {
 		//ここに検索結果の繰り返し表示を入れる。
 			echo '<ul class="wordEntry">';
-			echo '<li class="wordForm">' . $json["words"][$hitEntryIds[$i]]["entry"]["form"];
-			echo '<span class="wordId">#'. $hitWordIds[$i] . '</span></li>';
+			echo '<li class="wordForm">' , $json["words"][$hitEntryIds[$i]]["entry"]["form"];
+			echo '<span class="wordId">#', $hitWordIds[$i] , '</span></li>';
 			
 			$previousTitle = '';
 			echo '<li>';
 			foreach ($json["words"][$hitEntryIds[$i]]["translations"] as $index => $singleTranslation){
 				if ($index === 0){
-					echo '<span class="wordTitle">' . $singleTranslation["title"] . '</span>';
+					echo '<span class="wordTitle">' , $singleTranslation["title"] , '</span>';
 					echo '<ol>';
 				}else{
 					if ($previousTitle !== $singleTranslation["title"]) {
 						echo '</ol>';
-						echo '<span class="wordTitle">' . $singleTranslation["title"] . '</span>';
+						echo '<span class="wordTitle">' , $singleTranslation["title"] , '</span>';
 						echo '<ol>';
 					}
 				}
@@ -248,7 +248,7 @@ $json = json_decode($json,true);
 			
 			foreach ($json["words"][$hitEntryIds[$i]]["contents"] as $singleContent){
 				echo '<li class="wordContents">';
-				echo '<span class="wordContentTitle">' . $singleContent["title"] . '</span>';
+				echo '<span class="wordContentTitle">' , $singleContent["title"] , '</span>';
 				if ($singleContent["title"] !== "語源"){
 				echo '</br>';
 				    echo $singleContent["text"];
@@ -285,7 +285,7 @@ $json = json_decode($json,true);
 						//表示生成部
 						if ($isLink){
 							makeLinkStarter($singleContentText,'both', 'fwd', 1);
-							echo $singleContentText . '</a>';
+							echo $singleContentText , '</a>';
 						}else{
 							$isLink = true;
 							echo $singleContentText;
@@ -298,12 +298,12 @@ $json = json_decode($json,true);
 			$relationTitles = array();
 			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
 				if (array_search($singleRelation["title"],$relationTitles) === false){
-					echo '<li class="wordRelation"><span class="wordRelation">' . $singleRelation["title"] . '</span>';
+					echo '<li class="wordRelation"><span class="wordRelation">' , $singleRelation["title"] , '</span>';
 					$relationTitles[] = $singleRelation["title"];
 				}
 				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，スペースを全て+で接続した形に変換
 				makeLinkStarter($conForm,$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
-				echo $singleRelation["entry"]["form"] . '</a><span class="wordId">#' . $singleRelation["entry"]["id"] . '</span>';
+				echo $singleRelation["entry"]["form"] . '</a><span class="wordId">#' , $singleRelation["entry"]["id"] , '</span>';
 //				if ($singleRelation !== end($json["words"][$hitEntryIds[$i]]["relations"])){
 //					//最後のとき以外に「, 」を追加
 //					echo ', ';
