@@ -156,6 +156,7 @@
 		} else {
 			$keyWords = preg_replace('/[　]/u', ' ', $_GET["keyBox"]);//全角スペースを半角スペースに変換
 			$keyWords = preg_replace('/\s\s+/u', ' ', $keyWords);//スペース2つ以上であれば，1つに削減
+			$keyWords = preg_replace('/(^[\s]|[\s]$)/u', '', $keyWords);//先頭と末尾のスペースを削除
 			if ($type !== 'all'){
 				$keyWords = deleteNonIdyerinCharacters($keyWords);
 			}
