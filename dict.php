@@ -141,6 +141,7 @@
 
 	<div id="main">
 	<?php
+	//////初期化//////
 	$func = $mode ? setFunc($mode): "stripos";
 	$hitWordIds = array();
 	$hitEntryIds = array();
@@ -163,12 +164,20 @@
 			$keyWords = explode(' ',$keyWords);//スペースで区切られた検索語を分離して配列に格納
 		}
 	}
-
+	$tempHitWordIds = array(); // i-1番目の検索ワードに対してのヒットids格納
+	$tempHitEntryIds = array(); // i-1番目の検索ワードに対してのヒットids格納
+	//キーワードの数だけ結果一時保存用の配列を用意
+	for ($i = 0; $i < count($keyWords); $i++){
+		$tempHitWordIds[$i] = array(); 
+		$tempHitEntryIds[$i] = array(); 
+	}
+	//////ここまで初期化//////
+	
 	//ここから検索部。検索の結果を格納する。
 	if(empty($keyWords[0])){
 		echo "<p>検索ワードを入力してください。</p>";//$keyWordsが空なら警告を表示して終了する．
-    }else{
-    	//全てに優先してid指定時の表示を行う。
+	}else{
+	//全てに優先してid指定時の表示を行う。
 		if($id) {
 			$hitWordIds[] = $id;
 			foreach ($json["words"] as $entryId => $singleEntry){
@@ -195,12 +204,28 @@
 				}
 				
 				//検索部
-				foreach ($keyWords as $singleKey){
+				foreach ($keyWords as $keyIndex => $singleKey ){
 					if(isHit($singleEntry, $singleKey, $type, $mode)) {
-						$hitWordIds[] = $wordId;
-						$hitEntryIds[]= $entryId;
+						$tempHitWordIds[$keyIndex][] = $wordId;
+						$tempHitEntryIds[$keyIndex][] = $entryId;
 					}
 				}
+				unset($singleKey);
+				
+				//下の処理はtempを作った直後に同じループ内でできそうな気がする。
+				if (count($keyWords) === 1) {
+					$hitWordIds = $tempHitWordIds[0];
+					$hitEntryIds = $tempHitEntryIds[0];
+				}else{
+					$hitWordIds = array_intersect($tempHitWordIds[0], $tempHitWordIds[1]);
+					$hitEntryIds = array_intersect($tempHitEntryIds[0], $tempHitEntryIds[1]);
+					for($i = 2; $i < count($keyWords); $i++){
+						$hitWordIds = array_intersect($hitWordIds, $tempHitWordIds[$i]);
+						$hitEntryIds = array_intersect($hitEntryIds, $tempHitEntryIds[$i]);
+					}
+				}
+				$hitWordIds = array_merge($hitWordIds); // 歯抜けを詰めて再番号付け
+				$hitEntryIds = array_merge($hitEntryIds);
 			}
 		}
 		

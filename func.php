@@ -89,7 +89,7 @@ function isDoublebyte($string) {
 	return strlen($string) !== mb_strlen($string);
 }
 
-//
+//検索処理
 function isHit($singleEntry, $needle, $type, $mode){
 	$func = setFunc($mode);
 	switch ($type){
