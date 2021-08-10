@@ -1,17 +1,17 @@
 <?php echo '<' , '?xml version="1.0" encoding="utf-8"?' , '>'; ?>
 <?php
-require 'func.php';
+	require 'func.php';
 
-//変化型テーブル読み込み
-$fname = 'affixTable.csv';
-$affixTable = new SplFileObject($fname);
-$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv、[3]ある場合は特殊処理の記載
+	//変化型テーブル読み込み
+	$fname = 'affixTable.csv';
+	$affixTable = new SplFileObject($fname);
+	$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv、[3]ある場合は特殊処理の記載
 
-//json読み込み
-$fname = 'idyer.json';
-$json = file_get_contents($fname);
-$json = mb_convert_encoding($json, 'UTF8', 'ASCII,JIS,UTF-8,EUC-JP,SJIS-WIN');
-$json = json_decode($json,true);
+	//json読み込み
+	$fname = 'idyer.json';
+	$json = file_get_contents($fname);
+	$json = mb_convert_encoding($json, 'UTF8', 'ASCII,JIS,UTF-8,EUC-JP,SJIS-WIN');
+	$json = json_decode($json,true);
 ?>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -217,7 +217,7 @@ $json = json_decode($json,true);
 		while ( $i < ($wordNumPerPage*$page) && $i < $hitAmount) {
 		//ここに検索結果の繰り返し表示を入れる。
 			echo '<ul class="wordEntry">';
-			echo '<li class="wordForm" title="' , $json["words"][$hitEntryIds[$i]]["entry"]["form"], '">' , $json["words"][$hitEntryIds[$i]]["entry"]["form"];
+			echo '<li class="wordForm"><span title="' , $json["words"][$hitEntryIds[$i]]["entry"]["form"], '">' , $json["words"][$hitEntryIds[$i]]["entry"]["form"], '</span>';
 			echo '<span class="wordId">#', $hitWordIds[$i] , '</span></li>';
 			
 			$previousTitle = '';
