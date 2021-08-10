@@ -167,7 +167,8 @@
 	$tempHitWordIds = array(); // i-1番目の検索ワードに対してのヒットids格納
 	$tempHitEntryIds = array(); // i-1番目の検索ワードに対してのヒットids格納
 	//キーワードの数だけ結果一時保存用の配列を用意
-	for ($i = 0; $i < count($keyWords); $i++){
+	$keyWordsAmount = ((isset($keyWords)) && ($keyWords !== "")) ? count($keyWords) : 0;
+	for ($i = 0; $i < $keyWordsAmount; $i++){
 		$tempHitWordIds[$i] = array(); 
 		$tempHitEntryIds[$i] = array(); 
 	}
@@ -213,13 +214,13 @@
 				unset($singleKey);
 				
 				//下の処理はtempを作った直後に同じループ内でできそうな気がする。
-				if (count($keyWords) === 1) {
+				if ($keyWordsAmount === 1) {
 					$hitWordIds = $tempHitWordIds[0];
 					$hitEntryIds = $tempHitEntryIds[0];
 				}else{
 					$hitWordIds = array_intersect($tempHitWordIds[0], $tempHitWordIds[1]);
 					$hitEntryIds = array_intersect($tempHitEntryIds[0], $tempHitEntryIds[1]);
-					for($i = 2; $i < count($keyWords); $i++){
+					for($i = 2; $i < $keyWordsAmount; $i++){
 						$hitWordIds = array_intersect($hitWordIds, $tempHitWordIds[$i]);
 						$hitEntryIds = array_intersect($hitEntryIds, $tempHitEntryIds[$i]);
 					}
