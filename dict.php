@@ -212,22 +212,20 @@
 					}
 				}
 				unset($singleKey);
-				
-				//下の処理はtempを作った直後に同じループ内でできそうな気がする。
-				if ($keyWordsAmount === 1) {
-					$hitWordIds = $tempHitWordIds[0];
-					$hitEntryIds = $tempHitEntryIds[0];
-				}else{
-					$hitWordIds = array_intersect($tempHitWordIds[0], $tempHitWordIds[1]);
-					$hitEntryIds = array_intersect($tempHitEntryIds[0], $tempHitEntryIds[1]);
-					for($i = 2; $i < $keyWordsAmount; $i++){
-						$hitWordIds = array_intersect($hitWordIds, $tempHitWordIds[$i]);
-						$hitEntryIds = array_intersect($hitEntryIds, $tempHitEntryIds[$i]);
-					}
-				}
-				$hitWordIds = array_merge($hitWordIds); // 歯抜けを詰めて再番号付け
-				$hitEntryIds = array_merge($hitEntryIds);
 			}
+			if ($keyWordsAmount === 1) {
+				$hitWordIds = $tempHitWordIds[0];
+				$hitEntryIds = $tempHitEntryIds[0];
+			}else{
+				$hitWordIds = array_intersect($tempHitWordIds[0], $tempHitWordIds[1]);
+				$hitEntryIds = array_intersect($tempHitEntryIds[0], $tempHitEntryIds[1]);
+				for($i = 2; $i < $keyWordsAmount; $i++){
+					$hitWordIds = array_intersect($hitWordIds, $tempHitWordIds[$i]);
+					$hitEntryIds = array_intersect($hitEntryIds, $tempHitEntryIds[$i]);
+				}
+			}
+			$hitWordIds = array_merge($hitWordIds); // 歯抜けを詰めて再番号付け
+			$hitEntryIds = array_merge($hitEntryIds);
 		}
 		
 		//ここから表示部
