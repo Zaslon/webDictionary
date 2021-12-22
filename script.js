@@ -12,5 +12,8 @@ function changeFont(){
 	}
 }
 
+//メイン
+//チェックボックスを押したときの処理
 document.getElementById('c5').addEventListener('change', changeFont);
+//チェックボックスが押された状態で読み込まれたときの処理
 window.onload = changeFont();
