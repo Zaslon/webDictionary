@@ -26,6 +26,14 @@
 <meta http-equiv="Content-Style-Type" content="text/css" /> 
 <meta name="Description" content="イジェール語オンライン辞書" />
 <meta name="keywords" content="人工言語,辞書," />
+<meta property="og:type" content="dictionary" />
+<meta property="og:title" content="イジェール語 オンライン辞書" />
+<meta property="og:description" content="イジェール語 オンライン辞書" />
+<meta property="og:url" content="https://zaslon.info/dict/dict.php" />
+<meta property="og:site_name" content="イジェール語 オンライン辞書" />
+<meta property="og:image" content="https://zaslon.info/wordpress/wp-content/uploads/2020/08/cropped-ZaslonI-1.png">
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:site" content="@Zaslon" />
 <link rel="stylesheet" type="text/css" href="dict.css" />
 <link rel="shortcut icon" href="favicon.ico" />
 <link rel="icon" href="favicon.ico" />
