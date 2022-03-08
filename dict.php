@@ -161,7 +161,7 @@
 			if ($type !== 'all'){
 				$keyWords = deleteNonIdyerinCharacters($keyWords);
 			}
-			$keyWords = explode(' ',$keyWords);//スペースで区切られた検索語を分離して配列に格納
+			$keyWords = str_getcsv($keyWords, ' ', "\"");//スペースで区切られた検索語を分離して配列に格納。ただしダブルコーテーションの囲いをより優先する
 		}
 	}
 	$tempHitWordIds = array(); // i-1番目の検索ワードに対してのヒットids格納
