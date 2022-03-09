@@ -167,7 +167,7 @@
 		}
 		$keyWords = str_getcsv($keyWord, ' ', "\"");				//スペースで区切られた検索語を分離して配列に格納。ただしダブルコーテーションの囲いをより優先する
 		if ($mode === 'perf'){
-			$keyWords = (array)implode($keyWords);				//完全一致検索の場合は一つに戻す
+			$keyWords = (array)implode(" ", $keyWords);				//完全一致検索の場合は一つに戻す
 		}
 	}
 	$tempHitWordIds = array(); // i-1番目の検索ワードに対してのヒットids格納
