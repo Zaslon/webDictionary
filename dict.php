@@ -154,22 +154,20 @@
 	$hitWordIds = array();
 	$hitEntryIds = array();
 	$hitAmount =0;
-	$keyWords = "";
+	$keyWord = "";
 	$totalPages = 0;
 	$wordNumPerPage = 40;
 	//keyBoxに入力されているときのみ，$keyWordsに代入
 	if ($keyBox){
-	//数字が一部にでも含まれていたら$keyWordsは空になる．
-		if (preg_match("/^.*[0-9].*/", $keyBox)) {
-			echo "<p>検索ワードに数字を入力しないでください。数字を検索する場合は漢数字で入力してください。</p>";
-		} else {
-			$keyWords = preg_replace('/[　]/u', ' ', $_GET["keyBox"]);//全角スペースを半角スペースに変換
-			$keyWords = preg_replace('/\s\s+/u', ' ', $keyWords);//スペース2つ以上であれば，1つに削減
-			$keyWords = preg_replace('/(^[\s]|[\s]$)/u', '', $keyWords);//先頭と末尾のスペースを削除
-			if ($type !== 'all'){
-				$keyWords = deleteNonIdyerinCharacters($keyWords);
-			}
-			$keyWords = str_getcsv($keyWords, ' ', "\"");//スペースで区切られた検索語を分離して配列に格納。ただしダブルコーテーションの囲いをより優先する
+		$keyWord = preg_replace('/[　]/u', ' ', $_GET["keyBox"]);	//全角スペースを半角スペースに変換
+		$keyWord = preg_replace('/\s\s+/u', ' ', $keyWord);		//スペース2つ以上であれば，1つに削減
+		$keyWord = preg_replace('/(^[\s]|[\s]$)/u', '', $keyWord);	//先頭と末尾のスペースを削除
+		if ($type !== 'all' && $mode !== 'perf'){					//全文検索の場合、完全一致検索の場合は記号を削除しない
+			$keyWord = deleteNonIdyerinCharacters($keyWord);
+		}
+		$keyWords = str_getcsv($keyWord, ' ', "\"");				//スペースで区切られた検索語を分離して配列に格納。ただしダブルコーテーションの囲いをより優先する
+		if ($mode === 'perf'){
+			$keyWords = (array)implode($keyWords);				//完全一致検索の場合は一つに戻す
 		}
 	}
 	$tempHitWordIds = array(); // i-1番目の検索ワードに対してのヒットids格納
@@ -199,7 +197,11 @@
 			//ここに検索して、内容をarrayに格納する処理を入れる。
 			foreach ($json["words"] as $entryId =>$singleEntry){
 				$wordId = $singleEntry["entry"]["id"];
-				$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
+				if ($type !== 'all' && $mode !== 'perf'){					//全文検索の場合、完全一致検索の場合は記号を削除しない
+					$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
+				}else{
+					$singleEntry["entry"]["form"] = $singleEntry["entry"]["form"];
+				}
 				$wordForm = $singleEntry["entry"]["form"];
 				
 				////////////////ここから接辞サジェスト機能
@@ -294,8 +296,8 @@
 							$isLink = false;
 							$isNextLink = true;
 						}else{
-				    		$isLink = true;
-				    	}
+							$isLink = true;
+						}
 						//「.」を文字列に含むとき
 						if (stripos($singleContentText, '.') !== false){
 							$isLink = false;

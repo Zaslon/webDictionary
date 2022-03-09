@@ -1,7 +1,7 @@
 <?php
 //エスケープしてechoする関数
 function echo_h($str){
-    echo htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
+	echo htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
 }
 
 //前方一致検索
@@ -26,7 +26,7 @@ function endsWith($haystack, $needle){
 function perfectHit($haystack, $needle){
 	$haystack = mb_strtolower($haystack,'UTF-8');//検索の便宜のため小文字にする
 	$needle = mb_strtolower($needle,'UTF-8');//検索の便宜のため小文字にする
-    return $haystack === $needle;
+	return $haystack === $needle;
 }
 
 //母音で始まるかをチェック
@@ -219,7 +219,7 @@ function setFunc($mode){
 		case "fwd":
 			return "startsWith";
 		case "perf":
-			return "endsWith";
+			return "perfectHit";
 		default:
 			return "stripos";
 	}
