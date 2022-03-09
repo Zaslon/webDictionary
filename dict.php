@@ -45,6 +45,7 @@
 	
 	<h1>イジェール語 オンライン辞書</h1>
 	<ul id="menu">
+		<li><a class="menu" href="https://zaslon.info/idyerin/%e6%a4%9c%e7%b4%a2%e4%bb%95%e6%a7%98/">検索仕様</a></li>
 		<li><a class="menu" href="https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/">凡例</a></li>
 		<li><a class="menu" href="https://zaslon.info/idyer">ホームへ戻る</a></li>
 	</ul>
