@@ -77,12 +77,12 @@ function initialVoicing($string) {
 	return preg_replace($pattern, $replacement, $string);
 }
 
-//頭文字の連濁を戻す
-function initialUnvoicing($string) {
-	$replacement = array('/^h/u','/^k/u','/^s/u','/^t/u','/^c/u','/^p/u','/^f/u');
-	$pattern = array('g','g','z','d',"d'",'b','v');
-	return preg_replace($pattern, $replacement, $string);
-}
+//頭文字の連濁を戻す。この関数は使えない。連濁時に合流することで一対一対応が崩れているため。
+//function initialUnvoicing($string) {
+//	$pattern = array('/^g/u','/^g/u','/^z\'/u','/^d\'/u','/^d\'/u','/^b/u','/^v/u');
+//	$replacement = array('h','k','s','t','c','p','f');
+//	return preg_replace($pattern, $replacement, $string);
+//}
 
 //アルファベットのみで構成されているかの判定
 function isDoublebyte($string) {

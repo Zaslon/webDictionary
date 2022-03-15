@@ -66,6 +66,7 @@
 	$checked_6 = "";
 	$checked_7 = "";
 	$checked_8 = "";
+	$checked_9 = "";
 	
 	//スーパーグローバル関数の処理。
 	//返り値：
@@ -74,6 +75,7 @@
 	$type = ((isset($_GET["type"])) && ($_GET["type"] !== "")) ? $_GET["type"] :false;
 	$mode = ((isset($_GET["mode"])) && ($_GET["mode"] !== "")) ? $_GET["mode"] :false;
 	$idf = ((isset($_GET["Idf"])) && ($_GET["Idf"] !== "")) ? true  :false;
+	$voicing = ((isset($_GET["voicing"])) && ($_GET["voicing"] !== "")) ? true  :false;
 	$keyBox = ((isset($_GET["keyBox"])) && ($_GET["keyBox"] !== "")) ? $_GET["keyBox"]  :false;
 	$id = (isset($_GET["id"])) && ($_GET["id"] !== "") ? (int)$_GET["id"] :false;
 	$page = ((isset($_GET["page"])) && ($_GET["page"] !== "") && (preg_match("/^[0-9]+$/", $_GET["page"]))) ? (int)$_GET["page"] : 1; //ページIDに数字以外を入力された場合、強制的に1とする。
@@ -110,6 +112,12 @@
 		//デフォルトで空欄
 	}
 	
+	if($voicing) {
+		$checked_9 = "checked";
+	}else{
+		//デフォルトで空欄
+	}
+		
 	if($mode) {
 		switch($mode) {
 			case "prt":
@@ -144,6 +152,7 @@
 		<div class='buttonAndLabel'><input type="radio" name="mode" id="c6" value="prt" <?php echo $checked_6; ?>><label for="c6">部分一致</label></div>
 <!--		<div class='buttonAndLabel'><input type="radio" name="mode" id="c7" value="fwd" <?php echo $checked_7; ?>><label for="c7">前方一致</label></div> -->
 		<div class='buttonAndLabel'><input type="radio" name="mode" id="c8" value="perf" <?php echo $checked_8; ?>><label for="c8">完全一致</label></div>
+		<div class='buttonAndLabel'><input type="checkbox" name="voicing" id="c9" value="true" <?php echo $checked_9; ?>><label for="c9">検索対象に連濁派生語を含む</label></div>
 		<input type="hidden" name="page" value="1">
 	</form>
 	</div>
@@ -217,7 +226,9 @@
 				
 				//検索部
 				foreach ($keyWords as $keyIndex => $singleKey ){
-					if(isHit($singleEntry, $singleKey, $type, $mode)) {
+					$voicedSingleKey = initialVoicing($singleKey);
+					
+					if(isHit($singleEntry, $singleKey, $type, $mode) ||($voicing && isHit($singleEntry, $voicedSingleKey, $type, $mode))) {	//通常ヒット OR (連濁検索 AND 連濁ヒット)
 						$tempHitWordIds[$keyIndex][] = $wordId;
 						$tempHitEntryIds[$keyIndex][] = $entryId;
 					}
