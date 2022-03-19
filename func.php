@@ -224,3 +224,37 @@ function setFunc($mode){
 			return "stripos";
 	}
 }
+
+//HKS順ソート用の比較関数
+//紙辞書用と異なる
+//eaoiuhkstcnrmpfgzdbv
+//Aを先にしたければ-1を返す。
+function HKSCmpw($strA,$strB){
+	
+	$arrHks = array("e","a","o","i","u","h","k","s","t","c","n","r","m","p","f","g","z","d","b","v");
+	$odrHks = array("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20");
+	
+	$strA = $strA["entry"]["form"];
+	$strB = $strB["entry"]["form"];
+	
+	$strA = deleteNonIdyerinCharacters($strA);
+	$strB = deleteNonIdyerinCharacters($strB);
+	$strA = str_replace("\'", '', $strA);
+	$strB = str_replace("\'", '', $strB);
+	$strA = mb_strtolower($strA);
+	$strB = mb_strtolower($strB);
+	$arrA = str_split($strA);
+	$arrB = str_split($strB);
+	$arrA = str_replace($arrHks, $odrHks, $arrA);
+	$arrB = str_replace($arrHks, $odrHks, $arrB);
+	
+	for ($i = 0; $i < min(mb_strlen($strA), mb_strlen($strB)); $i++ ){
+		if ($arrA[$i] !== $arrB[$i]){
+			return $arrA[$i] <=> $arrB[$i];
+		}
+		if ($i === (min(mb_strlen($strA), mb_strlen($strB))-1)){
+			// 最後の文字まで同じである場合、文字列が長い方を後ろにする。
+			return mb_strlen($strA) <=> mb_strlen($strB);
+		}
+	}
+}
