@@ -227,34 +227,80 @@ function setFunc($mode){
 
 //HKS順ソート用の比較関数
 //紙辞書用と異なる
-//eaoiuhkstcnrmpfgzdbv
-//Aを先にしたければ-1を返す。
+//strAを先にしたければ-1を返す。
 function HKSCmpw($strA,$strB){
 	
-	$arrHks = array("e","a","o","i","u","h","k","s","t","c","n","r","m","p","f","g","z","d","b","v");
-	$odrHks = array("1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20");
+	$arrHks = array("E\'","e\'","A\'","a\'","O\'","o\'","I\'","i\'","U\'","u\'","S\'","s\'","T\'","t\'","N\'","n\'","R\'","r\'","Z\'","z\'","D\'","d\'","E","e","A","a","O","o","I","i","U","u","H","h","K","k","S","s","T","t","C","c","N","n","R","r","M","m","P","p","F","f","G","g","Z","z","D","d","B","b","V","v","-"," ");
+
+//変音記号付きを先に置換する必要があるため、変音記号付きを先に置く。
+	$odrHks = array("3","4","7","8","11","12","15","16","19","20","27","28","31","32","37","38","41","42","53","54","57","58","1","2","5","6","9","10","13","14","17","18","21","22","23","24","25","26","29","30","33","34","35","36","39","40","43","44","45","46","47","48","49","50","51","52","55","56","59","60","61","62","63","0");
+//置換の順序と文字の早さは異なるため、1から順にはならない。
 	
 	$strA = $strA["entry"]["form"];
 	$strB = $strB["entry"]["form"];
 	
-	$strA = deleteNonIdyerinCharacters($strA);
-	$strB = deleteNonIdyerinCharacters($strB);
-	$strA = str_replace("\'", '', $strA);
-	$strB = str_replace("\'", '', $strB);
-	$strA = mb_strtolower($strA);
-	$strB = mb_strtolower($strB);
-	$arrA = str_split($strA);
-	$arrB = str_split($strB);
-	$arrA = str_replace($arrHks, $odrHks, $arrA);
-	$arrB = str_replace($arrHks, $odrHks, $arrB);
+	//処理した文字列の生成
+	$strA1 = preg_replace('/^-|-$|[()]/u', '', $strA);
+	$strB1 = preg_replace('/^-|-$|[()]/u', '', $strB);
 	
-	for ($i = 0; $i < min(mb_strlen($strA), mb_strlen($strB)); $i++ ){
-		if ($arrA[$i] !== $arrB[$i]){
-			return $arrA[$i] <=> $arrB[$i];
+	//()を除いた文字列の生成
+	$strA2 = preg_replace('/[()]/u', '', $strA);
+	$strB2 = preg_replace('/[()]/u', '', $strB);
+	
+	//文字列を一文字ずつ分離して配列に入れる
+	$arrA1 = preg_split('/(.\')|./u', $strA1, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+	$arrB1 = preg_split('/(.\')|./u', $strB1, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+	
+	foreach($arrA1 as $singleArrA1){
+		if ($singleArrA1 === "\'"){
+			
 		}
-		if ($i === (min(mb_strlen($strA), mb_strlen($strB))-1)){
-			// 最後の文字まで同じである場合、文字列が長い方を後ろにする。
-			return mb_strlen($strA) <=> mb_strlen($strB);
+	}
+	
+	//処理した文字列を順序の数字に置換する
+	$arrA1 = str_replace($arrHks, $odrHks, $arrA1);
+	$arrB1 = str_replace($arrHks, $odrHks, $arrB1);
+	
+	$minLength = min(count($arrA1), count($arrB1));
+	//処理した文字列を先頭から比較して、異なる場合は先を先として返す
+	for ($i = 0; $i < $minLength; $i++ ){
+		$return =  $arrA1[$i] <=> $arrB1[$i];
+		if ($return !== 0){
+			return $return;
 		}
+	}
+	//短い方の単語の最後まで同じ
+	//ここまで大文字も判定済み
+	
+	//単語全体の長さを比較する。異なる場合、短い方を先とする。
+	$return = count($arrA1) <=> count($arrB1);
+	if ($return !== 0){
+		return $return;
+	}
+	
+	//元の文字列に記号が含まれない方を先とする
+	//()を有す場合必ず-を有すことを利用している
+	//両方の文字列が語頭か語末に-を含む場合
+	if ($strA1 !== $strA2 && $strB1 !== $strB2){
+		//-の位置が後ろの方が先
+		if (strripos($strA2, "-") > strripos($strB2, "-")){
+			return -1;
+		}elseif(strripos($strA2, "-") < strripos($strB2, "-")){
+			return 1;
+		//-の位置が同じ場合、(の位置が先の方が先
+		}elseif(strripos($strA2, "(") < strripos($strB2, "(")){
+			return -1;
+		}elseif(strripos($strA2, "(") > strripos($strB2, "(")){
+			return 1;
+		//(の位置が同じ場合、)の位置が先の方が先
+		}elseif(strripos($strA2, ")") < strripos($strB2, ")")){
+			return -1;
+		}elseif(strripos($strA2, ")") > strripos($strB2, ")")){
+			return 1;
+		}
+	}elseif($strA1 !== $strA2){
+		return 1;
+	}else{
+		return -1;
 	}
 }
