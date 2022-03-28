@@ -248,14 +248,8 @@ function HKSCmpw($strA,$strB){
 	$strB2 = preg_replace('/[()]/u', '', $strB);
 	
 	//文字列を一文字ずつ分離して配列に入れる
-	$arrA1 = preg_split('/(.\')|./u', $strA1, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
-	$arrB1 = preg_split('/(.\')|./u', $strB1, -1, PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
-	
-	foreach($arrA1 as $singleArrA1){
-		if ($singleArrA1 === "\'"){
-			
-		}
-	}
+	$arrA1 = preg_split('/(.\'?)/u',$strA1 , -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+	$arrB1 = preg_split('/(.\'?)/u',$strB1 , -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);	
 	
 	//処理した文字列を順序の数字に置換する
 	$arrA1 = str_replace($arrHks, $odrHks, $arrA1);
