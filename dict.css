@@ -10,10 +10,10 @@ Author URI: https://zaslon.info
 /* 全体の設定 */
 
 @font-face {
-	font-family: 'Fazik';
+	font-family: 'Endrata';
 	src:
-	url('Fazik-regular.woff') format('woff'),
-	url('Fazik-regular.ttf') format('truetype');
+	url('Endrata-regular.woff') format('woff'),
+	url('Endrata-regular.ttf') format('truetype');
 	}
 	
 
@@ -280,9 +280,8 @@ span.wordId {
 }
 
 li.wordForm {
-	font-size: 150%;
+	font-size: 170%;
 	max-height:100%;
-	font-weight: bold;
 }
 
 /*
