@@ -12,8 +12,8 @@ Author URI: https://zaslon.info
 @font-face {
 	font-family: 'Endrata';
 	src:
-	url('Endrata-regular.woff') format('woff'),
-	url('Endrata-regular.ttf') format('truetype');
+	url('Endrata-bold.woff') format('woff'),
+	url('Endrata-bold.ttf') format('truetype');
 	}
 	
 
@@ -280,8 +280,9 @@ span.wordId {
 }
 
 li.wordForm {
-	font-size: 170%;
+	font-size: 160%;
 	max-height:100%;
+	font-weight: bold;
 }
 
 /*
