@@ -268,7 +268,7 @@
 		//ここに検索結果の繰り返し表示を入れる。
 			echo '<ul class="wordEntry">';
 			echo '<li class="wordForm"><span title="' , $json["words"][$hitEntryIds[$i]]["entry"]["form"], '">' , $json["words"][$hitEntryIds[$i]]["entry"]["form"], '</span>';
-			echo '<span class="wordId">#', $hitWordIds[$i] , '</span></li>';
+			echo '</li>';
 			
 			$previousTitle = '';
 			echo '<li>';
@@ -353,11 +353,11 @@
 				}
 				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，スペースを全て+で接続した形に変換
 				makeLinkStarter($conForm,$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
-				echo $singleRelation["entry"]["form"] . '</a><span class="wordId">#' , $singleRelation["entry"]["id"] , '</span>';
-//				if ($singleRelation !== end($json["words"][$hitEntryIds[$i]]["relations"])){
-//					//最後のとき以外に「, 」を追加
-//					echo ', ';
-//				}
+				echo $singleRelation["entry"]["form"] . '</a>';
+				if ($singleRelation !== end($json["words"][$hitEntryIds[$i]]["relations"])){
+					//最後のとき以外に「, 」を追加
+					echo ', ';
+				}
 			}
 			echo '</li>';
 			echo '</ul>';
