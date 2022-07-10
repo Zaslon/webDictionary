@@ -45,119 +45,120 @@
 <body>
 <div class="all">
 	<div id="header">
-	
-	<h1>イジェール語 オンライン辞書</h1>
-	<ul id="menu">
-		<li><a class="menu" href="https://zaslon.info/idyerin/%e6%a4%9c%e7%b4%a2%e4%bb%95%e6%a7%98/">検索仕様</a></li>
-		<li><a class="menu" href="https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/">凡例</a></li>
-		<li><a class="menu" href="https://zaslon.info/idyer">ホームへ戻る</a></li>
-	</ul>
-	<div class="dictVer">
-		<?php
-		date_default_timezone_set('Asia/Tokyo');
-		echo "<p>プログラム更新日：",date("Y/m/d",filemtime(__FILE__)),"</p>";
-		echo "<p>辞書更新日：",date("Y/m/d",filemtime($fname)),"<br />";
-		echo "単語数：",count($json["words"]),"</p>";
-		?>
-	</div>
-	<?php
-	$checked_1 = "";
-	$checked_2 = "";
-	$checked_3 = "";
-	$checked_4 = "";
-	$checked_5 = "";
-	$checked_6 = "";
-	$checked_7 = "";
-	$checked_8 = "";
-	$checked_9 = "";
-	
-	//スーパーグローバル関数の処理。
-	//返り値：
-	//文字列 or false
-	
-	$type = ((isset($_GET["type"])) && ($_GET["type"] !== "")) ? $_GET["type"] :false;
-	$mode = ((isset($_GET["mode"])) && ($_GET["mode"] !== "")) ? $_GET["mode"] :false;
-	$idf = ((isset($_GET["Idf"])) && ($_GET["Idf"] !== "")) ? true  :false;
-	$voicing = ((isset($_GET["voicing"])) && ($_GET["voicing"] !== "")) ? true  :false;
-	$keyBox = ((isset($_GET["keyBox"])) && ($_GET["keyBox"] !== "")) ? $_GET["keyBox"]  :false;
-	$id = (isset($_GET["id"])) && ($_GET["id"] !== "") ? (int)$_GET["id"] :false;
-	$page = ((isset($_GET["page"])) && ($_GET["page"] !== "") && (preg_match("/^[0-9]+$/", $_GET["page"]))) ? (int)$_GET["page"] : 1; //ページIDに数字以外を入力された場合、強制的に1とする。
-	
-	if($type) {
-		switch($type) {
-			case "word":
-				$checked_1 = "checked";
-				break;
-			case "trans":
-				// $checked_2 = "checked"; 本来はこの表記だが、訳語検索モードで検索された次の検索時は両方モードを選択するようにする
-				$checked_3 = "checked";
-				break;
-			case "both":
-				$checked_3 = "checked";
-				break;
-			case "all":
-				$checked_4 = "checked";
-				break;
-			default:
-				$checked_3 = "checked";
-				$type = "both";
-				break;
-		}
-	}else{
-		//デフォルトで両方検索を選択
-		$checked_3 = "checked";
-		$type = "both";
-	}
-	
-	if($idf) {
-		$checked_5 = "checked";
-	}else{
-		//デフォルトで空欄
-	}
-	
-	if($voicing) {
-		$checked_9 = "checked";
-	}else{
-		//デフォルトで空欄
-	}
 		
-	if($mode) {
-		switch($mode) {
-			case "prt":
-				$checked_6 = "checked";
-				break;
-			case "fwd":
-				// $checked_7 = "checked"; 本来はこの表記だが、前方一致モードで検索された次の検索時は部分一致を選択するようにする
-				$checked_6 = "checked";
-				break;
-			case "perf":
-				$checked_8 = "checked";
-				break;
-			default:
-				$checked_6 = "checked";
-				$mode = "prt";
-				break;
+		<h1>イジェール語 オンライン辞書</h1>
+		<ul id="menu">
+			<li><a class="menu" href="https://zaslon.info/idyerin/%e6%a4%9c%e7%b4%a2%e4%bb%95%e6%a7%98/">検索仕様</a></li>
+			<li><a class="menu" href="https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/">凡例</a></li>
+			<li><a class="menu" href="https://zaslon.info/dict/chart.php">単語数推移</a></li>
+			<li><a class="menu" href="https://zaslon.info/idyer">ホームへ戻る</a></li>
+		</ul>
+		<div class="dictVer">
+			<?php
+			date_default_timezone_set('Asia/Tokyo');
+			echo "<p>プログラム更新日：",date("Y/m/d",filemtime(__FILE__)),"</p>";
+			echo "<p>辞書更新日：",date("Y/m/d",filemtime($fname)),"<br />";
+			echo "単語数：",count($json["words"]),"</p>";
+			?>
+		</div>
+		<?php
+		$checked_1 = "";
+		$checked_2 = "";
+		$checked_3 = "";
+		$checked_4 = "";
+		$checked_5 = "";
+		$checked_6 = "";
+		$checked_7 = "";
+		$checked_8 = "";
+		$checked_9 = "";
+		
+		//スーパーグローバル関数の処理。
+		//返り値：
+		//文字列 or false
+		
+		$type = ((isset($_GET["type"])) && ($_GET["type"] !== "")) ? $_GET["type"] :false;
+		$mode = ((isset($_GET["mode"])) && ($_GET["mode"] !== "")) ? $_GET["mode"] :false;
+		$idf = ((isset($_GET["Idf"])) && ($_GET["Idf"] !== "")) ? true  :false;
+		$voicing = ((isset($_GET["voicing"])) && ($_GET["voicing"] !== "")) ? true  :false;
+		$keyBox = ((isset($_GET["keyBox"])) && ($_GET["keyBox"] !== "")) ? $_GET["keyBox"]  :false;
+		$id = (isset($_GET["id"])) && ($_GET["id"] !== "") ? (int)$_GET["id"] :false;
+		$page = ((isset($_GET["page"])) && ($_GET["page"] !== "") && (preg_match("/^[0-9]+$/", $_GET["page"]))) ? (int)$_GET["page"] : 1; //ページIDに数字以外を入力された場合、強制的に1とする。
+		
+		if($type) {
+			switch($type) {
+				case "word":
+					$checked_1 = "checked";
+					break;
+				case "trans":
+					// $checked_2 = "checked"; 本来はこの表記だが、訳語検索モードで検索された次の検索時は両方モードを選択するようにする
+					$checked_3 = "checked";
+					break;
+				case "both":
+					$checked_3 = "checked";
+					break;
+				case "all":
+					$checked_4 = "checked";
+					break;
+				default:
+					$checked_3 = "checked";
+					$type = "both";
+					break;
+			}
+		}else{
+			//デフォルトで両方検索を選択
+			$checked_3 = "checked";
+			$type = "both";
 		}
-	}else{
-		//デフォルトで部分一致を選択
-		$checked_6 = "checked";
-		$mode = "prt";
-	}
-	?>
-	
-	<form action="" method="GET">
-		<div class='textAndSubmit'><input type="text" name="keyBox"><input type="submit" name="submit" id="btn" value="検索"></div>
-<!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c1" value="word" <?php echo $checked_1; ?>><label for="c1">見出し語検索</label></div> -->
-<!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c2" value="trans" <?php echo $checked_2; ?>><label for="c2">訳語検索</label></div> -->
-		<div class='buttonAndLabel'><input type="radio" name="type" id="c3" value="both" <?php echo $checked_3; ?>><label for="c3">見出し語・訳語検索</label></div>
-		<div class='buttonAndLabel'><input type="radio" name="type" id="c4" value="all" <?php echo $checked_4; ?>><label for="c4">全文検索</label></div>
-		<div class='buttonAndLabel'><input type="checkbox" name="Idf" id="c5" value="true" <?php echo $checked_5; ?>><label for="c5">イジェール文字表示</label></div>
-		<div class='buttonAndLabel'><input type="radio" name="mode" id="c6" value="prt" <?php echo $checked_6; ?>><label for="c6">部分一致</label></div>
-<!--		<div class='buttonAndLabel'><input type="radio" name="mode" id="c7" value="fwd" <?php echo $checked_7; ?>><label for="c7">前方一致</label></div> -->
-		<div class='buttonAndLabel'><input type="radio" name="mode" id="c8" value="perf" <?php echo $checked_8; ?>><label for="c8">完全一致</label></div>
-		<div class='buttonAndLabel'><input type="checkbox" name="voicing" id="c9" value="true" <?php echo $checked_9; ?>><label for="c9">検索対象に連濁派生語を含む</label></div>
-		<input type="hidden" name="page" value="1">
-	</form>
+		
+		if($idf) {
+			$checked_5 = "checked";
+		}else{
+			//デフォルトで空欄
+		}
+		
+		if($voicing) {
+			$checked_9 = "checked";
+		}else{
+			//デフォルトで空欄
+		}
+			
+		if($mode) {
+			switch($mode) {
+				case "prt":
+					$checked_6 = "checked";
+					break;
+				case "fwd":
+					// $checked_7 = "checked"; 本来はこの表記だが、前方一致モードで検索された次の検索時は部分一致を選択するようにする
+					$checked_6 = "checked";
+					break;
+				case "perf":
+					$checked_8 = "checked";
+					break;
+				default:
+					$checked_6 = "checked";
+					$mode = "prt";
+					break;
+			}
+		}else{
+			//デフォルトで部分一致を選択
+			$checked_6 = "checked";
+			$mode = "prt";
+		}
+		?>
+		
+		<form action="" method="GET">
+			<div class='textAndSubmit'><input type="text" name="keyBox"><input type="submit" name="submit" id="btn" value="検索"></div>
+	<!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c1" value="word" <?php echo $checked_1; ?>><label for="c1">見出し語検索</label></div> -->
+	<!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c2" value="trans" <?php echo $checked_2; ?>><label for="c2">訳語検索</label></div> -->
+			<div class='buttonAndLabel'><input type="radio" name="type" id="c3" value="both" <?php echo $checked_3; ?>><label for="c3">見出し語・訳語検索</label></div>
+			<div class='buttonAndLabel'><input type="radio" name="type" id="c4" value="all" <?php echo $checked_4; ?>><label for="c4">全文検索</label></div>
+			<div class='buttonAndLabel'><input type="checkbox" name="Idf" id="c5" value="true" <?php echo $checked_5; ?>><label for="c5">イジェール文字表示</label></div>
+			<div class='buttonAndLabel'><input type="radio" name="mode" id="c6" value="prt" <?php echo $checked_6; ?>><label for="c6">部分一致</label></div>
+	<!--		<div class='buttonAndLabel'><input type="radio" name="mode" id="c7" value="fwd" <?php echo $checked_7; ?>><label for="c7">前方一致</label></div> -->
+			<div class='buttonAndLabel'><input type="radio" name="mode" id="c8" value="perf" <?php echo $checked_8; ?>><label for="c8">完全一致</label></div>
+			<div class='buttonAndLabel'><input type="checkbox" name="voicing" id="c9" value="true" <?php echo $checked_9; ?>><label for="c9">検索対象に連濁派生語を含む</label></div>
+			<input type="hidden" name="page" value="1">
+		</form>
 	</div>
 
 	<div id="main">
