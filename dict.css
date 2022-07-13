@@ -76,7 +76,7 @@ body{
 #menu li{
 	letter-spacing:2px;
 	margin:0 10px;
-	display:inline;
+	display:inline-block;
 	}
 
 #menu a{
