@@ -1,5 +1,6 @@
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(drawChart);
+window.onresize = drawChart;
 
 function getCsv(url){
 //CSVファイルを文字列で取得。
