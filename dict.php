@@ -347,20 +347,20 @@
 			}
 
 			$relationTitles = array();
+			$isComma = false;
 			foreach ($json["words"][$hitEntryIds[$i]]["relations"] as $singleRelation){
-				$isChanged = false;
 				if (array_search($singleRelation["title"],$relationTitles) === false){
 					echo '<li class="wordRelation"><span class="wordRelation">' , $singleRelation["title"] , '</span>';
 					$relationTitles[] = $singleRelation["title"];
-					$isChanged = true;
+				}
+				if ($isComma){
+					echo ', ';
+					$isComma = false;
 				}
 				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，スペースを全て+で接続した形に変換
 				makeLinkStarter($conForm,$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
 				echo $singleRelation["entry"]["form"] . '</a>';
-				if ($singleRelation !== end($json["words"][$hitEntryIds[$i]]["relations"]) && $isChanged === true){
-					//全体の最後のとき以外 と 関連語の見出しが変化したときの最後に「, 」を追加
-					echo ', ';
-				}
+				$isComma = true;
 			}
 			echo '</li>';
 			echo '</ul>';
