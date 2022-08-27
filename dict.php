@@ -352,15 +352,16 @@
 				if (array_search($singleRelation["title"],$relationTitles) === false){
 					echo '<li class="wordRelation"><span class="wordRelation">' , $singleRelation["title"] , '</span>';
 					$relationTitles[] = $singleRelation["title"];
+					$isComma = false;
 				}
 				if ($isComma){
 					echo ', ';
 					$isComma = false;
 				}
+				$isComma = true;
 				$conForm =  str_replace(" ", "+", $singleRelation["entry"]["form"]);//リンク作成のため，スペースを全て+で接続した形に変換
 				makeLinkStarter($conForm,$_GET["type"], $_GET["mode"],1,$singleRelation["entry"]["id"]);
 				echo $singleRelation["entry"]["form"] . '</a>';
-				$isComma = true;
 			}
 			echo '</li>';
 			echo '</ul>';
