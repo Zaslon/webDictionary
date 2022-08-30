@@ -249,12 +249,6 @@
         "id" : 489,
         "form" : "azma"
       }
-    }, {
-      "title" : "関連",
-      "entry" : {
-        "id" : 5079,
-        "form" : "fan-"
-      }
     } ]
   }, {
     "entry" : {
@@ -3785,13 +3779,10 @@
     },
     "translations" : [ {
       "title" : "動詞",
-      "forms" : [ "(対象を)(対象に対して)戦わせる", "戦闘させる", "決闘させる", "戦争させる" ]
+      "forms" : [ "戦わせる", "戦闘させる", "決闘させる", "戦争させる" ]
     } ],
     "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "対格を、与格に対して戦闘状態にさせること。"
-    } ],
+    "contents" : [ ],
     "variations" : [ ],
     "relations" : [ ]
   }, {
@@ -10232,13 +10223,7 @@
       "text" : "イジェール語においては、初期は2つの単語の前半分と後ろ半分を接合する方法で造語することが多かった。つまりかばん語方式が主流だった。移民船で移動していた頃はかばん語が広く用いられていたが、現在は専ら複合によって語を形成する事が多い。"
     } ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "下位語",
-      "entry" : {
-        "id" : 5053,
-        "form" : "deivgai"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 542,
@@ -10405,9 +10390,6 @@
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "語法",
-      "text" : "紐や縄を編んで格子状にしたもの。硬軟を問わないので、鉄線を編んだフェンス状のものも含まれる一方で、金属板や木板を格子状に肉抜きしたものは含まれない。紙を格子状に肉抜きしたものは、編んでいないために本来含まれないが、伸び縮みする様にbarkiを見出されてこの語で表現されることがある。"
-    }, {
       "title" : "文化",
       "text" : "漁業がほとんどないので漁業用の網はあまり馴染みがない。ハンモックや罠用の網の方を想像する。"
     }, {
@@ -13023,15 +13005,12 @@
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "語法",
-      "text" : "イジェール語では剣一般はkorneで表し、そのうち特に両刃であることを明示したい場合にcargaを用いる。"
-    }, {
       "title" : "語源",
       "text" : "r>"
     } ],
     "variations" : [ ],
     "relations" : [ {
-      "title" : "上位語",
+      "title" : "類義語",
       "entry" : {
         "id" : 2282,
         "form" : "korne"
@@ -13522,13 +13501,10 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "【電算】インターネット", "ネットワーク", "情報網" ]
+      "forms" : [ "【電算】インターネット", "ネット", "情報網" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "語法",
-      "text" : "情報を相互にやり取りする装置による、網状の構成のこと。"
-    }, {
       "title" : "語源",
       "text" : "ceis+barki"
     } ],
@@ -15561,7 +15537,7 @@
     } ],
     "variations" : [ ],
     "relations" : [ {
-      "title" : "対義語",
+      "title" : "関連",
       "entry" : {
         "id" : 4329,
         "form" : "vame"
@@ -15614,7 +15590,7 @@
       "text" : "墓そのものと墓場の区別が無い。"
     }, {
       "title" : "文化",
-      "text" : "アルザフィーレ教では死体の有無を重視しない。むしろ、体を残しておくとそこに悪い何かが憑りつくと考えているため、死体は完全に灰になるように火葬して自然に返していた。その後は遺留品の一部を自宅で保管する。それも、その遺留品が名残惜しいと感じる間だけで良く、末代まで保管する必要はない。ここには、それをすると資源も空間も足りなくなるという都合も影響している。"
+      "text" : "アルザフィーレ教では死体の有無を重視しない。むしろ、体を残しておくとそこに悪い何かが憑りつくと考えているため、死体は完全に灰になるように火葬して自然に返していた。その後は遺留品の一部を自宅で保管する。それも、その遺留品が名残惜しいと感じる間だけで良く、末代まで保管する必要はない(というより、それをすると資源も空間も足りなくなるという都合による)。"
     }, {
       "title" : "語源",
       "text" : "deive+itte+ave"
@@ -20915,7 +20891,7 @@
     },
     "translations" : [ {
       "title" : "記述詞",
-      "forms" : [ "急激に", "素早く", "はやく", "早く", "速く", "早い", "速い", "はやい", "素早い" ]
+      "forms" : [ "急激に", "素早く", "はやく", "早く", "速く" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
@@ -20923,7 +20899,7 @@
       "text" : "立ち上がりが急激であること。例えば、速度が高いことではなく加速度が高い状況を指す。"
     }, {
       "title" : "語源",
-      "text" : "en+dunden>"
+      "text" : "en+dunden"
     } ],
     "variations" : [ ],
     "relations" : [ {
@@ -21397,32 +21373,17 @@
     "translations" : [ {
       "title" : "名詞",
       "forms" : [ "範囲", "領域", "レンジ", "圏", "射程", "域" ]
-    }, {
-      "title" : "名詞",
-      "forms" : [ "状態", "ステート" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "1. 行動や影響が届く時間や空間の幅のこと。日本語や英語と同様、範囲の限界を示すことに使われることが多く、「範囲内」を示すためには処格を用いる必要がある。\n2. 一時的な性質のこと。変化する可能性を秘めた性質のこと。"
+      "text" : "行動や影響が届く時間や空間の幅のこと。日本語や英語と同様、範囲の限界を示すことに使われることが多く、「範囲内」を示すためには処格を用いる必要がある。"
     }, {
       "title" : "用例",
       "text" : "Enif senhur guni.|範囲は三から五までだ。\nTakef kaunanis enira.|敵は射程内だ。"
     } ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 4034,
-        "form" : "tevi"
-      }
-    }, {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5031,
-        "form" : "s'u"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 1140,
@@ -23551,7 +23512,7 @@
   }, {
     "entry" : {
       "id" : 1252,
-      "form" : "etube Ratain engarin"
+      "form" : "etube Ratin engarin"
     },
     "translations" : [ {
       "title" : "名詞",
@@ -27019,7 +26980,7 @@
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "仮想的な線のこと。物理的な軸はvaramで表す。特に、移動や回転や座標を考えるときに仮想的に必要になる線のこと。イメージするのは直線だが、曲がっていても直交していなくても定義上は問題ない。"
+      "text" : "仮想的な線のこと。回転の軸はvaram。特に、移動や回転や座標を考えるときに仮想的に必要になる線のこと。イメージするのは直線だが、曲がっていても直交していなくても定義上は問題ない。"
     }, {
       "title" : "語源",
       "text" : "*fif+*sand"
@@ -27213,10 +27174,7 @@
     },
     "translations" : [ {
       "title" : "動詞",
-      "forms" : [ "(場所や施設や人員を)占拠する", "支配する" ]
-    }, {
-      "title" : "動詞",
-      "forms" : [ "【軍】占領する" ]
+      "forms" : [ "(場所や施設や人員を)占拠する", "支配する", "【軍】占領する" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
@@ -30509,15 +30467,12 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "文字" ]
-    }, {
-      "title" : "名詞",
       "forms" : [ "【言】字母", "文字" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "1. 一般用語としての文字、言語を表記するために用いる記号のこと。一般に数字を含めない。\n2. ある言語の表記に用いられる文字集合のことを指す。 集合全体のことを指す場合と、個別の文字を表す場合があるが、文脈で判断する。"
+      "text" : "ある言語の表記に用いられる文字集合のことを指す。 集合全体のことを指す場合と、個別の文字を表す場合があるが、文脈で判断する。"
     } ],
     "variations" : [ ],
     "relations" : [ ]
@@ -30665,20 +30620,11 @@
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "語法",
-      "text" : "フォントのこと。ある特定の文字形状の集合のこと。"
-    }, {
       "title" : "語源",
       "text" : "funeruzem+anseresk"
     } ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 5062,
-        "form" : "oskurmizer"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 1642,
@@ -31728,10 +31674,7 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "宣教師", "布教者", "宗教者" ]
-    }, {
-      "title" : "名詞",
-      "forms" : [ "【蔑】スパイ", "政治家" ]
+      "forms" : [ "宣教師", "布教者", "宗教者", "(比喩)【蔑】スパイ", "【蔑】政治家" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
@@ -31834,13 +31777,7 @@
     "tags" : [ ],
     "contents" : [ ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5056,
-        "form" : "mogerin"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 1703,
@@ -34207,7 +34144,7 @@
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "物体の表面が硬質なこと。内部の硬さは問わない。"
+      "text" : "物体の表面が硬質なこと。内部までは問わない。"
     }, {
       "title" : "語源",
       "text" : "r"
@@ -36233,9 +36170,6 @@
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "語法",
-      "text" : "物体の表面が柔らかなこと。内部の硬さは問わない。"
-    }, {
       "title" : "語源",
       "text" : "r"
     } ],
@@ -36247,10 +36181,10 @@
         "form" : "hetean"
       }
     }, {
-      "title" : "類義語",
+      "title" : "参照",
       "entry" : {
-        "id" : 5068,
-        "form" : "sugaran"
+        "id" : 1828,
+        "form" : "hetean"
       }
     } ]
   }, {
@@ -37203,16 +37137,10 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "治癒する人", "癒す人" ]
-    }, {
-      "title" : "名詞",
       "forms" : [ "【医】医者", "女医", "医師", "ドクター" ]
     } ],
     "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "一般に治癒者のことを指す場合と、医者のことを指す場合とがある。"
-    } ],
+    "contents" : [ ],
     "variations" : [ ],
     "relations" : [ ]
   }, {
@@ -38488,13 +38416,7 @@
     "tags" : [ ],
     "contents" : [ ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 5052,
-        "form" : "kaideiv"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 2061,
@@ -42572,7 +42494,7 @@
     } ],
     "variations" : [ ],
     "relations" : [ {
-      "title" : "下位語",
+      "title" : "類義語",
       "entry" : {
         "id" : 696,
         "form" : "carga"
@@ -42931,16 +42853,10 @@
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "複数人が腰掛けられる構造物。椅子であることを明示していないため、dungid'iusと異なり一時的に腰掛とみなせる長い構造物に対して用いることができる。"
+      "text" : "人複数人が腰掛けられる構造物。"
     } ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 5037,
-        "form" : "dungid'ius"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 2301,
@@ -44176,10 +44092,7 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "ニュートラル", "中立", "中心", "中央", "芯", "中くらい", "半ば", "途中", "途上", "(大中小の)中" ]
-    }, {
-      "title" : "名詞",
-      "forms" : [ "【音】アルト" ]
+      "forms" : [ "ニュートラル", "中立", "中心", "中央", "芯", "中くらい", "半ば", "途中", "途上", "(大中小の)中", "【音】アルト" ]
     } ],
     "tags" : [ ],
     "contents" : [ ],
@@ -45124,9 +45037,6 @@
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "語法",
-      "text" : "複数個あるものの内、そのすべてを指す。「万国」の万にあたる表現であり、「全国」の全のように、その要素内の全てを指すものではない。"
-    }, {
       "title" : "語源",
       "text" : "u"
     } ],
@@ -45136,12 +45046,6 @@
       "entry" : {
         "id" : 3375,
         "form" : "san"
-      }
-    }, {
-      "title" : "関連",
-      "entry" : {
-        "id" : 5079,
-        "form" : "fan-"
       }
     } ]
   }, {
@@ -46512,7 +46416,7 @@
       "form" : "mazae"
     },
     "translations" : [ {
-      "title" : "動詞",
+      "title" : "名詞",
       "forms" : [ "(対象を)指示する", "示す", "指し示す", "ポイントする", "特定する", "表す" ]
     } ],
     "tags" : [ ],
@@ -49622,7 +49526,7 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "手法", "方法", "手段", "策" ]
+      "forms" : [ "手法", "方法", "手段" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
@@ -51703,10 +51607,7 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "屈曲", "偏向" ]
-    }, {
-      "title" : "名詞",
-      "forms" : [ "【物】屈折" ]
+      "forms" : [ "屈曲", "偏向", "【物】屈折" ]
     } ],
     "tags" : [ ],
     "contents" : [ ],
@@ -55075,18 +54976,15 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "【緯】【宗】ニル" ]
+      "forms" : [ "魂", "ソウル", "霊", "命", "生命", "ゴースト", "御霊", "御魂" ]
     }, {
       "title" : "名詞",
-      "forms" : [ "魂", "ソウル", "霊", "命", "生命", "ゴースト", "御霊", "御魂" ]
+      "forms" : [ "【緯】【宗】ニル" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "語法",
-      "text" : "魂のこと。メタファーとしては、箱に入った液体のイメージを持たれている。そのため、流れ出たり、こぼれたり、沸き立ったりする。一方で炎のイメージがないので、揺らめいたり、灯されたりはしない。"
-    }, {
       "title" : "文化",
-      "text" : "生き物と、それ以外を分かつ原因となるもの。尊いものであり、守るべきものである。感情も論理もどちらも魂から湧き出るもので、貴賤はない。とはいえ、情動の方が一次的なもので、論理はその上に現れる二次的なものとは理解されている。現世における人とは、スラリーファを通じてニルウェルテにおいて棺に閉じ込められた人々の魂の投影である。人は死後、魂がニルウェルテに帰還し、再び同じ魂が別の肉体へと投影される。この輪廻を何度か繰り返した後で、それまでの魂の行いに応じてイニニーヴェとハラスィーヴェのいずれかに永住すると信じられている。"
+      "text" : "生き物と、それ以外を分かつ原因。尊いものであり、守るべきものである。感情も論理もどちらも魂から湧き出るもので、貴賤はない。とはいえ、情動の方が一次的なもので、論理はその上に現れる二次的なものとは理解されている。メタファーとしては、箱に入った液体のイメージを持たれている。そのため、流れ出たり、こぼれたり、沸き立ったりする。一方で炎のイメージがないので、揺らめいたり、灯されたりはしない。"
     }, {
       "title" : "語源",
       "text" : "r.a"
@@ -55109,12 +55007,6 @@
       "entry" : {
         "id" : 3809,
         "form" : "srarifa"
-      }
-    }, {
-      "title" : "下位語",
-      "entry" : {
-        "id" : 5085,
-        "form" : "ranir"
       }
     } ]
   }, {
@@ -55152,12 +55044,6 @@
       "entry" : {
         "id" : 4776,
         "form" : "deauerte"
-      }
-    }, {
-      "title" : "関連",
-      "entry" : {
-        "id" : 5085,
-        "form" : "ranir"
       }
     } ]
   }, {
@@ -63489,7 +63375,7 @@
     "tags" : [ ],
     "contents" : [ {
       "title" : "文化",
-      "text" : "神々の子あるいは眷属を指す。イジェール人の神話は善悪二元的な世界観だが、あくまで「元々神であったものの眷属」を表す語なので、天使も悪魔も含む。よってこの語に善悪の判断はない。"
+      "text" : "神々の子あるいは眷属を指す。神々が神と魔王に分化する善悪二元的な世界観だが、あくまで「元々神であったものの眷属」を表す語なので、天使も悪魔も含む。よって善悪の判断はない。"
     }, {
       "title" : "語源",
       "text" : "sari+noka"
@@ -63506,12 +63392,6 @@
       "entry" : {
         "id" : 164,
         "form" : "akeranoka"
-      }
-    }, {
-      "title" : "下位語",
-      "entry" : {
-        "id" : 5074,
-        "form" : "arsruna"
       }
     } ]
   }, {
@@ -66165,14 +66045,17 @@
   }, {
     "entry" : {
       "id" : 3557,
-      "form" : "sugra sendan"
+      "form" : "sendaduie"
     },
     "translations" : [ {
       "title" : "名詞",
       "forms" : [ "音速" ]
     } ],
     "tags" : [ ],
-    "contents" : [ ],
+    "contents" : [ {
+      "title" : "語源",
+      "text" : "senda+tuie"
+    } ],
     "variations" : [ ],
     "relations" : [ ]
   }, {
@@ -67031,9 +66914,6 @@
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "語法",
-      "text" : "演奏者が練習のために用いる曲のこと。作曲者が習作として作成した曲のことではない。"
-    }, {
       "title" : "語源",
       "text" : "serbide+kisdaresk"
     } ],
@@ -68353,7 +68233,7 @@
       "title" : "類義語",
       "entry" : {
         "id" : 4661,
-        "form" : "enzase"
+        "form" : "enzas"
       }
     } ]
   }, {
@@ -70769,9 +70649,6 @@
     } ],
     "tags" : [ ],
     "contents" : [ {
-      "title" : "文化",
-      "text" : "創作においてデアウェルテに出てきた怪物は鏡に映らないとされることが多い。怪物の姿は目で見ているのではなく、存在そのものを脳が直接知覚しているからで、したがって光線のみを反射して魂を反射しない鏡には映らない。"
-    }, {
       "title" : "語源",
       "text" : "*sor|磨く+satun>"
     } ],
@@ -71461,7 +71338,7 @@
       "title" : "固有名詞",
       "forms" : [ "【宗】【緯】スティヤハーゼ" ]
     }, {
-      "title" : "名詞",
+      "title" : "慣用句",
       "forms" : [ "快刀乱麻を断つ", "銀の弾丸" ]
     } ],
     "tags" : [ ],
@@ -71505,12 +71382,6 @@
       "entry" : {
         "id" : 4843,
         "form" : "Aranruti"
-      }
-    }, {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 5071,
-        "form" : "sarvagorne"
       }
     } ]
   }, {
@@ -72189,12 +72060,12 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "早さ", "速度", "速さ", "スピード" ]
+      "forms" : [ "早さ", "速度", "速さ" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "時間当たりの位置の変化量のこと。"
+      "text" : "はやさの度合い。"
     }, {
       "title" : "語源",
       "text" : "r"
@@ -72445,7 +72316,7 @@
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "空から降る氷全般を指す。"
+      "text" : "空から氷全般。"
     }, {
       "title" : "語源",
       "text" : "suta+karta>"
@@ -73890,7 +73761,7 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "体力", "(ゲームの)ヒットポイント", "HP" ]
+      "forms" : [ "(ゲームの)体力", "ヒットポイント", "HP" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
@@ -75016,12 +74887,6 @@
         "id" : 4745,
         "form" : "tazma"
       }
-    }, {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 1139,
-        "form" : "eni"
-      }
     } ]
   }, {
     "entry" : {
@@ -76144,12 +76009,6 @@
         "id" : 1792,
         "form" : "gui"
       }
-    }, {
-      "title" : "関連",
-      "entry" : {
-        "id" : 5043,
-        "form" : "sendavansas"
-      }
     } ]
   }, {
     "entry" : {
@@ -76456,7 +76315,7 @@
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "原義は膨らませる力だが、負圧であっても用いて良い。日本語のように「圧迫する力」というイメージがないため、「圧力を受けた」という比喩に用いることができない。"
+      "text" : "原義は膨らませる力だが、現在は負圧であっても用いて良い。日本語のように「圧迫する力」というイメージがないため、「圧力を受けた」という比喩に用いることができない。"
     }, {
       "title" : "語源",
       "text" : "te+okreme"
@@ -77400,7 +77259,7 @@
       "title" : "同意",
       "entry" : {
         "id" : 4971,
-        "form" : "torcoskom tugo-sugran"
+        "form" : "torcoskom tugo-tedungin"
       }
     } ]
   }, {
@@ -80385,7 +80244,7 @@
     } ],
     "variations" : [ ],
     "relations" : [ {
-      "title" : "対義語",
+      "title" : "関連",
       "entry" : {
         "id" : 829,
         "form" : "deive"
@@ -80931,9 +80790,6 @@
     },
     "translations" : [ {
       "title" : "名詞",
-      "forms" : [ "(回転体の)芯", "軸" ]
-    }, {
-      "title" : "名詞",
       "forms" : [ "ヒンジ", "回転軸", "蝶番", "ちょうつがい" ]
     } ],
     "tags" : [ ],
@@ -80942,13 +80798,7 @@
       "text" : "*var+*vam"
     } ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "関連",
-      "entry" : {
-        "id" : 1441,
-        "form" : "fasant"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 4360,
@@ -85859,17 +85709,14 @@
     "translations" : [ {
       "title" : "名詞",
       "forms" : [ "(順番が)先頭", "トップ", "筆頭" ]
-    }, {
-      "title" : "名詞",
-      "forms" : [ "はじめに", "イントロダクション", "序章", "前文" ]
     } ],
     "tags" : [ ],
     "contents" : [ {
       "title" : "語法",
-      "text" : "1. 先頭という位置そのもの、あるいは先頭に立つもののこと。序列における先頭ではなく、順序における先頭を指す。\n2. 書籍の冒頭部分のセクションのこと。本文の前提や経緯などを記載する箇所であり、本文には含まれない事が多い。"
+      "text" : "先頭という位置そのもの、あるいは先頭に立つもののこと。序列における先頭ではなく、順序における先頭を指す。"
     }, {
       "title" : "文化",
-      "text" : "1. 企業活動や戦闘行為において先頭を行くことは良いことであるため、プラスのニュアンスを見いだされることが多い。一方で、伝統を重んじる文脈においては先頭を走ることはマイナスのニュアンスを持って語られる。"
+      "text" : "企業活動や戦闘行為において先頭を行くことは良いことであるため、プラスのニュアンスを見いだされることが多い。一方で、伝統を重んじる文脈においては先頭を走ることはマイナスのニュアンスを持って語られる。"
     }, {
       "title" : "語源",
       "text" : "r>i.k"
@@ -86436,7 +86283,7 @@
   }, {
     "entry" : {
       "id" : 4659,
-      "form" : "enzasee"
+      "form" : "enzase"
     },
     "translations" : [ {
       "title" : "動詞",
@@ -86448,7 +86295,7 @@
       "text" : "別々のものの区別を無くし、ひとつに纏めること。同一個体の一部として取り込むこと。"
     }, {
       "title" : "語源",
-      "text" : "en+sasee"
+      "text" : "en+sase"
     } ],
     "variations" : [ ],
     "relations" : [ {
@@ -86474,7 +86321,7 @@
   }, {
     "entry" : {
       "id" : 4661,
-      "form" : "enzase"
+      "form" : "enzas"
     },
     "translations" : [ {
       "title" : "名詞",
@@ -87147,13 +86994,7 @@
       "text" : "sin+muzin"
     } ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 4699,
-        "form" : "amzinmuzin"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 4699,
@@ -87172,13 +87013,7 @@
       "text" : "am+sin+muzin"
     } ],
     "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 4698,
-        "form" : "sinmuzin"
-      }
-    } ]
+    "relations" : [ ]
   }, {
     "entry" : {
       "id" : 4700,
@@ -88359,7 +88194,7 @@
   }, {
     "entry" : {
       "id" : 4761,
-      "form" : "idoagzaseom"
+      "form" : "idoagzasom"
     },
     "translations" : [ {
       "title" : "名詞",
@@ -88368,20 +88203,20 @@
     "tags" : [ ],
     "contents" : [ {
       "title" : "語源",
-      "text" : "idoag+sasee"
+      "text" : "idoag+sase"
     } ],
     "variations" : [ ],
     "relations" : [ {
       "title" : "対義語",
       "entry" : {
         "id" : 4762,
-        "form" : "karagenzaseom"
+        "form" : "karagenzasom"
       }
     } ]
   }, {
     "entry" : {
       "id" : 4762,
-      "form" : "karagenzaseom"
+      "form" : "karagenzasom"
     },
     "translations" : [ {
       "title" : "名詞",
@@ -88390,14 +88225,14 @@
     "tags" : [ ],
     "contents" : [ {
       "title" : "語源",
-      "text" : "karag+enzasee"
+      "text" : "karag+enzase"
     } ],
     "variations" : [ ],
     "relations" : [ {
       "title" : "対義語",
       "entry" : {
         "id" : 4761,
-        "form" : "idoagzaseom"
+        "form" : "idoagzasom"
       }
     } ]
   }, {
@@ -91224,7 +91059,7 @@
       "title" : "類義語",
       "entry" : {
         "id" : 4659,
-        "form" : "enzasee"
+        "form" : "enzase"
       }
     } ]
   }, {
@@ -92643,7 +92478,7 @@
   }, {
     "entry" : {
       "id" : 4971,
-      "form" : "torcoskom tugo-sugran"
+      "form" : "torcoskom tugo-tedungin"
     },
     "translations" : [ {
       "title" : "名詞",
@@ -94008,1234 +93843,6 @@
     } ],
     "variations" : [ ],
     "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5031,
-      "form" : "s'u"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "性質", "特性", "性格", "気質" ]
-    }, {
-      "title" : "名詞",
-      "forms" : [ "【電算】プロパティ" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "1. 本質と不可分で容易に変更できない性質のこと。生物か非生物に関わらずに用いる。\n2. プロパティの訳語。この意味で用いる際は、容易に変更できるかどうかは不問となる。"
-    }, {
-      "title" : "語源",
-      "text" : "r"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 1139,
-        "form" : "eni"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5032,
-      "form" : "mevizin"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "内向きの", "内側方向の", "内向きに" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "外側から内側に向かう方向のこと。"
-    }, {
-      "title" : "語源",
-      "text" : "me+vizin"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5033,
-        "form" : "sovizin"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5033,
-      "form" : "sovizin"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "外向きの", "外側方向の", "外向きに" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "内側から外側に向かう方向のこと。"
-    }, {
-      "title" : "語源",
-      "text" : "so+vizin"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5032,
-        "form" : "mevizin"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5034,
-      "form" : "mekremidoe"
-    },
-    "translations" : [ {
-      "title" : "動詞",
-      "forms" : [ "(対象を)(対象に)圧入する", "押し込む", "押し入れる" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "対格を、圧力をかけて与格に入れること。"
-    }, {
-      "title" : "語源",
-      "text" : "mekreme+idoe"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5035,
-      "form" : "karkmekremidoom"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "空気入れ", "エアコンプレッサー" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "空気に圧力をかけて押し込む機器のこと。"
-    }, {
-      "title" : "語源",
-      "text" : "kark+mekremidoe"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5036,
-      "form" : "sugra meverin"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "回転速度", "回転数" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "物体が回転する速度のこと。日本語で「回転数」と言ったとき、指しているものは大抵は一定時間の回転数、つまり回転速度であるため、この語で訳して良い。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5037,
-      "form" : "dungid'ius"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "ソファー", "カウチ", "長椅子", "ベンチ" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "横方向に長く、複数人が座れる形状の椅子のこと。"
-    }, {
-      "title" : "語源",
-      "text" : "dungin+t'ius"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 2300,
-        "form" : "koza"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5038,
-      "form" : "sim-"
-    },
-    "translations" : [ {
-      "title" : "接頭辞",
-      "forms" : [ "同一～", "一致した～" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "この後に接続する要素を同一とするような性質を指す単語を形成する。殆どの場合、記述詞となる。"
-    }, {
-      "title" : "語源",
-      "text" : "simin"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5039,
-      "form" : "simmuren"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "同程度の", "同程度に", "同じくらいの" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "程度が同じであること。"
-    }, {
-      "title" : "語源",
-      "text" : "sim+muren"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5040,
-      "form" : "simvaramin"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "同軸の", "同一回転軸の" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "軸を共有している状態にあること。"
-    }, {
-      "title" : "語源",
-      "text" : "sim+varam"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5041,
-      "form" : "amzimvaramin"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "非同軸の", "非同一回転軸の" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "am+simvaramin"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5042,
-      "form" : "skivunemekrom"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】頭字語", "アクロニム", "イニシャリズム" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "頭文字のみを取り出して単語とすること。また、それによって構成された単語そのもののこと。一般にアクロニムとイニシャリズムを区別しない。"
-    }, {
-      "title" : "語源",
-      "text" : "ski+fune+mekrom"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5043,
-      "form" : "sendavansas"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】音素" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "ある言語の話者にとって、同じであると感じられる音声群をまとめた存在のこと。"
-    }, {
-      "title" : "語源",
-      "text" : "senda+fansas"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "関連",
-      "entry" : {
-        "id" : 4097,
-        "form" : "tirzenda"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5044,
-      "form" : "as'tavansas"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】形態素" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "意味を構成する最小要素と見なせる音素の塊のこと。"
-    }, {
-      "title" : "語源",
-      "text" : "as'tae+fansas"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "下位語",
-      "entry" : {
-        "id" : 5046,
-        "form" : "kaivansas"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5045,
-      "form" : "-vansas"
-    },
-    "translations" : [ {
-      "title" : "接尾辞",
-      "forms" : [ "～物質" ]
-    }, {
-      "title" : "接尾辞",
-      "forms" : [ "～素", "～素子" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "fansasのふたつの用法に対応して、ふたつの用法が存在する。"
-    }, {
-      "title" : "語源",
-      "text" : "fansas"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5046,
-      "form" : "kaivansas"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】語根" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "as'tavansasの内、単語の意味の中心となるもののこと。有意味な自由形態素のこと。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "上位語",
-      "entry" : {
-        "id" : 5044,
-        "form" : "as'tavansas"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5047,
-      "form" : "sebaiesk"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "ゲスト", "客人", "客", "来賓" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "誘われてやって来た人のこと。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5048,
-      "form" : "kaizenda"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "(単語や文字列の)発音", "音声" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "文字列に対応する音声のこと。単語として有効な文字列である必要はなく、ある文字列を対象として、対応する発音のことを指す。"
-    }, {
-      "title" : "語源",
-      "text" : "kai+senda"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5049,
-      "form" : "siraca"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】名詞" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "i.a"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5050,
-      "form" : "veesasui"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】助動詞" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "英語などにおける助動詞を指す語。イジェール語には助動詞は存在しない。"
-    }, {
-      "title" : "語源",
-      "text" : "vees+asui"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5051,
-      "form" : "veesziraca"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】代名詞" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "vees+siraca"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5052,
-      "form" : "kaideiv"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】派生" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "派生による造語行為のこと。"
-    }, {
-      "title" : "語源",
-      "text" : "kai+deive"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 2060,
-        "form" : "kaivam"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5053,
-      "form" : "deivgai"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】派生語" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "deivin+kai"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "上位語",
-      "entry" : {
-        "id" : 541,
-        "form" : "bardgai"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5054,
-      "form" : "Kiev"
-    },
-    "translations" : [ {
-      "title" : "固有名詞",
-      "forms" : [ "【地名】キーウ", "キエフ" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "cal/ru"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5055,
-      "form" : "Donbas"
-    },
-    "translations" : [ {
-      "title" : "固有名詞",
-      "forms" : [ "【地名】ドンバス" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "cal/"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5056,
-      "form" : "mogerin"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "無罪の", "罪のない", "潔白な" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "cal/mo+gerin"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 1702,
-        "form" : "gerin"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5057,
-      "form" : "s'odurin"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "(味や匂いが)爽やかな", "爽やかに" ]
-    }, {
-      "title" : "記述詞",
-      "forms" : [ "(人が)無垢な", "無邪気な", "素直な" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "1. 特に食品が、清涼感を感じさせるような性質を有していること。\n2. 人に邪念や裏表が無いこと。"
-    }, {
-      "title" : "語源",
-      "text" : "r>i.a"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5058,
-      "form" : "udeduhin"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "(人が)陽気な", "明るい" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "r>i.a"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5059,
-        "form" : "kareman"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5059,
-      "form" : "kareman"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "(人が)陰気な", "暗い" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "r"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5058,
-        "form" : "udeduhin"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5060,
-      "form" : "karemae"
-    },
-    "translations" : [ {
-      "title" : "動詞",
-      "forms" : [ "(人を)落ち込ませる", "暗い気持ちにさせる", "陰気にさせる" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5061,
-        "form" : "deduhie"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5061,
-      "form" : "deduhie"
-    },
-    "translations" : [ {
-      "title" : "動詞",
-      "forms" : [ "(人を)元気づける", "明るくする", "陽気にさせる", "明るい気持ちにする" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5060,
-        "form" : "karemae"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5062,
-      "form" : "oskurmizer"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "書体", "スクリプト" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "文字の様式のこと。個別のフォントのことではなく、サンセリフや草書といった、フォントが属する集団を指す語。"
-    }, {
-      "title" : "語源",
-      "text" : "osukure+mizer"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 1641,
-        "form" : "funeruzemanseresk"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5063,
-      "form" : "oskurmizer anarogin"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "草書体", "筆記体" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "本来は一筆書きを想定した書体のこと。現在は、一筆書きから発展した筆記体などの書体を指す。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5064,
-      "form" : "oskurmizer deanin"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "標準体", "ブロック体" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "標準的に使用される書体のこと。現実にはブロック体を指す。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5065,
-      "form" : "akebe"
-    },
-    "translations" : [ {
-      "title" : "動詞",
-      "forms" : [ "浮かせる", "浮遊させる" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "地面から離れた状態を維持すること。空中に浮遊する場合、水面に浮かぶ場合などが含まれる。"
-    }, {
-      "title" : "語源",
-      "text" : "r"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5066,
-      "form" : "akeb"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "浮遊", "浮かべること" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5067,
-      "form" : "akebin"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "浮いている", "浮いた", "浮かんだ", "浮かべられた", "浮遊している" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5068,
-      "form" : "sugaran"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "柔軟な", "変形しやすい", "やわらかい", "しなやかな" ]
-    }, {
-      "title" : "記述詞",
-      "forms" : [ "(規則などに対して)柔軟な", "弾力的な" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "1. 変形が容易な構造であること。\n2. 規則や常識、手続きに対しての準拠度が低いさま。"
-    }, {
-      "title" : "語源",
-      "text" : "a"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 1933,
-        "form" : "ien"
-      }
-    }, {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5069,
-        "form" : "amzugaran"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5069,
-      "form" : "amzugaran"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "柔軟性のない", "かたい", "変形し難い", "剛な" ]
-    }, {
-      "title" : "記述詞",
-      "forms" : [ "かっちりとした", "規則的な", "真面目な", "お堅い" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "1. 変形が容易ではない構造であること。\n2. 規則や常識、手続きに対しての準拠度が高いさま。"
-    }, {
-      "title" : "語源",
-      "text" : "am+sugaran"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5068,
-        "form" : "sugaran"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5070,
-      "form" : "idoagzimaom"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "吸気冷却器", "インタークーラー", "アフタークーラー" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "吸気を冷却する装置のこと。"
-    }, {
-      "title" : "語源",
-      "text" : "idoag+simae"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5071,
-      "form" : "sarvagorne"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "銀の剣", "快刀乱麻を断つ", "(比喩的に)銀の弾丸" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "全てを解決する万能策のこと。現実には存在しないという含意がある。"
-    }, {
-      "title" : "文化",
-      "text" : "Stiahazeと同意だが、こちらには宗教的な響きがないため非宗教的な単語を求める場合にこちらが用いられる。実際にはStiahazeは銀でできた剣ではないため、その意味では同意語とは言えない。"
-    }, {
-      "title" : "語源",
-      "text" : "sarva+korne"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "類義語",
-      "entry" : {
-        "id" : 3837,
-        "form" : "Stiahaze"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5072,
-      "form" : "ariam"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】慣用句", "イディオム" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "イジェール語における慣用句とは、イディオムの内「足が出る」や「鯖を読む」のように、活用するものをいう。特に有縁性（構成要素が保つ意味との関連性）が希薄で、元の単語の意味から句の意味が想像しがたいものを指す。この辞書においては、意味は緯語における直訳の後、対応する日本語訳を記述する。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5073,
-        "form" : "bant'e"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5073,
-      "form" : "bant'e"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【言】ことわざ", "イディオム" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "イジェール語におけることわざとは、イディオムの内「勝てば官軍」や「仏の顔も三度まで」のように、活用しないものをいう。単独で句を形成し、文中で使用するときはことわざ全体で単独の名詞の様に扱う。このため、登録語としては大文字で始める。意味は緯語における直訳の後、対応する日本語訳を記述する。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5072,
-        "form" : "ariam"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5074,
-      "form" : "arsruna"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【宗】【緯】アルスルーナ" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "文化",
-      "text" : "サリノーカのうち、クロームトン以前に生まれた者のことを指す。天使と悪魔に分離する前の天部であり、三神同様に善悪二面を併せ持った性格を持つ。後の天使と悪魔は善と悪の片方の性質しか持たないため、この点で格上の存在とされる。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "上位語",
-      "entry" : {
-        "id" : 3416,
-        "form" : "sarinoka"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5075,
-      "form" : "sugra akerin"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "光速" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "光の速度のこと。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5076,
-      "form" : "gevan"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "ステルスの", "隠密の" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "自らを隠すことができる性質や能力を有していること。"
-    }, {
-      "title" : "語源",
-      "text" : "geve"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5077,
-      "form" : "fe"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "妖精", "フェアリー" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "無垢な精神を宿した、人ならざる者たちのこと。"
-    }, {
-      "title" : "文化",
-      "text" : "無垢であるということは善良であるということを意味しない。無邪気な悪を宿している場合も含む。また、人型であるとは限らず、小人や子供の姿だけでなく、鬼火等も含む。外来の文化であり、イジェール人本来の信仰としては、人以外の超常の存在としては神々と天使と悪魔、魔獣が広く認知されている。"
-    }, {
-      "title" : "語源",
-      "text" : "de:Fee"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5078,
-      "form" : "barkigasku"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "チェーンメイル", "鎖帷子" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "barki+gasku"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5079,
-      "form" : "fan-"
-    },
-    "translations" : [ {
-      "title" : "接頭辞",
-      "forms" : [ "全～", "汎～", "全～的な", "インター～", "オール～" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "ある要素内全てに対しての、という語を作る接頭辞。日本語で言えば「全国」の全にあたる。なお、「万国」の万は記述詞の man にあたる。"
-    }, {
-      "title" : "語源",
-      "text" : "*fan"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "関連",
-      "entry" : {
-        "id" : 11,
-        "form" : "-azma"
-      }
-    }, {
-      "title" : "関連",
-      "entry" : {
-        "id" : 2418,
-        "form" : "man"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5080,
-      "form" : "fanvedenan"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "全惑星的な", "全国的な", "全球的な", "惑星全体にわたる" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "文化",
-      "text" : "複数の惑星や星系が連合して国家をなす時代であっても、人々は自分が居住している惑星以外にはあまり興味がない。輸出入は可能であるとはいえ空気密度や重力が異なる星でも動作可能な製品を製造することは難しく、データ転送も光速の壁に阻まれるために同時性が保てないために、現代よりもインターネットの影響力が低い。従って、全惑星的な規模であるということは、殆どの人にとっては全国的であるという認識になりがちである。"
-    }, {
-      "title" : "語源",
-      "text" : "fan+fedena"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5081,
-      "form" : "ceisbarki fanvedenan"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【電算】ワールドワイドウェブ", "インターネット", "ウェブ" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "文化",
-      "text" : "現代では全世界を繋いでいるインターネットも、星々をまたぐには光が遅すぎるために、同じ仕組みで拡張していくのは惑星内が限界である。非同期的な仕組みによって惑星間のネットワークも繋がってはいるが、現代の様にほぼリアルタイムで接続できるわけではないため、影響力が現代よりも低い。"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5082,
-      "form" : "iebioskuresk"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【電算】ハイパーテキスト" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "en:hypertext"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5083,
-      "form" : "ceidd'ag"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【電算】リンク" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "ceid+cag"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5084,
-      "form" : "iebiceidd'ag"
-    },
-    "translations" : [ {
-      "title" : "記述詞",
-      "forms" : [ "【電算】ハイパーリンク" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語源",
-      "text" : "en:hyperlink"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
-  }, {
-    "entry" : {
-      "id" : 5085,
-      "form" : "ranir"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【緯】【宗】ラーニル", "大霊", "神霊" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "神々の魂のこと。"
-    }, {
-      "title" : "文化",
-      "text" : "niruerteで目覚めていられる特別なnirのこと。人の魂はniruerteでは起きてはいられないため、必然的に神々や天使、悪魔の魂ということになる。"
-    }, {
-      "title" : "語源",
-      "text" : "*ra+nir"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "上位語",
-      "entry" : {
-        "id" : 2956,
-        "form" : "nir"
-      }
-    }, {
-      "title" : "関連",
-      "entry" : {
-        "id" : 2957,
-        "form" : "niruerte"
-      }
-    }, {
-      "title" : "下位語",
-      "entry" : {
-        "id" : 5086,
-        "form" : "iriranir"
-      }
-    }, {
-      "title" : "下位語",
-      "entry" : {
-        "id" : 5087,
-        "form" : "fazaranir"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5086,
-      "form" : "iriranir"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【緯】【宗】イリラーニル", "(神々の)悪心", "邪心", "乱心" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "文化",
-      "text" : "神々は2つの側面を持つ。そのうちの人に害をなす方を指す言葉。"
-    }, {
-      "title" : "語源",
-      "text" : "r.a"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "上位語",
-      "entry" : {
-        "id" : 5085,
-        "form" : "ranir"
-      }
-    }, {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5087,
-        "form" : "fazaranir"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5087,
-      "form" : "fazaranir"
-    },
-    "translations" : [ {
-      "title" : "名詞",
-      "forms" : [ "【緯】【宗】ファザラーニル", "(神々の)善心", "良心" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "文化",
-      "text" : "神々は2つの側面を持つ。そのうちの人に恩恵をもたらす方を指す言葉。"
-    }, {
-      "title" : "語源",
-      "text" : "r.a"
-    } ],
-    "variations" : [ ],
-    "relations" : [ {
-      "title" : "上位語",
-      "entry" : {
-        "id" : 5085,
-        "form" : "ranir"
-      }
-    }, {
-      "title" : "対義語",
-      "entry" : {
-        "id" : 5086,
-        "form" : "iriranir"
-      }
-    } ]
-  }, {
-    "entry" : {
-      "id" : 5088,
-      "form" : "Rurucamariris"
-    },
-    "translations" : [ {
-      "title" : "固有名詞",
-      "forms" : [ "【緯】【宗】ルルツァマリーリス", "この世とあの世の境", "中陰", "煉獄" ]
-    } ],
-    "tags" : [ ],
-    "contents" : [ {
-      "title" : "語法",
-      "text" : "イニニーヴェとハラスィーヴェを繋ぐ橋のこと。魂の世界における、天国と地獄の間の橋のこと。"
-    }, {
-      "title" : "文化",
-      "text" : "この橋の存在自体は宗派に寄らず認めるところであるが、その位置付けについては諸説ある。生者の領域と死者の領域を繋ぐ橋であることから容易には渡れないことは共通しているが、門の存在や門番の存在や、陸橋であるか建造物であるかなどが異なる。なお、ここで言う生死はニルウェルテにおける生死であるため、現世であるデアウェルテとニルウェルテの間に存在するわけではない。生きたままニルウェルテに存在することができない人の観点では、天国と地獄の間の領域と見なすことができるが、あくまで通過点という意識が強く、長期間滞在する場所ではない。"
-    }, {
-      "title" : "語源",
-      "text" : "i.a"
-    } ],
-    "variations" : [ ],
-    "relations" : [ ]
   } ],
   "zpdic" : {
     "alphabetOrder" : "eaoiuhkstcnrmpfgzdbv",
@@ -95245,7 +93852,7 @@
     "pronunciationTitle" : null,
     "plainInformationTitles" : [ "語源" ],
     "informationTitleOrder" : [ "語法", "用例", "文化", "例文", "語源" ],
-    "formFontFamily" : "Endrata",
+    "formFontFamily" : "Fazik",
     "defaultWord" : {
       "entry" : {
         "id" : -1,
