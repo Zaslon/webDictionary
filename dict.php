@@ -266,7 +266,7 @@
 		echo("</p>");
 	
 		while ( $i < ($wordNumPerPage*$page) && $i < $hitAmount) {
-		//ここに検索結果の繰り返し表示を入れる。
+			//ここに検索結果の繰り返し表示を入れる。
 			echo '<ul class="wordEntry">';
 			echo '<li class="wordForm"><span title="' , $json["words"][$hitEntryIds[$i]]["entry"]["form"], '">' , $json["words"][$hitEntryIds[$i]]["entry"]["form"], '</span>';
 			echo '</li>';
@@ -368,7 +368,6 @@
 			$i++;
 		}
 	}
-
 
 	//ページ送り機能
 
