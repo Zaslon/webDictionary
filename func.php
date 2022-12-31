@@ -298,3 +298,33 @@ function HKSCmpw($strA,$strB){
 		return -1;
 	}
 }
+
+//発音記号生成
+//snojをもとにルールを生成
+//なお、このルール生成はakrantianの規則に完全には則っておらず、必要部分のみを実装している。
+function readSnoj($snojs){
+	$tempDefs = array();
+	$tempRules = array();
+	foreach($snojs as $singleRow){
+		if(strpos($singleRow, "="){
+			// = が含まれる行は定義を表す。
+			$tempDefs[] = $singleRow;			
+		}elseif(strpos($singleRow, "->"){
+			// -> が含まれる行はルールを表す。
+			$tempRules[] = $singleRow;
+		}
+	}
+	//定義の処理。
+	//""で囲まれた部分は文字列とする。
+	//囲まれていないものは他で定義されたものを参照する。
+	//従って、右辺に""のみを含む定義をすべて処理したのちに処理する。
+	foreach($tempDefs as $singleRow){
+		//左辺と右辺を分離する
+		//右辺を|で分離する
+			//右辺に""で囲まれていない要素があればbreak
+			//右辺すべてを結合してパターンとして保存する
+	}
+	//""で囲まれていない要素に対して、他の要素の左辺と比較して、右辺に置き換える
+	//すべての要素が""で囲まれるまで繰り返し処理する。
+
+}

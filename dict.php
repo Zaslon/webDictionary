@@ -7,6 +7,10 @@
 	$affixTable = new SplFileObject($fname);
 	$affixTable -> setFlags(SplFileObject::READ_CSV); //[0]対象品詞、[1]形態、[2]説明のcsv、[3]ある場合は特殊処理の記載
 
+	//snoj読み込み
+	$fname = 'akrantiain.snoj';
+	$akrantiain = new SplFileObject($fname);
+
 	//json読み込み
 	$fname = 'idyer.json';
 	$json = file_get_contents($fname);
