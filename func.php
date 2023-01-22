@@ -225,6 +225,13 @@ function setFunc($mode){
 	}
 }
 
+//文字列を一文字ずつ分離して配列に入れる。
+//イジェール語における一文字なので、変音記号はまとめて1文字になる。
+function idzSplit ($str){
+		
+	return preg_split('/(.\'?)/u',$str , -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+}
+
 //HKS順ソート用の比較関数
 //紙辞書用と異なる
 //strAを先にしたければ-1を返す。
@@ -248,8 +255,8 @@ function HKSCmpw($strA,$strB){
 	$strB2 = preg_replace('/[()]/u', '', $strB);
 	
 	//文字列を一文字ずつ分離して配列に入れる
-	$arrA1 = preg_split('/(.\'?)/u',$strA1 , -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-	$arrB1 = preg_split('/(.\'?)/u',$strB1 , -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);	
+	$arrA1 = idzSplit($strA1);
+	$arrB1 = idzSplit($strB1);	
 	
 	//処理した文字列を順序の数字に置換する
 	$arrA1 = str_replace($arrHks, $odrHks, $arrA1);
