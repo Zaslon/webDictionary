@@ -72,8 +72,8 @@ function makeLinkStarter($word, $type, $mode, $page = 1,$id = false){
 
 //頭文字の連濁
 function initialVoicing($string) {
-	$pattern = array('/^h/u','/^k/u','/^s/u','/^t/u','/^c/u','/^p/u','/^f/u');
-	$replacement = array('g','g','z','d',"d'",'b','v');
+	$pattern = array('/^h/u','/^k/u','/^s/u','/^t/u','/^c/u','/^p/u','/^f/u','/^hh/u','/^hk/u','/^hs/u','/^ht/u','/^hc/u','/^hp/u','/^hf/u','/^kh/u','/^kk/u','/^ks/u','/^kt/u','/^kc/u','/^kp/u','/^kf/u','/^sh/u','/^sk/u','/^ss/u','/^st/u','/^sc/u','/^sp/u','/^sf/u','/^th/u','/^tk/u','/^ts/u','/^tt/u','/^tc/u','/^tp/u','/^tf/u','/^ch/u','/^ck/u','/^cs/u','/^ct/u','/^cc/u','/^cp/u','/^cf/u','/^ph/u','/^pk/u','/^ps/u','/^pt/u','/^pc/u','/^pp/u','/^pf/u','/^fh/u','/^fk/u','/^fs/u','/^ft/u','/^fc/u','/^fp/u','/^ff/u','/^s\'h/u','/^s\'k/u','/^s\'s/u','/^s\'t/u','/^s\'c/u','/^s\'p/u','/^s\'f/u','/^t\'h/u','/^t\'k/u','/^t\'s/u','/^t\'t/u','/^t\'c/u','/^t\'p/u','/^t\'f/u');
+	$replacement = array('g','g','z','d','d\'','b','v','gg','gg','gz','gd','gd\'','gb','gv','gg','gg','gz','gd','gd\'','gb','gv','zg','zg','zz','zd','zd\'','zb','zv','dg','dg','dz','dd','dd\'','db','dv','d\'g','d\'g','d\'z','d\'d','d\'d\'','d\'b','d\'v','bg','bg','bz','bd','bd\'','bb','bv','vg','vg','vz','vd','vd\'','vb','vv','z\'g','z\'g','z\'z','z\'d','z\'d\'','z\'b','z\'v','d\'g','d\'g','d\'z','d\'d','d\'d\'','d\'b','d\'v');
 	return preg_replace($pattern, $replacement, $string);
 }
 
