@@ -299,10 +299,23 @@
 			
 			foreach ($json["words"][$hitEntryIds[$i]]["contents"] as $singleContent){
 				echo '<li class="wordContents">';
-				echo '<span class="wordContentTitle">' , $singleContent["title"] , '</span>';
+				switch ($singleContent["title"]){
+					case "文化":
+					case "語法":
+					case "用例":
+					case "語源":
+						echo '<span class="wordContentTitle">',$singleContent["title"], '</span>';
+						echo '</br>';
+					default:
+				}
 				if ($singleContent["title"] !== "語源"){
-				echo '</br>';
-				    echo $singleContent["text"];
+					switch ($singleContent["title"]){
+						case "文化":
+						case "語法":
+						case "用例":
+							echo $singleContent["text"];
+						default:
+					}
 				}else{
 					$text = '';
 					$isNextLink = true;
