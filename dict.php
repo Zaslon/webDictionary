@@ -170,7 +170,7 @@
 	$hitAmount =0;
 	$keyWord = "";
 	$totalPages = 0;
-	$wordNumPerPage = 40;
+	$wordNumPerPage = 20;
 	//keyBoxに入力されているときのみ，$keyWordsに代入
 	if ($keyBox){
 		$keyWord = preg_replace('/[　]/u', ' ', $_GET["keyBox"]);	//全角スペースを半角スペースに変換
