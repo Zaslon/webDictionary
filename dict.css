@@ -14,8 +14,7 @@ Author URI: https://zaslon.info
 	src:
 	url('Endrata-bold.woff') format('woff'),
 	url('Endrata-bold.ttf') format('truetype');
-	}
-	
+}
 
 a {
 	color: black;

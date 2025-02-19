@@ -1,4 +1,4 @@
-function changeFont(){
+function changeFont() {
 	let list = document.getElementsByClassName('wordForm');
 	let font = 'inherit';
 //	let size = '150%';
@@ -7,7 +7,7 @@ function changeFont(){
 //		size = '170%';
 	}
 	for (let i = 0; i < list.length; ++i) {
-		list[i].style.fontFamily= font;
+		list[i].style.fontFamily = font;
 //		list[i].style.fontSize= size;
 	}
 }
