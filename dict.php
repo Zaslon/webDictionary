@@ -52,6 +52,7 @@
 			<li><a class="menu" href="https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/">凡例</a></li>
 			<li><a class="menu" href="https://zaslon.info/dict/chart.php">単語数推移</a></li>
 			<li><a class="menu" href="https://zaslon.info/idyer">ホームへ戻る</a></li>
+			<li><button id="toggle-mode">ライト/ダーク</button></li>
 		</ul>
 		<div class="dictVer">
 			<?php

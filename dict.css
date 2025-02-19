@@ -16,19 +16,41 @@ Author URI: https://zaslon.info
 	url('Endrata-bold.ttf') format('truetype');
 }
 
+.light-mode{
+	--background-color: #E5E5E0;
+	--main-background-color: #F6F6F8;
+	--light-border-color: #ccc;
+	--heavy-border-color: #aaa;
+	--button-background-color: #eee;
+	--font-color: black;
+	--textbox-color:white;
+	--textbox-border-color: #ddd;
+}
+
+.dark-mode{
+	--background-color: black;
+	--main-background-color: #121212;
+	--light-border-color: #444;
+	--heavy-border-color: #333;
+	--button-background-color: #222;
+	--font-color: #ccc;
+	--textbox-color: #333;
+	--textbox-border-color: black;
+}
+
 a {
-	color: black;
+	color: var(--font-color);
 	}
 
 body{
-	color:#FFFFFF;
+	color:var(--font-color);
 	height: 100%;
 	margin : auto;
 	padding : 0;
 	line-height : 1.6;
 	font-size : 14px;
 	max-height:100%;
-	background-color : #E5E5E0;
+	background-color : var(--background-color);
 	font-family:"ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","メイリオ","Meiryo",sans-serif;
 	overflow-x:scroll;
 	overflow-y:scroll;
@@ -51,7 +73,7 @@ body{
 }
 
 .etymology {
-	color:#ccc;
+	color: var(--light-border-color);
 }
 
 #wordchart{
@@ -67,24 +89,38 @@ body{
 	display: inline-block;
 }
 
+input[type="text"]{
+	border-radius: 5px;
+	background-color: var(--textbox-color);
+	border-color: var(--textbox-border-color);
+}
+
+input[type="submit"],
+button{
+	background-color: var(--button-background-color);
+	border: 1px solid var(--heavy-border-color);
+	border-radius: 3px;
+	font-family: inherit;
+	font-size: inherit;
+	color: inherit;
+}
+
 #menu {
 	margin:0 10px;
 	font-size:125%;
 	max-height:100%;
 	text-align:center;
-	border-top:1px #CCC solid;
-	border-bottom:1px #CCC solid;
+	border-top:1px var(--light-border-color) solid;
+	border-bottom:1px var(--light-border-color) solid;
 	list-style:none;
 	}
 
 #menu li{
-	letter-spacing:2px;
 	margin:0 10px;
 	display:inline-block;
 	}
 
 #menu a{
-	color:#111;
 	text-decoration:none;
 	}
 
@@ -103,7 +139,7 @@ p.result{
 }
 
 p.suggest{
-	background-color:#EEE;
+	background-color:var(--button-background-color);
 }
 
 #main p{
@@ -135,90 +171,50 @@ ul.navigation {
 	}
 	
 ul.navigation li {
-	background-color: #eee;
+	background-color: var(--button-background-color);
 	float: left;
 	min-width: 50px;
 	letter-spacing: 0;
-	border: 1px solid #ccc;
+	border: 1px solid var(--light-border-color);
 	border-radius: 3px;
 	margin: 5px;
 	text-align: center;
 	}
 	
 li.currentPage {
-	color: #aaa !important;
-	border-color: #eee !important;
+	color: var(--heavy-border-color) !important;
+	border-color: var(--button-background-color) !important;
 	}
 	
 ul.navigation li a{
 	text-decoration: none;
-	color: #111;
+	/* color: #111; */
 	display: block;
 	}
 	
 ul.navigation li a:hover{
-	background-color: #ccc;
+	background-color: var(--heavy-border-color);
 	}
 	
 h1 {
-	margin-top:0;
-	margin-left:0.5em;
+	margin:0;
+	margin-left:10px;
 	font-size:200%;
 	max-height:100%;
 	line-height:160%;
 }
 
 h1 a{text-decoration:none;}
-	
-h2 {
-	font-size:130%;
-	max-height:100%;
-	margin:1em 1em 0.2em;
-	width: 80%;
-	background-color:#eeeeee;
-	border: solid;
-	border-color: #773300;
-	border-width: 0 0 1px 5px;
-	padding : 0 0 0 0.5em;
-	text-align : left;
-	line-height : 120%;
-	}
-	
-h3 {
-	margin:1em 1em 0.2em;
-	width: 70%;
-	border: solid;
-	border-color:#730000;
-	border-width: 0 0 1px;
-	padding : 0 0 0 0.5em;
-	font-size : 110%;
-	max-height:100%;
-	text-align : left;
-	line-height : 100%;
-	}
-	
-h4,
-h5,
-h6 {
-	margin:1em 1em 0.2em;
-	width: 60%;
-	border-width: 0 0 1px;
-	padding : 0 0 0 0.5em;
-	font-size : 110%;
-	max-height:100%;
-	text-align : left;
-	line-height : 100%;
-	}
 
 .all {
 	word-break:break-all;
-	border-right:1px solid #aaa;
-	border-left:1px solid #aaa;
-	border-bottom:1px solid #ccc;
-	background-color : #F6F6F8;
+	border-right:1px solid var(--heavy-border-color);
+	border-left:1px solid var(--heavy-border-color);
+	border-bottom:1px solid var(--light-border-color);
+	background-color : var(--main-background-color);
 	width : 95%;
 	margin: auto;
-	color : #111;
+	/* color : #111; */
 	}
 
 #header {
@@ -231,9 +227,9 @@ h6 {
 
 #footer {
 	margin:0 10px;
-	border-top:1px solid #ccc;
+	border-top:1px solid var(--light-border-color);
 	clear:both;
-	color:#CCC;
+	color: var(--light-border-color);
 	}
 	
 #footer p {
@@ -249,15 +245,20 @@ h6 {
 	}
 
 input{
+	color: inherit;
 	font-family:inherit;
 	margin-right:0.2em;
 	}
+
+input[type="radio"]{
+	background-color: var(--light-border-color);
+}
 	
 ul.wordEntry {
 	padding: 10px;
 	padding-top: 0 ;
 	list-style: none;
-	border-bottom: #ccc 1px solid;
+	border-bottom: var(--light-border-color) 1px solid;
 	max-height:100%;
 }
 
@@ -268,7 +269,7 @@ ul.wordEntry li {
 span.wordTitle,
 span.wordContentTitle,
 span.wordRelation {
-	border: #ccc 1px solid;
+	border: var(--light-border-color) 1px solid;
 	border-radius: 3px;
 	padding: 0 0.2em 0 0.2em;
 	margin-right:1em;
@@ -277,7 +278,7 @@ span.wordRelation {
 span.wordId {
 	margin: 0 1em 0 0.2em ;
 	border: none !important;
-	color: #ccc;
+	color: var(--light-border-color);
 	font-size: 50%;
 	max-height:100%;
 	font-weight: normal;
@@ -288,23 +289,6 @@ li.wordForm {
 	max-height:100%;
 	font-weight: bold;
 }
-
-/*
-@media screen and (max-width: 600px) {
-	
-	#main{
-	padding-left:0;
-	padding-right:0;
-	}
-		
-	.all{
-	width:100%;
-	border-right:none;
-	border-left:none;
-	}
-
-}
-*/
 
 @media screen and (max-width: 500px) {
 	#header,

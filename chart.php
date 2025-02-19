@@ -54,6 +54,7 @@
 			<li><a class="menu" href="https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/">凡例</a></li>
 			<li><a class="menu" href="https://zaslon.info/dict/dict.php">検索ページへ戻る</a></li>
 			<li><a class="menu" href="https://zaslon.info/idyer">ホームへ戻る</a></li>
+			<li><button id="toggle-mode">ライト/ダーク</button></li>
 		</ul>
 	</div>
 	<div id="main">
