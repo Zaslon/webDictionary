@@ -37,6 +37,7 @@
 <meta property="og:image" content="https://zaslon.info/wordpress/wp-content/uploads/2020/08/cropped-ZaslonI-1.png">
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:site" content="@Zaslon" />
+<script src="script.js"></script>
 <link rel="stylesheet" type="text/css" href="dict.css" />
 <link rel="shortcut icon" href="favicon.ico" />
 <link rel="icon" href="favicon.ico" />
@@ -52,7 +53,7 @@
 			<li><a class="menu" href="https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/">凡例</a></li>
 			<li><a class="menu" href="https://zaslon.info/dict/chart.php">単語数推移</a></li>
 			<li><a class="menu" href="https://zaslon.info/idyer">ホームへ戻る</a></li>
-			<li><button id="toggle-mode">ライト/ダーク</button></li>
+			<!-- <li><button id="toggle-mode">ライト/ダーク</button></li> -->
 		</ul>
 		<div class="dictVer">
 			<?php
@@ -416,6 +417,6 @@
 		<p>&copy; 2010-<?php echo date('Y'); ?> Zaslon</p>
 	</div>
 </div>
-<script src="script.js"></script>
+<script src="dict.js"></script>
 </body>
 </html>
