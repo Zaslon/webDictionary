@@ -30,8 +30,8 @@ Author URI: https://zaslon.info
 .dark-mode{
 	--background-color: black;
 	--main-background-color: #121212;
-	--light-border-color: #444;
-	--heavy-border-color: #333;
+	--light-border-color: #666;
+	--heavy-border-color: #444;
 	--button-background-color: #222;
 	--font-color: #ccc;
 	--textbox-color: #333;
