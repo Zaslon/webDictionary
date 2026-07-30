@@ -1,3 +1,4 @@
 *.woff
 *.ttf
 .vs
+cache/

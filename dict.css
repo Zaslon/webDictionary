@@ -52,8 +52,8 @@ body{
 	max-height:100%;
 	background-color : var(--background-color);
 	font-family:"ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","メイリオ","Meiryo",sans-serif;
-	overflow-x:scroll;
-	overflow-y:scroll;
+	overflow-x:auto;
+	overflow-y:auto;
 	-webkit-text-size-adjust: 100%;
 	text-align: justify;
 	}

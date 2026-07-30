@@ -1,20 +1,15 @@
+// イジェール文字表示チェックボックスに合わせて見出し語のフォントを切り替える
 function changeFont() {
-	let list = document.getElementsByClassName('wordForm');
-	let font = 'inherit';
-//	let size = '150%';
-	if (document.getElementById('c5').checked) {
-		font = 'Endrata';
-//		size = '170%';
-	}
+	const list = document.getElementsByClassName('wordForm');
+	const font = document.getElementById('c5').checked ? 'Endrata' : 'inherit';
 	for (let i = 0; i < list.length; ++i) {
 		list[i].style.fontFamily = font;
-//		list[i].style.fontSize= size;
 	}
 }
 
-if(document.getElementById('c5')){
-	//チェックボックスを押したときの処理
+if (document.getElementById('c5')) {
+	// チェックボックスを押したときの処理
 	document.getElementById('c5').addEventListener('change', changeFont);
-	//チェックボックスが押された状態で読み込まれたときの処理
-	window.onload = changeFont();
+	// チェックボックスが押された状態で読み込まれたときの処理
+	changeFont();
 }
