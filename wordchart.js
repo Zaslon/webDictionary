@@ -56,7 +56,7 @@ async function drawChart() {
 
 	let dictLogs;
 	try {
-		dictLogs = await getCsv('dictLog.csv');
+		dictLogs = await getCsv('logger/dictLog.csv');
 	} catch (error) {
 		target.textContent = 'グラフのデータを読み込めませんでした。';
 		console.error(error);

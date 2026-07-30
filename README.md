@@ -17,7 +17,8 @@
 | `anal.php` | アクセス解析タグの差し込み口 |
 | `idyer.json` | 辞書データ（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)で管理） |
 | `affixTable.csv` | 接辞テーブル。[0]対象品詞、[1]形態、[2]説明、[3]特殊処理 |
-| `dictLog.csv` | 単語数の記録。グラフの元データ |
+| `logger/dictLog.csv` | 単語数の記録。グラフの元データ |
+| `logger/idyer_logger.php` | 単語数を記録するスクリプト。cronから定期実行する |
 | `tests/run.php` | テスト |
 
 `Endrata` フォント（`*.woff` / `*.ttf`）は意図的にリポジトリに含めていないため、
@@ -34,6 +35,18 @@
 （並び順の規則を変えたときにも作り直されるよう、比較関数のあるファイルも無効化の対象にしている）。
 キャッシュが壊れていたり書き込めなかったりしても、その場でソートし直して動作する。
 手動で消す場合はディレクトリごと削除してよい（`cache/` はGit管理外）。
+
+## 単語数の記録
+`chart.php` のグラフの元データは `logger/dictLog.csv` で、`logger/idyer_logger.php` が追記する。
+`idyer.json` の単語数が前回の記録と変わっていれば「その日の日付, 単語数」を1行足し、
+変わっていなければ何もしない。cronで毎日1回まわす想定。
+
+```
+php logger/idyer_logger.php
+```
+
+`logger/` は `dictLog.csv` をブラウザから読むため公開ディレクトリに置いてあるので、
+Web経由で叩かれて勝手に追記されないよう、スクリプト側でCLI以外の実行を403で弾いている。
 
 ## テスト
 ```
