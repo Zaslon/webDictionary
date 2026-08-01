@@ -7,6 +7,9 @@ date_default_timezone_set('Asia/Tokyo');
 //1ページあたりの表示単語数
 const WORDS_PER_PAGE = 20;
 
+//1ページあたりの表示例文数
+const EXAMPLES_PER_PAGE = 20;
+
 //////////////////////////////////////////////////
 //出力ヘルパ
 //////////////////////////////////////////////////
@@ -336,6 +339,85 @@ function loadDictionary($path){
 	uasort($json['words'], 'HKSCmpw');
 	writeCache('dictionary', $json, $sources);
 	return $json;
+}
+
+//例文を引くための索引を組み立てる
+//辞書データ側では例文と単語がIDで結ばれているだけなので、表示にも検索にも使える形にここでまとめる
+//返り値：array(
+//  'examples'      => id順に並べた例文。任意項目は空で埋めてある
+//  'byWordId'      => 単語ID => その単語を使う例文のキーの配列
+//  'formById'      => 単語ID => 見出し語
+//  'textByWordId'  => 単語ID => その単語を使う例文の検索用テキスト
+//)
+function makeExampleIndex(array $json){
+	$index = array('examples' => array(), 'byWordId' => array(), 'formById' => array(), 'textByWordId' => array());
+
+	if (isset($json['words']) && is_array($json['words'])){
+		foreach ($json['words'] as $singleEntry){
+			if (isset($singleEntry['entry']['id'], $singleEntry['entry']['form'])){
+				$index['formById'][$singleEntry['entry']['id']] = $singleEntry['entry']['form'];
+			}
+		}
+	}
+	if (!isset($json['examples']) || !is_array($json['examples'])){
+		return $index;
+	}
+
+	//任意項目が欠けていても表示と検索で場合分けせずに済むよう、ここで形を揃える
+	$examples = array();
+	foreach ($json['examples'] as $singleExample){
+		if (!isset($singleExample['id'], $singleExample['sentence'])){
+			continue;
+		}
+		$examples[] = array(
+			'id'         => $singleExample['id'],
+			'sentence'   => $singleExample['sentence'],
+			'translation' => isset($singleExample['translation']) ? $singleExample['translation'] : '',
+			'supplement' => isset($singleExample['supplement']) ? $singleExample['supplement'] : '',
+			'tags'       => isset($singleExample['tags']) && is_array($singleExample['tags']) ? $singleExample['tags'] : array(),
+			'words'      => isset($singleExample['words']) && is_array($singleExample['words']) ? $singleExample['words'] : array(),
+			'offer'      => isset($singleExample['offer']) && is_array($singleExample['offer']) ? $singleExample['offer'] : array(),
+		);
+	}
+
+	//辞書データ中の並びは登録順で決まっていないため、id順に直してから通し番号を振る
+	usort($examples, function ($a, $b){
+		return $a['id'] <=> $b['id'];
+	});
+	$index['examples'] = $examples;
+
+	foreach ($examples as $exampleKey => $singleExample){
+		//全文検索でまとめて照合できるよう、例文1件分の文字列を先に作っておく
+		//検索語は空白で区切られるため、改行でつないでおけば項目をまたいだ誤ヒットは起きない
+		$text = implode("\n", array_filter(array_merge(
+			array($singleExample['sentence'], $singleExample['translation'], $singleExample['supplement']),
+			$singleExample['tags']
+		), 'strlen'));
+
+		$countedIds = array();
+		foreach ($singleExample['words'] as $singleWord){
+			if (!isset($singleWord['id']) || isset($countedIds[$singleWord['id']])){
+				continue;//同じ単語を複数回使う例文を、二重に並べない
+			}
+			$countedIds[$singleWord['id']] = true;
+			$wordId = $singleWord['id'];
+			$index['byWordId'][$wordId][] = $exampleKey;
+			$index['textByWordId'][$wordId] = isset($index['textByWordId'][$wordId])
+				? $index['textByWordId'][$wordId] . "\n" . $text
+				: $text;
+		}
+	}
+	return $index;
+}
+
+//例文へのリンクの開始タグを返す
+function makeExampleLink($exampleId){
+	return '<a href="example.php#' . h(exampleAnchor($exampleId)) . '">';
+}
+
+//例文1件を指すアンカー名を返す
+function exampleAnchor($exampleId){
+	return 'example-' . preg_replace('/[^0-9]/', '', (string)$exampleId);
 }
 
 //プログラムの更新日を返す

@@ -134,6 +134,113 @@ is_same('idから見出し語を引ける', 'c', findEntryKeyById($words, 12));
 is_same('存在しないidはnullを返す', null, findEntryKeyById($words, 999));
 
 //////////////////////////////////////////////////
+//例文
+//////////////////////////////////////////////////
+
+//テスト用の辞書データを組み立てる
+$exampleJson = array(
+	'words' => array(
+		makeEntry('zere', '動詞', array('食べる'), array(), 10),
+		makeEntry('mira', '名詞', array('水'), array(), 12),
+	),
+	'examples' => array(
+		array(
+			'id' => 5, 'sentence' => 'Ref mirau zere.', 'translation' => '私は水を飲む。',
+			'tags' => array(), 'words' => array(array('id' => 12), array('id' => 10), array('id' => 999)),
+			'offer' => array('catalog' => 'zpdicDaily', 'number' => 3),
+		),
+		array(
+			'id' => 1, 'sentence' => 'Ref zere.', 'translation' => '私は食べる。', 'supplement' => '補足',
+			'tags' => array('日常'), 'words' => array(array('id' => 10), array('id' => 10)),
+			'offer' => array('catalog' => 'zpdicDaily', 'number' => 1),
+		),
+	),
+);
+$exampleIndex = makeExampleIndex($exampleJson);
+
+is_same('例文をid順に並べ替える', array(1, 5), array_column($exampleIndex['examples'], 'id'));
+is_same('欠けている任意項目を空で埋める', '', $exampleIndex['examples'][1]['supplement']);
+is_same('単語IDから例文を引ける', array(0, 1), $exampleIndex['byWordId'][10]);
+is_same('例文を持たない単語は索引に載らない', false, isset($exampleIndex['byWordId'][11]));
+is_same('単語IDから見出し語を引ける', 'mira', $exampleIndex['formById'][12]);
+is_same('検索用テキストに原文と訳文を含む', true, strpos($exampleIndex['textByWordId'][12], '水を飲む') !== false);
+is_same('検索用テキストにタグを含む', true, strpos($exampleIndex['textByWordId'][10], '日常') !== false);
+is_same('例文が無い辞書でも索引を作れる', array(), makeExampleIndex(array('words' => array()))['examples']);
+
+//全文検索の対象に例文を含める
+$exampleWords = $exampleJson['words'];
+is_same('全文検索は例文の原文にヒットする',
+	array(0, 1), searchEntries($exampleWords, array('mirau'), 'all', 'prt', false, $exampleIndex));
+is_same('全文検索は例文の訳文にヒットする',
+	array(0), searchEntries($exampleWords, array('食べる。'), 'all', 'prt', false, $exampleIndex));
+is_same('見出し語・訳語検索は例文を対象にしない',
+	array(), searchEntries($exampleWords, array('食べる。'), 'both', 'prt', false, $exampleIndex));
+is_same('索引を渡さなければ例文は検索されない',
+	array(), searchEntries($exampleWords, array('食べる。'), 'all', 'prt', false));
+
+//例文の表示
+ob_start();
+renderEntry($exampleWords[1], 'both', 'prt', $exampleIndex);
+$html = ob_get_clean();
+is_same('単語欄に例文を出す', true, strpos($html, 'Ref mirau zere.') !== false);
+is_same('単語欄では例文にid属性を振らない', false, strpos($html, 'id="example-5"'));
+is_same('例文の使用単語をリンクにする', true, strpos($html, '&amp;id=10">zere</a>') !== false);
+is_same('表示中の単語自身は使用単語に並べない', false, strpos($html, '&amp;id=12">mira</a>'));
+is_same('辞書に無い単語IDは並べない', false, strpos($html, 'id=999'));
+
+//例文は見出し語の欄の一番下に置く
+$relatedEntry = makeEntry('mira', '名詞', array('水'), array(array('title' => '語法', 'text' => '解説')), 12);
+$relatedEntry['relations'] = array(array('title' => '参照', 'entry' => array('id' => 10, 'form' => 'zere')));
+ob_start();
+renderEntry($relatedEntry, 'both', 'prt', $exampleIndex);
+$html = ob_get_clean();
+is_same('例文は関連語より下に出す', true, strpos($html, 'wordRelation') < strpos($html, 'wordExamples'));
+
+//例文を持たない単語では欄ごと出さない
+ob_start();
+renderEntry(makeEntry('kere', '動詞', array('する'), array(), 11), 'both', 'prt', $exampleIndex);
+$html = ob_get_clean();
+is_same('例文が無ければ欄を出さない', false, strpos($html, 'wordExamples'));
+
+//例文一覧ページ側の表示
+ob_start();
+renderExample($exampleIndex['examples'][1], $exampleIndex, 'both', 'prt');
+$html = ob_get_clean();
+is_same('例文一覧では例文にid属性を振る', true, strpos($html, 'id="example-5"') !== false);
+is_same('例文一覧では全ての使用単語を並べる', true, strpos($html, '&amp;id=12">mira</a>') !== false);
+is_same('出典を出す', true, strpos($html, 'zpdicDaily #3') !== false);
+
+//同じ単語を複数回使う例文を二重に並べない
+is_same('同じ単語を複数回使っても例文は1回だけ紐づく', 2, count($exampleIndex['byWordId'][10]));
+
+//辞書データはエスケープして出力する
+ob_start();
+renderExample(array(
+	'id' => 1, 'sentence' => '<script>', 'translation' => "一行目\n二行目", 'supplement' => '',
+	'tags' => array('a&b'), 'words' => array(), 'offer' => array(),
+), $exampleIndex, 'both', 'prt');
+$html = ob_get_clean();
+is_same('例文の原文をエスケープする', false, strpos($html, '<script>'));
+is_same('例文の訳文の改行を<br />にする', true, strpos($html, '一行目<br />') !== false);
+is_same('例文のタグをエスケープする', true, strpos($html, 'a&amp;b') !== false);
+is_same('出典が無ければ出さない', false, strpos($html, 'exampleOffer'));
+
+//アンカー名に数字以外を通さない
+is_same('アンカー名は数字だけにする', 'example-1', exampleAnchor('1"><script>'));
+
+//例文一覧のページ送り
+ob_start();
+renderExampleNavigation(45, 2);
+$html = ob_get_clean();
+is_same('例文数どおりにページ送りを出す', 3, substr_count($html, '<li'));
+is_same('現在のページはリンクにしない', true, strpos($html, '<li class="currentPage">2</li>') !== false);
+
+ob_start();
+renderExampleNavigation(20, 1);
+$html = ob_get_clean();
+is_same('1ページに収まる場合はページ送りを出さない', '<ul class="navigation"></ul>', $html);
+
+//////////////////////////////////////////////////
 //連濁
 //////////////////////////////////////////////////
 

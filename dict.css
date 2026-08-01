@@ -284,10 +284,57 @@ span.wordId {
 	font-weight: normal;
 }
 
+span.wordId a {
+	color: inherit;
+}
+
 li.wordForm {
 	font-size: 160%;
 	max-height:100%;
 	font-weight: bold;
+}
+
+/* 例文 */
+
+div.example {
+	margin: 0.3em 0 0.8em 1em;
+}
+
+div.exampleEntry {
+	padding: 10px;
+	padding-top: 0;
+	border-bottom: var(--light-border-color) 1px solid;
+}
+
+div.exampleEntry div.example {
+	margin-left: 0;
+}
+
+div.exampleSentence {
+	font-weight: bold;
+}
+
+div.exampleSupplement,
+div.exampleWords,
+div.exampleOffer {
+	font-size: 85%;
+}
+
+div.exampleOffer,
+span.exampleLabel {
+	color: var(--light-border-color);
+}
+
+span.exampleLabel {
+	margin-right: 0.5em;
+}
+
+span.exampleTag {
+	border: var(--light-border-color) 1px solid;
+	border-radius: 3px;
+	padding: 0 0.2em 0 0.2em;
+	margin-right: 0.5em;
+	font-size: 85%;
 }
 
 @media screen and (max-width: 500px) {

@@ -11,6 +11,7 @@ $affixTableFile = __DIR__ . '/affixTable.csv';
 $json = loadDictionary($dictionaryFile);
 $affixTable = loadAffixTable($affixTableFile);//[0]対象品詞、[1]形態、[2]説明のcsv、[3]ある場合は特殊処理の記載
 $words = $json["words"];
+$exampleIndex = makeExampleIndex($json);
 
 //////リクエストパラメータの取り出し//////
 $type = normalizeType(getParam("type"));
@@ -39,7 +40,7 @@ if ($keyWords){
 		$hitKeys = ($entryKey === null) ? array() : array($entryKey);
 	}else{
 		$suggestions = findDerivationSuggestions($words, $affixTable, $keyWords[0]);
-		$hitKeys = searchEntries($words, $keyWords, $type, $mode, $includeVoicing);
+		$hitKeys = searchEntries($words, $keyWords, $type, $mode, $includeVoicing, $exampleIndex);
 	}
 }
 $hitAmount = count($hitKeys);
@@ -49,6 +50,7 @@ $firstIndex = WORDS_PER_PAGE * ($page - 1);
 $pageMenu = array(
 	'検索仕様'   => 'https://zaslon.info/idyerin/%e6%a4%9c%e7%b4%a2%e4%bb%95%e6%a7%98/',
 	'凡例'       => 'https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/',
+	'例文一覧'   => 'https://zaslon.info/dict/example.php',
 	'単語数推移' => 'https://zaslon.info/dict/chart.php',
 	'ホームへ戻る' => 'https://zaslon.info/idyer',
 );
@@ -92,7 +94,7 @@ require __DIR__ . '/header.php';
 		echo '</p>';
 
 		foreach (array_slice($hitKeys, $firstIndex, WORDS_PER_PAGE) as $entryKey){
-			renderEntry($words[$entryKey], $type, $mode);
+			renderEntry($words[$entryKey], $type, $mode, $exampleIndex);
 		}
 	}
 

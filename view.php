@@ -14,12 +14,14 @@ function renderSuggestions(array $suggestions, $type, $mode){
 }
 
 //見出し語1件分を表示する
-function renderEntry(array $entry, $type, $mode){
+//$exampleIndex は makeExampleIndex() の返り値。渡すとその単語を使う例文も並べる
+function renderEntry(array $entry, $type, $mode, array $exampleIndex = array()){
 	echo '<ul class="wordEntry">';
 	renderWordForm($entry);
 	renderTranslations($entry);
 	renderContents($entry);
 	renderRelations($entry, $type, $mode);
+	renderExamples($entry, $exampleIndex, $type, $mode);
 	echo '</ul>';
 }
 
@@ -105,6 +107,100 @@ function renderEtymology($text){
 			echo h($singlePart);
 		}
 	}
+}
+
+//見出し語に紐づく例文。例文を持たない語では欄ごと出さない
+function renderExamples(array $entry, array $exampleIndex, $type, $mode){
+	$wordId = $entry["entry"]["id"];
+	if (!isset($exampleIndex['byWordId'][$wordId])){
+		return;
+	}
+	echo '<li class="wordExamples">';
+	echo '<span class="wordContentTitle">例文</span><br />';
+	foreach ($exampleIndex['byWordId'][$wordId] as $exampleKey){
+		//表示中の単語自身は「使用単語」に並べない
+		renderExample($exampleIndex['examples'][$exampleKey], $exampleIndex, $type, $mode, $wordId);
+	}
+	echo '</li>';
+}
+
+//例文1件分を表示する。単語欄と例文一覧ページの両方から使う
+//$currentWordId は表示中の見出し語のID。例文一覧ページのようにどの単語の欄でもない場合はnull
+//ひとつの例文は複数の単語の欄に出るため、id属性は重複しない例文一覧ページ側にだけ振る
+function renderExample(array $example, array $exampleIndex, $type, $mode, $currentWordId = null){
+	$anchor = ($currentWordId === null) ? ' id="' . h(exampleAnchor($example['id'])) . '"' : '';
+	echo '<div class="example"', $anchor, '>';
+
+	echo '<div class="exampleSentence">';
+	echo '<span class="exampleText">', h($example['sentence']), '</span>';//イジェール文字表示の切り替え対象
+	echo '<span class="wordId">', makeExampleLink($example['id']), '#', h($example['id']), '</a></span>';
+	echo '</div>';
+
+	if ($example['translation'] !== ''){
+		echo '<div class="exampleTranslation">', nl2br(h($example['translation'])), '</div>';//原文の改行を保つ
+	}
+	if ($example['supplement'] !== ''){
+		echo '<div class="exampleSupplement">', nl2br(h($example['supplement'])), '</div>';
+	}
+	if ($example['tags']){
+		echo '<div class="exampleTags">';
+		foreach ($example['tags'] as $singleTag){
+			echo '<span class="exampleTag">', h($singleTag), '</span>';
+		}
+		echo '</div>';
+	}
+
+	renderExampleWords($example, $exampleIndex, $type, $mode, $currentWordId);
+	renderExampleOffer($example);
+	echo '</div>';
+}
+
+//例文が使っている単語。辞書に無いIDと、表示中の単語自身は並べない
+function renderExampleWords(array $example, array $exampleIndex, $type, $mode, $currentWordId = null){
+	$formById = isset($exampleIndex['formById']) ? $exampleIndex['formById'] : array();
+	$links = array();
+	$shownIds = array();
+	foreach ($example['words'] as $singleWord){
+		if (!isset($singleWord['id'])){
+			continue;
+		}
+		$wordId = $singleWord['id'];
+		if ($wordId === $currentWordId || isset($shownIds[$wordId]) || !isset($formById[$wordId])){
+			continue;
+		}
+		$shownIds[$wordId] = true;
+		$links[] = makeLink($formById[$wordId], $type, $mode, 1, $wordId) . h($formById[$wordId]) . '</a>';
+	}
+	if (!$links){
+		return;
+	}
+	echo '<div class="exampleWords"><span class="exampleLabel">使用単語</span>', implode('、', $links), '</div>';
+}
+
+//例文の出典
+function renderExampleOffer(array $example){
+	if (!isset($example['offer']['catalog'], $example['offer']['number'])){
+		return;
+	}
+	echo '<div class="exampleOffer">';
+	echo h($example['offer']['catalog']), ' #', h($example['offer']['number']);
+	echo '</div>';
+}
+
+//例文一覧のページ送り
+function renderExampleNavigation($exampleAmount, $page){
+	echo '<ul class="navigation">';
+	if ($exampleAmount > EXAMPLES_PER_PAGE){
+		$totalPages = (int)ceil($exampleAmount / EXAMPLES_PER_PAGE);
+		for ($i = 1; $i <= $totalPages; $i++){
+			if ($page === $i){
+				echo '<li class="currentPage">', h($i), '</li>';
+			}else{
+				echo '<li><a href="example.php?', h(http_build_query(array('page' => $i))), '">', h($i), '</a></li>';
+			}
+		}
+	}
+	echo '</ul>';
 }
 
 //関連語。同じ見出しの語はまとめて読点で並べる

@@ -1,6 +1,6 @@
-// イジェール文字表示チェックボックスに合わせて見出し語のフォントを切り替える
+// イジェール文字表示チェックボックスに合わせて見出し語と例文のフォントを切り替える
 function changeFont() {
-	const list = document.getElementsByClassName('wordForm');
+	const list = document.querySelectorAll('.wordForm, .exampleText');
 	const font = document.getElementById('c5').checked ? 'Endrata' : 'inherit';
 	for (let i = 0; i < list.length; ++i) {
 		list[i].style.fontFamily = font;

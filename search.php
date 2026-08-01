@@ -18,7 +18,8 @@ function setFunc($mode){
 
 //検索処理
 //stripos は先頭一致で0を返すため、必ず !== false で判定して真偽値に揃える
-function isHit($singleEntry, $needle, $type, $mode){
+//$exampleText はこの見出し語を使う例文をつないだもの。全文検索のときだけ使う
+function isHit($singleEntry, $needle, $type, $mode, $exampleText = ''){
 	$func = setFunc($mode);
 
 	//見出し語を対象にする（訳語検索のみ対象外）
@@ -47,6 +48,10 @@ function isHit($singleEntry, $needle, $type, $mode){
 			if ($func($singleContent["text"], $needle) !== false){
 				return true;
 			}
+		}
+		//例文は単語欄に表示されるので、全文検索の対象にも含める
+		if ($exampleText !== '' && $func($exampleText, $needle) !== false){
+			return true;
 		}
 	}
 
@@ -84,11 +89,14 @@ function keepsSymbols($type, $mode){
 }
 
 //全ての検索語に一致した見出し語のキーを返す
+//$exampleIndex は makeExampleIndex() の返り値。渡すと全文検索が例文も対象にする
 //返り値：$words の添字の配列
-function searchEntries(array $words, array $keyWords, $type, $mode, $includeVoicing){
+function searchEntries(array $words, array $keyWords, $type, $mode, $includeVoicing, array $exampleIndex = array()){
 	if (!$keyWords){
 		return array();
 	}
+
+	$exampleTexts = ($type === 'all' && isset($exampleIndex['textByWordId'])) ? $exampleIndex['textByWordId'] : array();
 
 	//連濁形はキーワードごとに一度求めれば足りる
 	$voicedKeyWords = array();
@@ -101,13 +109,15 @@ function searchEntries(array $words, array $keyWords, $type, $mode, $includeVoic
 	//キーワードの数だけ結果一時保存用の配列を用意
 	$hitsPerKeyword = array_fill(0, count($keyWords), array());
 	foreach ($words as $entryKey => $singleEntry){
+		$entryId = $singleEntry["entry"]["id"];
 		if (!keepsSymbols($type, $mode)){
 			$singleEntry["entry"]["form"] = deleteNonIdyerinCharacters($singleEntry["entry"]["form"]);
 		}
+		$exampleText = isset($exampleTexts[$entryId]) ? $exampleTexts[$entryId] : '';
 		foreach ($keyWords as $index => $singleKey){
 			//通常ヒット OR (連濁検索 AND 連濁ヒット)
-			if (isHit($singleEntry, $singleKey, $type, $mode)
-				|| ($includeVoicing && isHit($singleEntry, $voicedKeyWords[$index], $type, $mode))){
+			if (isHit($singleEntry, $singleKey, $type, $mode, $exampleText)
+				|| ($includeVoicing && isHit($singleEntry, $voicedKeyWords[$index], $type, $mode, $exampleText))){
 				$hitsPerKeyword[$index][] = $entryKey;
 			}
 		}
