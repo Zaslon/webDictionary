@@ -76,6 +76,22 @@ is_same(
 $_GET = array();
 
 //////////////////////////////////////////////////
+//静的ファイルのURL
+//////////////////////////////////////////////////
+
+is_same(
+	'assetUrl は更新時刻を付ける',
+	'dict.css?v=' . filemtime(__DIR__ . '/../dict.css'),
+	assetUrl('dict.css')
+);
+is_same(
+	'assetUrl は外部のURLをそのまま返す',
+	'https://www.gstatic.com/charts/loader.js',
+	assetUrl('https://www.gstatic.com/charts/loader.js')
+);
+is_same('assetUrl は無いファイルをそのまま返す', 'none.js', assetUrl('none.js'));
+
+//////////////////////////////////////////////////
 //検索
 //////////////////////////////////////////////////
 

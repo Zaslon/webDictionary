@@ -54,7 +54,7 @@ $pageMenu = array(
 	'単語数推移' => 'https://zaslon.info/dict/chart.php',
 	'ホームへ戻る' => 'https://zaslon.info/idyer',
 );
-$pageBodyScripts = array('dict.js');
+$pageScripts = array('dict.js');//表示前にフォントを確定させるため、head内で読み込む
 require __DIR__ . '/header.php';
 ?>
 		<div class="dictVer">

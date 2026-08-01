@@ -26,11 +26,11 @@ $pageScripts = isset($pageScripts) ? $pageScripts : array();
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:site" content="@Zaslon" />
 <!-- 表示前にライト/ダークを確定させるため、head内で同期読み込みする -->
-<script src="script.js"></script>
+<script src="<?php echo h(assetUrl('script.js')); ?>"></script>
 <?php foreach ($pageScripts as $singleScript): ?>
-<script src="<?php echo h($singleScript); ?>"></script>
+<script src="<?php echo h(assetUrl($singleScript)); ?>"></script>
 <?php endforeach; ?>
-<link rel="stylesheet" href="dict.css" />
+<link rel="stylesheet" href="<?php echo h(assetUrl('dict.css')); ?>" />
 <link rel="shortcut icon" href="favicon.ico" />
 <link rel="icon" href="favicon.ico" />
 <title>イジェール語 オンライン辞書</title>

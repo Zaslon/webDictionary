@@ -24,11 +24,17 @@ $pageMenu = array(
 	'単語数推移'       => 'https://zaslon.info/dict/chart.php',
 	'ホームへ戻る'     => 'https://zaslon.info/idyer',
 );
+$pageScripts = array('dict.js');//表示前にフォントを確定させるため、head内で読み込む
 require __DIR__ . '/header.php';
 ?>
 		<div class="dictVer">
 			<p>辞書更新日：<?php echo h(date("Y/m/d", filemtime($dictionaryFile))); ?><br />
 			例文数：<?php echo h($exampleAmount); ?></p>
+		</div>
+
+		<!-- 検索ページと状態を共有するため、送信はせずdict.jsに任せる -->
+		<div class="fontSwitch">
+			<div class="buttonAndLabel"><input type="checkbox" id="c5"<?php echo checkedAttr(isIdfRequested()); ?>><label for="c5">イジェール文字表示</label></div>
 		</div>
 	</header>
 

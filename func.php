@@ -29,6 +29,16 @@ function checkedAttr($isChecked){
 	return $isChecked ? ' checked' : '';
 }
 
+//静的ファイルのURLを返す
+//更新してもブラウザが古いCSSやJSを使い続けないよう、更新時刻を付ける
+function assetUrl($path){
+	if (preg_match('#^(https?:)?//#u', $path)){
+		return $path;//外部のURLはそのまま返す
+	}
+	$file = __DIR__ . '/' . $path;
+	return is_file($file) ? $path . '?v=' . filemtime($file) : $path;
+}
+
 //////////////////////////////////////////////////
 //リクエストパラメータ
 //////////////////////////////////////////////////

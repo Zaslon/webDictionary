@@ -16,6 +16,18 @@ Author URI: https://zaslon.info
 	url('Endrata-bold.ttf') format('truetype');
 }
 
+/* イジェール文字表示。dict.jsが<html>にクラスを付ける */
+.idyer-font .wordForm,
+.idyer-font .exampleText {
+	font-family: 'Endrata';
+}
+
+/* 例文一覧ページの表示切り替え。検索フォームと同じ位置に置く */
+.fontSwitch {
+	text-align: left;
+	padding: 0 10px 0.2em;
+}
+
 .light-mode{
 	--background-color: #E5E5E0;
 	--main-background-color: #F6F6F8;
@@ -300,14 +312,30 @@ div.example {
 	margin: 0.3em 0 0.8em 1em;
 }
 
+/* 例文一覧ページ。1件を単語1件と同じ見出しの立て方で区切る */
 div.exampleEntry {
 	padding: 10px;
-	padding-top: 0;
+	padding-top: 0.8em;
 	border-bottom: var(--light-border-color) 1px solid;
 }
 
 div.exampleEntry div.example {
-	margin-left: 0;
+	margin: 0;
+}
+
+div.exampleEntry div.exampleSentence {
+	font-size: 140%;
+	line-height: 1.4;
+	margin-bottom: 0.2em;
+}
+
+/* 見出しになる例文の下にぶら下げる */
+div.exampleEntry div.exampleTranslation,
+div.exampleEntry div.exampleSupplement,
+div.exampleEntry div.exampleTags,
+div.exampleEntry div.exampleWords,
+div.exampleEntry div.exampleOffer {
+	margin: 0 0 0.2em 1em;
 }
 
 div.exampleSentence {

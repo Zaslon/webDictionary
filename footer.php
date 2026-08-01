@@ -8,7 +8,7 @@ $pageBodyScripts = isset($pageBodyScripts) ? $pageBodyScripts : array();
 	</footer>
 </div>
 <?php foreach ($pageBodyScripts as $singleScript): ?>
-<script src="<?php echo h($singleScript); ?>"></script>
+<script src="<?php echo h(assetUrl($singleScript)); ?>"></script>
 <?php endforeach; ?>
 </body>
 </html>
