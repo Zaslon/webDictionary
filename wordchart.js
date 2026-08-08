@@ -4,12 +4,33 @@ google.charts.setOnLoadCallback(drawChart);
 let chart = null;
 let chartData = null;
 
-// 描画済みのデータを使い回して、リサイズのたびに読み込み直さないようにする
-window.addEventListener('resize', () => {
+// 描画済みのデータを使い回して、描き直しのたびに読み込み直さないようにする
+function redraw() {
 	if (chart && chartData) {
 		chart.draw(chartData, chartOptions());
 	}
+}
+
+window.addEventListener('resize', redraw);
+
+// グラフの色はCSSではなく描画時に決まるため、明暗が変わったら描き直す
+// script.jsが<html>のdata-themeを書き換えるので、それを見張る
+new MutationObserver(redraw).observe(document.documentElement, {
+	attributes: true,
+	attributeFilter: ['data-theme']
 });
+
+// まだボタンで選んでいなければ、OS側の設定変更にも追従する
+if (window.matchMedia) {
+	const query = window.matchMedia('(prefers-color-scheme: dark)');
+	if (query.addEventListener) {
+		query.addEventListener('change', () => {
+			if (!document.documentElement.hasAttribute('data-theme')) {
+				redraw();
+			}
+		});
+	}
+}
 
 // CSVを取得して[年, 月, 日, 単語数]の二次元配列にする
 async function getCsv(url) {
@@ -39,14 +60,35 @@ async function getCsv(url) {
 	return rows;
 }
 
+// dict.cssの色をそのまま使う。CSSの色を変えればグラフも一緒に変わる
+function themeColor(name, fallback) {
+	const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+	return (value === '') ? fallback : value;
+}
+
 function chartOptions() {
+	const paper = themeColor('--paper', '#F6F6F8');
+	const text = themeColor('--text', '#111');
+	const muted = themeColor('--muted', '#777');
+	const rule = themeColor('--rule-light', '#ddd');
+	const link = themeColor('--link', '#1a5fb4');
+	const axis = {
+		titleTextStyle: {color: muted},
+		textStyle: {color: muted},
+		gridlines: {color: rule},
+		baselineColor: rule
+	};
+
 	return {
 		title: '単語数推移',
-		hAxis: {
+		backgroundColor: paper,
+		titleTextStyle: {color: text},
+		colors: [link],
+		hAxis: Object.assign({
 			title: '日付',
 			format: 'YYYY/MM'
-		},
-		vAxis: {title: '単語数'},
+		}, axis),
+		vAxis: Object.assign({title: '単語数'}, axis),
 		legend: 'none'
 	};
 }

@@ -15,6 +15,10 @@
 | `search.php` | 検索と接辞サジェスト |
 | `view.php` | 検索結果のHTML出力 |
 | `header.php` / `footer.php` | 全ページ共通のレイアウト |
+| `dict.css` | 全ページ共通のスタイル。色は zaslon.info 本体と同じ変数名で持つ |
+| `script.js` | 明暗（ライト／ダーク）の切り替え |
+| `dict.js` | イジェール文字表示の切り替え |
+| `wordchart.js` | 単語数推移のグラフの描画 |
 | `anal.php` | アクセス解析タグの差し込み口 |
 | `idyer.json` | 辞書データ（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)で管理） |
 | `affixTable.csv` | 接辞テーブル。[0]対象品詞、[1]形態、[2]説明、[3]特殊処理 |
@@ -39,6 +43,46 @@
 
 なお、CSSやJSを更新してもブラウザが古いものを使い続けないよう、
 `func.php` の `assetUrl()` で `dict.css?v=更新時刻` の形にしている。
+
+## 見た目（配色・書体・ダークモード）
+配色も書体も zaslon.info 本体（[zaslon-site](https://zaslon.info/) の `css/style.css`）に合わせてある。
+
+### 配色
+`dict.css` の先頭で本体と**同じ変数名・同じ値**の色を定義しているので、
+どちらかの色を変えたときは、もう一方の同じ名前の値も合わせること。
+
+### 書体
+本文の書体・字の大きさ・行間・狭い画面での切り替え（768px）は本体と同じ値にしてある。
+
+| | 値 | 備考 |
+| --- | --- | --- |
+| 本文 | `"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif` | |
+| 字の大きさ | `100%`（768px以下は `108%`） | |
+| 行間 | `1.85`（768px以下は `1.8`） | 一覧（`wordEntry` / `menu` / `navigation`）は本体の `.post-list` と同じ `1.6` に戻す |
+| サイト名（`h1`） | `Georgia,"Times New Roman",serif` | 大きさは本体（60px）に揃えず200%のまま。和文で長く、60pxだと折り返すため |
+
+イジェール文字の `Endrata` だけは辞書固有なので、上の指定より優先される。
+
+### ダークモード
+切り替えは `script.js` が担当し、ヘッダ右上のボタン（`header.php`）で選ぶ。
+**辞書と本体は同じドメインに置いてあり、明暗はサイト全体で1つの設定として共有する。**
+そのため、次の3つは本体（`common/header.php` と `css/style.css`）と必ず同じにすること。
+片方だけ変えると、辞書と本体で設定が分かれてしまう。
+
+| 何 | 値 |
+| --- | --- |
+| `localStorage` のキー | `theme` |
+| 保存する値 | `dark` / `light` |
+| `<html>` に付ける属性 | `data-theme="dark"` / `"light"` |
+
+- ボタンで選んでいなければ、OSの設定（`prefers-color-scheme`）に従う
+- 保存済みの選択は `<head>` で同期読み込みする `script.js` が画面を描く前に付けるので、
+  明るい画面が一瞬見えることはない
+- 暗い色は `dict.css` の `@media (prefers-color-scheme: dark)` と `:root[data-theme="dark"]` の
+  2か所に同じ並びで書いてある。JavaScriptが動かない環境でもOSの設定だけで暗くなるようにするためで、
+  片方だけ直さないこと
+- グラフ（`wordchart.js`）の色はCSSではなく描画時に決まるため、
+  `dict.css` の変数を読んで描き、`data-theme` の変化を見張って描き直している
 
 ## 辞書順
 見出し語の並び順は[辞書順について](https://zaslon.info/idyerin/%E8%BE%9E%E6%9B%B8%E9%A0%86%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/)の規則に従う。

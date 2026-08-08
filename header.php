@@ -25,6 +25,8 @@ $pageScripts = isset($pageScripts) ? $pageScripts : array();
 <meta property="og:image" content="https://zaslon.info/wordpress/wp-content/uploads/2020/08/cropped-ZaslonI-1.png" />
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:site" content="@Zaslon" />
+<?php //スマホのブラウザ枠の色。今の明暗に合わせてscript.jsが書き換える ?>
+<meta name="theme-color" id="theme-color-meta" content="#E5E5E0" />
 <!-- 表示前にライト/ダークを確定させるため、head内で同期読み込みする -->
 <script src="<?php echo h(assetUrl('script.js')); ?>"></script>
 <?php foreach ($pageScripts as $singleScript): ?>
@@ -46,3 +48,17 @@ $pageScripts = isset($pageScripts) ? $pageScripts : array();
 <?php endforeach; ?>
 			</ul>
 		</nav>
+<?php
+//明暗の切り替えボタン。JavaScriptが無いと動かないのでhiddenで置き、script.jsが外す。
+//絵は「今と逆の表示」を示す（明るいとき＝月／暗いとき＝太陽）。
+?>
+		<button type="button" class="theme-toggle" id="theme-toggle" hidden>
+			<svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+				<path d="M20.7 14.5A8.6 8.6 0 0 1 9.5 3.3a8.7 8.7 0 1 0 11.2 11.2z"/>
+			</svg>
+			<svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+			     stroke-width="2" stroke-linecap="round" aria-hidden="true">
+				<circle cx="12" cy="12" r="4.2"/>
+				<path d="M12 1.8v2.6M12 19.6v2.6M4.6 4.6l1.9 1.9M17.5 17.5l1.9 1.9M1.8 12h2.6M19.6 12h2.6M4.6 19.4l1.9-1.9M17.5 6.5l1.9-1.9"/>
+			</svg>
+		</button>

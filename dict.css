@@ -4,6 +4,16 @@ Theme URI: NULL
 Description: 辞書用に変更
 Author: Zaslon
 Author URI: https://zaslon.info
+
+色と書体は zaslon.info 本体（zaslon-site の css/style.css）に合わせてある。
+色は本体と同じ変数名・同じ値で持たせているので、
+どちらかの色を変えたときは、もう一方の同じ名前の値も合わせること。
+
+本体から受け継いでいる考え方:
+- 灰色の地色(--page-bg)の上に、明るい紙面(--paper)を左右1px罫(--paper-edge)で立てる
+- ボタン・タグ・チップの類はすべて 地色--chip / 枠1px --border / 角丸3px、hoverで--chip-hover
+- 装飾色は持たず、--text の文字と灰色の罫だけで構成する（本文中のリンクの青 --link だけが例外）
+- 本文はNoto Sans JP系のゴシック、サイト名だけGeorgia系の明朝。地の文の行間は1.85、一覧は1.6
 */
 
 
@@ -28,47 +38,114 @@ Author URI: https://zaslon.info
 	padding: 0 10px 0.2em;
 }
 
-.light-mode{
-	--background-color: #E5E5E0;
-	--main-background-color: #F6F6F8;
-	--light-border-color: #ccc;
-	--heavy-border-color: #aaa;
-	--button-background-color: #eee;
-	--font-color: black;
-	--textbox-color:white;
-	--textbox-border-color: #ddd;
+/* 色はここだけ変えれば全体に反映される。
+   色を1つ足すときは、下の「ダークモード」の2か所にも同じ名前で暗い色を書くこと。 */
+:root {
+	color-scheme: light;
+	--page-bg:    #E5E5E0;   /* 紙面の外側 */
+	--paper:      #F6F6F8;   /* 紙面 */
+	--paper-edge: #aaa;      /* 紙面の左右の罫 */
+	--text:       #111;
+	--text-soft:  #444;      /* 更新日・単語数など、少し落とした文字 */
+	--muted:      #777;      /* 語ID・出典など補助情報 */
+	--rule-light: #ddd;      /* 一覧の区切り線 */
+	--border:     #ccc;      /* 枠線（ボタン・入力欄・チップ） */
+	--chip:       #EEE;      /* ボタン・タグの地色 */
+	--chip-hover: #CCC;      /* 同・hover */
+	--link:       #1a5fb4;   /* 見出し語・関連語などへのリンク */
+	--input-bg:   #fff;      /* 入力欄の地色 */
+	--focus:      #555;      /* キーボード操作時の輪郭 */
+
+	/* 明暗の切り替えボタンの大きさ。h1が空ける場所もこの値から決めるので、
+	   大きさを変えるならここだけ直せばよい（狭い画面用の値は末尾のmedia queryにある） */
+	--toggle-size: 40px;
+	--toggle-gap: 6px;       /* ボタンの上下に空ける余白 */
+	--toggle-right: 12px;    /* 同・右 */
 }
 
-.dark-mode{
-	--background-color: black;
-	--main-background-color: #121212;
-	--light-border-color: #666;
-	--heavy-border-color: #444;
-	--button-background-color: #222;
-	--font-color: #ccc;
-	--textbox-color: #333;
-	--textbox-border-color: black;
+/* ============ ダークモード ============
+   zaslon.info 本体と同じ仕組みで切り替える。ヘッダ右上のボタン（header.php）で選ぶと
+   <html> に data-theme="dark" / "light" が付き、選んだ内容は localStorage のキー 'theme' に残る。
+   キー名・値・属性名は本体（zaslon-site の common/header.php）と同じにしてあり、
+   同じドメインに置いているので、サイト全体で1つの設定として共有される。変えないこと。
+   ・何も選んでいなければOSの設定に従う（下の @media）
+   ・保存済みの選択は script.js が画面を描く前に <html> へ付けるので、
+     明るい画面が一瞬見えることはない。
+   同じ色の並びを2か所に書いているのは、JavaScriptが動かない環境でも
+   OSの設定だけで暗くなるようにするため。片方だけ直さないこと。 */
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		color-scheme: dark;
+		--page-bg:    #131417;
+		--paper:      #1C1E22;
+		--paper-edge: #3A3D43;
+		--text:       #E8E6E2;
+		--text-soft:  #C2BFBA;
+		--muted:      #8E8B86;
+		--rule-light: #35383D;
+		--border:     #4A4D53;
+		--chip:       #2A2D32;
+		--chip-hover: #3B3F45;
+		--link:       #85B4F0;
+		--input-bg:   #17191C;
+		--focus:      #9AA0A8;
+	}
+}
+:root[data-theme="dark"] {
+	color-scheme: dark;
+	--page-bg:    #131417;
+	--paper:      #1C1E22;
+	--paper-edge: #3A3D43;
+	--text:       #E8E6E2;
+	--text-soft:  #C2BFBA;
+	--muted:      #8E8B86;
+	--rule-light: #35383D;
+	--border:     #4A4D53;
+	--chip:       #2A2D32;
+	--chip-hover: #3B3F45;
+	--link:       #85B4F0;
+	--input-bg:   #17191C;
+	--focus:      #9AA0A8;
 }
 
 a {
-	color: var(--font-color);
+	color: var(--text);
 	}
 
+/* キーボード操作時に今どこにいるかが分かるように（マウス操作では出ない） */
+:focus-visible {
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+}
+
+/* 書体・字の大きさ・行間は本体（zaslon-site の css/style.css）と同じにする。
+   行間1.85は地の文に合わせた値なので、一覧のように行を詰めたいところは
+   本体の .post-list と同じく1.6に戻している（下のwordEntry・menu・navigation）。 */
 body{
-	color:var(--font-color);
+	color:var(--text);
 	height: 100%;
 	margin : auto;
 	padding : 0;
-	line-height : 1.6;
-	font-size : 14px;
+	line-height : 1.85;
+	font-size : 100%;
 	max-height:100%;
-	background-color : var(--background-color);
-	font-family:"ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro","メイリオ","Meiryo",sans-serif;
+	background-color : var(--page-bg);
+	font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
 	overflow-x:auto;
 	overflow-y:auto;
 	-webkit-text-size-adjust: 100%;
 	text-align: justify;
 	}
+
+/* 狭い画面での字の大きさ・字送り。切り替えの768pxも本体に合わせてある
+   （この下のレイアウトの切り替えは、辞書独自の500px） */
+@media screen and (max-width: 768px) {
+	body {
+		font-size: 108%;
+		line-height: 1.8;
+		letter-spacing: 0.02em;
+	}
+}
 
 .dictVer {
 	margin: 0.3em 10px;
@@ -76,7 +153,9 @@ body{
 	margin-right:5px;
 	margin-left:auto;
 	font-size:80%;
+	line-height:1.7;
 	max-height:100%;
+	color: var(--text-soft);
 }
 
 .dictVer p{
@@ -85,7 +164,7 @@ body{
 }
 
 .etymology {
-	color: var(--light-border-color);
+	color: var(--muted);
 }
 
 #wordchart{
@@ -102,19 +181,22 @@ body{
 }
 
 input[type="text"]{
-	border-radius: 5px;
-	background-color: var(--textbox-color);
-	border-color: var(--textbox-border-color);
+	border-radius: 3px;
+	background-color: var(--input-bg);
+	border: 1px solid var(--border);
 }
 
 input[type="submit"],
 button{
-	background-color: var(--button-background-color);
-	border: 1px solid var(--heavy-border-color);
+	background-color: var(--chip);
+	border: 1px solid var(--border);
 	border-radius: 3px;
-	font-family: inherit;
-	font-size: inherit;
 	color: inherit;
+}
+
+input[type="submit"]:hover,
+button:hover{
+	background-color: var(--chip-hover);
 }
 
 #menu {
@@ -122,14 +204,15 @@ button{
 	font-size:125%;
 	max-height:100%;
 	text-align:center;
-	border-top:1px var(--light-border-color) solid;
-	border-bottom:1px var(--light-border-color) solid;
+	border-top:1px var(--border) solid;
+	border-bottom:1px var(--border) solid;
 	list-style:none;
 	}
 
 #menu li{
 	margin:0 10px;
 	display:inline-block;
+	line-height:1.6;
 	}
 
 #menu a{
@@ -150,25 +233,29 @@ p.result{
 	margin-top: 10px;
 }
 
+/* 他のボタン・タグと同じチップの見た目にする。続けて出たときに枠が繋がらないよう下を空ける */
 p.suggest{
-	background-color:var(--button-background-color);
+	background-color:var(--chip);
+	border: 1px solid var(--border);
+	border-radius: 3px;
+	margin-bottom: 0.3em;
 }
 
 #main p{
 	padding: 0 10px;
 }
-	
+
 form {
 	text-align: left;
 	padding: 10px;
 	padding-top: 0;
 	padding-bottom: 0.2em;
 	}
-	
+
 form p{
 	display:inline;
 	}
-	
+
 ul.navigation {
 	font-size: 120%;
 	max-height:100%;
@@ -181,36 +268,44 @@ ul.navigation {
 	padding: 0;
 	display: inline-block;
 	}
-	
+
 ul.navigation li {
-	background-color: var(--button-background-color);
+	background-color: var(--chip);
 	float: left;
 	min-width: 50px;
 	letter-spacing: 0;
-	border: 1px solid var(--light-border-color);
+	line-height: 1.6;
+	border: 1px solid var(--border);
 	border-radius: 3px;
 	margin: 5px;
 	text-align: center;
 	}
-	
+
 li.currentPage {
-	color: var(--heavy-border-color) !important;
-	border-color: var(--button-background-color) !important;
+	color: var(--muted) !important;
+	border-color: var(--chip) !important;
 	}
-	
+
 ul.navigation li a{
 	text-decoration: none;
-	/* color: #111; */
 	display: block;
 	}
-	
+
 ul.navigation li a:hover{
-	background-color: var(--heavy-border-color);
+	background-color: var(--chip-hover);
 	}
-	
+
+/* サイト名は本体の .site-title と同じ明朝系にする。
+   ただし大きさは本体（60px）に揃えず200%のまま。本体のサイト名と違って和文で長く、
+   60pxだと折り返してしまうため。 */
 h1 {
 	margin:0;
 	margin-left:10px;
+	/* 右上の明暗の切り替えボタンの場所を空けておく。
+	   高さを空けないと、ボタンの下端がこの下のメニューの罫に被る */
+	min-height:calc(var(--toggle-size) + var(--toggle-gap) * 2);
+	padding-right:calc(var(--toggle-size) + var(--toggle-right));
+	font-family:Georgia,"Times New Roman",serif;
 	font-size:200%;
 	max-height:100%;
 	line-height:160%;
@@ -220,16 +315,16 @@ h1 a{text-decoration:none;}
 
 .all {
 	word-break:break-all;
-	border-right:1px solid var(--heavy-border-color);
-	border-left:1px solid var(--heavy-border-color);
-	border-bottom:1px solid var(--light-border-color);
-	background-color : var(--main-background-color);
+	border-right:1px solid var(--paper-edge);
+	border-left:1px solid var(--paper-edge);
+	border-bottom:1px solid var(--border);
+	background-color : var(--paper);
 	width : 95%;
 	margin: auto;
-	/* color : #111; */
 	}
 
 #header {
+	position: relative;   /* 明暗の切り替えボタンの位置の基準 */
 	padding-left: 10px;
 	padding-right: 10px;
 	padding-top : 0;
@@ -237,15 +332,43 @@ h1 a{text-decoration:none;}
 	margin-bottom:5px;
 	}
 
+/* ---- 明暗の切り替えボタン（ヘッダ右上） ----
+   本体（zaslon-site）と同じ「地色--chip・枠1px・角丸3px」のチップにする。
+   中の絵は月＝これから暗くする / 太陽＝これから明るくする。今の表示と逆の絵を出す。
+   JavaScriptが無い環境では切り替えられないので、header.php 側でhiddenにして置き、script.jsが外す。 */
+.theme-toggle {
+	position: absolute; top: var(--toggle-gap); right: var(--toggle-right);
+	display: inline-flex; align-items: center; justify-content: center;
+	width: var(--toggle-size); height: var(--toggle-size); padding: 0;
+	background-color: var(--chip); color: var(--text);
+	border: 1px solid var(--border); border-radius: 3px;
+	cursor: pointer;
+}
+/* display を指定した要素は hidden 属性だけでは消えないので明示する */
+.theme-toggle[hidden] { display: none; }
+.theme-toggle svg { width: 20px; height: 20px; display: block; }
+/* 既定（明るい表示）では月だけ、暗い表示では太陽だけを出す。
+   出し分けの条件は上のダークモードの色と同じ書き方に揃えてある。 */
+.theme-toggle .icon-sun  { display: none; }
+.theme-toggle .icon-moon { display: block; }
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) .theme-toggle .icon-sun  { display: block; }
+	:root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+}
+:root[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
+:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
 #footer {
 	margin:0 10px;
-	border-top:1px solid var(--light-border-color);
+	border-top:1px solid var(--border);
 	clear:both;
-	color: var(--light-border-color);
+	color: var(--muted);
 	}
-	
+
 #footer p {
 	text-align:center;
+	font-size:0.85rem;
+	line-height:1.5;
 	}
 
 #main {
@@ -256,32 +379,49 @@ h1 a{text-decoration:none;}
 	clear:both;
 	}
 
+/* 入力欄・ボタンの書体と大きさを地の文に揃える（本体と同じ扱い）。
+   スマホで入力欄に触れたときに画面が拡大されるのも防げる */
+select, textarea, input, button { font: inherit; }
+
 input{
 	color: inherit;
-	font-family:inherit;
 	margin-right:0.2em;
 	}
 
-input[type="radio"]{
-	background-color: var(--light-border-color);
-}
-	
+/* ラジオ・チェックボックスの色は、:root の color-scheme に従ってブラウザが暗くする */
+
 ul.wordEntry {
 	padding: 10px;
 	padding-top: 0 ;
 	list-style: none;
-	border-bottom: var(--light-border-color) 1px solid;
+	border-bottom: var(--rule-light) 1px solid;
 	max-height:100%;
 }
 
+/* 見出し語・訳語・関連語は一覧なので行を詰める */
 ul.wordEntry li {
 	margin-bottom: 0.2em;
+	line-height: 1.6;
+}
+
+/* 語源・語法・用例は地の文なので、行間をbodyに戻す */
+ul.wordEntry li.wordContents {
+	line-height: 1.85;
+}
+
+/* 見出し語・関連語・使用単語などへのリンクは、本体の本文中リンクと同じ青にする。
+   メニュー・ページ送りは地の文と同じ色のまま（下線とチップで区別できるため）。 */
+ul.wordEntry a,
+div.exampleEntry a,
+p.suggest a {
+	color: var(--link);
 }
 
 span.wordTitle,
 span.wordContentTitle,
 span.wordRelation {
-	border: var(--light-border-color) 1px solid;
+	background-color: var(--chip);
+	border: var(--border) 1px solid;
 	border-radius: 3px;
 	padding: 0 0.2em 0 0.2em;
 	margin-right:1em;
@@ -290,7 +430,7 @@ span.wordRelation {
 span.wordId {
 	margin: 0 1em 0 0.2em ;
 	border: none !important;
-	color: var(--light-border-color);
+	color: var(--muted);
 	font-size: 50%;
 	max-height:100%;
 	font-weight: normal;
@@ -316,7 +456,7 @@ div.example {
 div.exampleEntry {
 	padding: 10px;
 	padding-top: 0.8em;
-	border-bottom: var(--light-border-color) 1px solid;
+	border-bottom: var(--rule-light) 1px solid;
 }
 
 div.exampleEntry div.example {
@@ -350,7 +490,7 @@ div.exampleOffer {
 
 div.exampleOffer,
 span.exampleLabel {
-	color: var(--light-border-color);
+	color: var(--muted);
 }
 
 span.exampleLabel {
@@ -358,7 +498,8 @@ span.exampleLabel {
 }
 
 span.exampleTag {
-	border: var(--light-border-color) 1px solid;
+	background-color: var(--chip);
+	border: var(--border) 1px solid;
 	border-radius: 3px;
 	padding: 0 0.2em 0 0.2em;
 	margin-right: 0.5em;
@@ -371,40 +512,48 @@ span.exampleTag {
 	padding-left:0.3em;
 	padding-right:0.3em;
 	}
-	
+
 	#footer {
 	margin:0 0.3em;
 	}
-	
+
 	h1{
 	font-size:150%;
 	margin-bottom:0;
 	}
-	
+
 	#menu {
 	font-size:100%;
 	}
-	
+
 	.all{
 	width:100%;
 	border-right:none;
 	border-left:none;
 	}
-	
+
 	.textAndSubmit{
 	width:100%;
 	}
-	
+
 	input[type="text"]{
 	float:left;
 	width:48%;
 	margin-right:0;
 	}
-	
+
 	input[type="submit"]{
 	float:right;
 	width:48%;
 	margin-right:0;
+	}
+
+	/* 明暗の切り替えボタンもタップ領域を44pxにする。
+	   h1が空ける場所も一緒に広がるので、ここを直すだけでよい */
+	:root {
+	--toggle-size: 44px;
+	--toggle-gap: 8px;
+	--toggle-right: 8px;
 	}
 
 }
