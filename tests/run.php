@@ -249,12 +249,12 @@ ob_start();
 renderExampleNavigation(45, 2);
 $html = ob_get_clean();
 is_same('例文数どおりにページ送りを出す', 3, substr_count($html, '<li'));
-is_same('現在のページはリンクにしない', true, strpos($html, '<li class="currentPage">2</li>') !== false);
+is_same('現在のページはリンクにしない', true, strpos($html, '<li class="currentPage" aria-current="page">2</li>') !== false);
 
 ob_start();
 renderExampleNavigation(20, 1);
 $html = ob_get_clean();
-is_same('1ページに収まる場合はページ送りを出さない', '<ul class="navigation"></ul>', $html);
+is_same('1ページに収まる場合はページ送りを出さない', '<nav aria-label="ページ送り"><ul class="navigation"></ul></nav>', $html);
 
 //////////////////////////////////////////////////
 //連濁
@@ -417,13 +417,13 @@ ob_start();
 renderNavigation(45, 2, array('a', 'b'), 'both', 'prt');
 $html = ob_get_clean();
 is_same('総ページ数どおりにページ送りを出す', 3, substr_count($html, '<li'));
-is_same('現在のページはリンクにしない', true, strpos($html, '<li class="currentPage">2</li>') !== false);
+is_same('現在のページはリンクにしない', true, strpos($html, '<li class="currentPage" aria-current="page">2</li>') !== false);
 is_same('ページ送りは検索語を引き継ぐ', true, strpos($html, 'keyBox=a+b') !== false);
 
 ob_start();
 renderNavigation(20, 1, array('a'), 'both', 'prt');
 $html = ob_get_clean();
-is_same('1ページに収まる場合はページ送りを出さない', '<ul class="navigation"></ul>', $html);
+is_same('1ページに収まる場合はページ送りを出さない', '<nav aria-label="ページ送り"><ul class="navigation"></ul></nav>', $html);
 
 //////////////////////////////////////////////////
 

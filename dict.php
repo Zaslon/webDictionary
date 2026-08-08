@@ -47,13 +47,7 @@ $hitAmount = count($hitKeys);
 $page = min($page, max(1, (int)ceil($hitAmount / WORDS_PER_PAGE)));//存在しないページを指定された場合は最終ページに寄せる
 $firstIndex = WORDS_PER_PAGE * ($page - 1);
 
-$pageMenu = array(
-	'検索仕様'   => 'https://zaslon.info/idyerin/%e6%a4%9c%e7%b4%a2%e4%bb%95%e6%a7%98/',
-	'凡例'       => 'https://zaslon.info/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/',
-	'例文一覧'   => 'https://zaslon.info/dict/example.php',
-	'単語数推移' => 'https://zaslon.info/dict/chart.php',
-	'ホームへ戻る' => 'https://zaslon.info/idyer',
-);
+$pageMenu = buildPageMenu('dict');
 $pageScripts = array('dict.js');//表示前にフォントを確定させるため、head内で読み込む
 require __DIR__ . '/header.php';
 ?>

@@ -40,6 +40,71 @@ function assetUrl($path){
 }
 
 //////////////////////////////////////////////////
+//設定・全ページ共通の情報
+//zaslon-site本体のcommon/lib.phpにあるsite_config()相当。config.phpを読み込んで使い回す
+//////////////////////////////////////////////////
+
+//config.phpの内容を返す
+function dictConfig(){
+	static $config = null;
+	if ($config === null){
+		$config = require __DIR__ . '/config.php';
+	}
+	return $config;
+}
+
+//ページ間メニューを組み立てる
+//$currentPageKey : 今開いているページのキー（config.phpの'pages'参照）。該当項目は自分自身への
+//リンクになるため取り除く。どの項目にも該当しないページ（トップの検索ページ以外の想定外ページ等）はnullでよい
+function buildPageMenu($currentPageKey){
+	$config = dictConfig();
+	$siteUrl = rtrim($config['site_url'], '/');
+	$menu = array();
+	foreach ($config['menu_before'] as $label => $path){
+		$menu[$label] = $siteUrl . $path;
+	}
+	foreach ($config['pages'] as $pageKey => $page){
+		if ($pageKey === $currentPageKey){
+			continue;
+		}
+		$menu[$page['label']] = $siteUrl . $page['path'];
+	}
+	foreach ($config['menu_after'] as $label => $path){
+		$menu[$label] = $siteUrl . $path;
+	}
+	return $menu;
+}
+
+//コピーライト表記（終了年は常に今年）
+function copyrightText(){
+	$config = dictConfig();
+	$start = (int)$config['copyright_start'];
+	$now = (int)date('Y');
+	$years = ($now > $start) ? $start . '-' . $now : (string)$start;
+	return '© ' . $years . ' ' . $config['copyright_holder'];
+}
+
+//計測タグに使うGA4測定ID。未設定のとき、およびga_exclude_hostsに載っている
+//ホスト（手元のXAMPP等）で開いているときは''を返し、タグを出力させない
+//zaslon-site本体のga_measurement_id()と同じロジック
+function gaMeasurementId(){
+	$config = dictConfig();
+	$id = trim($config['ga_id']);
+	if ($id === ''){
+		return '';
+	}
+	$host = strtolower(trim(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ''));
+	$host = preg_replace('/:\d+$/', '', $host);//ポート番号を除く
+	$host = trim($host, '[]');//IPv6の[::1]形式を裸にする
+	foreach ($config['ga_exclude_hosts'] as $excludeHost){
+		if ($host === strtolower($excludeHost)){
+			return '';
+		}
+	}
+	return $id;
+}
+
+//////////////////////////////////////////////////
 //リクエストパラメータ
 //////////////////////////////////////////////////
 

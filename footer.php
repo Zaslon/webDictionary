@@ -4,7 +4,7 @@
 $pageBodyScripts = isset($pageBodyScripts) ? $pageBodyScripts : array();
 ?>
 	<footer id="footer">
-		<p>&copy; 2010-<?php echo date('Y'); ?> Zaslon</p>
+		<p><?php echo h(copyrightText()); ?></p>
 	</footer>
 </div>
 <?php foreach ($pageBodyScripts as $singleScript): ?>

@@ -189,18 +189,18 @@ function renderExampleOffer(array $example){
 
 //例文一覧のページ送り
 function renderExampleNavigation($exampleAmount, $page){
-	echo '<ul class="navigation">';
+	echo '<nav aria-label="ページ送り"><ul class="navigation">';
 	if ($exampleAmount > EXAMPLES_PER_PAGE){
 		$totalPages = (int)ceil($exampleAmount / EXAMPLES_PER_PAGE);
 		for ($i = 1; $i <= $totalPages; $i++){
 			if ($page === $i){
-				echo '<li class="currentPage">', h($i), '</li>';
+				echo '<li class="currentPage" aria-current="page">', h($i), '</li>';
 			}else{
 				echo '<li><a href="example.php?', h(http_build_query(array('page' => $i))), '">', h($i), '</a></li>';
 			}
 		}
 	}
-	echo '</ul>';
+	echo '</ul></nav>';
 }
 
 //関連語。同じ見出しの語はまとめて読点で並べる
@@ -232,17 +232,17 @@ function renderRelations(array $entry, $type, $mode){
 
 //ページ送り
 function renderNavigation($hitAmount, $page, array $keyWords, $type, $mode){
-	echo '<ul class="navigation">';
+	echo '<nav aria-label="ページ送り"><ul class="navigation">';
 	if ($hitAmount > WORDS_PER_PAGE){
 		$totalPages = (int)ceil($hitAmount / WORDS_PER_PAGE);
 		$keyWord = implode(' ', $keyWords);
 		for ($i = 1; $i <= $totalPages; $i++){
 			if ($page === $i){
-				echo '<li class="currentPage">', h($i), '</li>';
+				echo '<li class="currentPage" aria-current="page">', h($i), '</li>';
 			}else{
 				echo '<li>', makeLink($keyWord, $type, $mode, $i), h($i), '</a></li>';
 			}
 		}
 	}
-	echo '</ul>';
+	echo '</ul></nav>';
 }

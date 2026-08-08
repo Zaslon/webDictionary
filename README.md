@@ -11,7 +11,8 @@
 | `dict.php` | 検索ページ。パラメータの解釈と組み立てのみを行う |
 | `example.php` | 例文の一覧ページ |
 | `chart.php` | 単語数推移のグラフページ |
-| `func.php` | 文字列処理、HKS順ソート、データ読み込み、キャッシュ |
+| `config.php` | サイト共通設定（サイト名・アクセス解析ID・コピーライト・ページ間メニュー） |
+| `func.php` | 設定読み込み、文字列処理、HKS順ソート、データ読み込み、キャッシュ |
 | `search.php` | 検索と接辞サジェスト |
 | `view.php` | 検索結果のHTML出力 |
 | `header.php` / `footer.php` | 全ページ共通のレイアウト |
@@ -19,7 +20,6 @@
 | `script.js` | 明暗（ライト／ダーク）の切り替え |
 | `dict.js` | イジェール文字表示の切り替え |
 | `wordchart.js` | 単語数推移のグラフの描画 |
-| `anal.php` | アクセス解析タグの差し込み口 |
 | `idyer.json` | 辞書データ（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)で管理） |
 | `affixTable.csv` | 接辞テーブル。[0]対象品詞、[1]形態、[2]説明、[3]特殊処理 |
 | `logger/dictLog.csv` | 単語数の記録。グラフの元データ |
@@ -28,6 +28,23 @@
 
 `Endrata` フォント（`*.woff` / `*.ttf`）は意図的にリポジトリに含めていないため、
 クローンした環境では「イジェール文字表示」は既定のフォントで表示される。
+
+## 共通設定（config.php）
+サイト名・zaslon.info本体のURL・アクセス解析ID・コピーライト表記・ページ間メニューは
+`config.php` に集約している。値は `func.php` の `dictConfig()` で読み込んで使い回す。
+zaslon-site本体の `common/config.php` / `site_config()` に対応するファイルで、
+本体と揃える必要がある値（`site_url`・`ga_id`・コピーライトの表記形式）は本体側と一致させること。
+
+ページ間メニュー（検索仕様・凡例・検索ページ・例文一覧・単語数推移・ホームへ戻る）は
+`func.php` の `buildPageMenu($currentPageKey)` が `config.php` の `pages` から自分自身の項目を
+除いて組み立てる。以前は `dict.php` / `chart.php` / `example.php` にそれぞれ同じ配列を
+書いていたため、リンクを直すのに3箇所触る必要があったが、今は `config.php` の1箇所で済む。
+
+## アクセス解析
+`header.php` が `config.php` の `ga_id` を使って zaslon.info 本体と同じGA4プロパティに計測タグを出す
+（本体の `common/header.php` / `ga_measurement_id()` と同じ仕組み）。
+`ga_exclude_hosts` に載っているホスト（`localhost` 等、手元のXAMPPでの確認用）では出力されない。
+`ga_id` を空にすれば全体で計測タグ自体を出さない。
 
 ## イジェール文字表示
 検索ページと例文一覧ページの「イジェール文字表示」は `dict.js` が担当する。
