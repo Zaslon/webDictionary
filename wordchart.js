@@ -88,7 +88,10 @@ function chartOptions() {
 			title: '日付',
 			format: 'YYYY/MM'
 		}, axis),
-		vAxis: Object.assign({title: '単語数'}, axis),
+		vAxis: Object.assign({
+			title: '単語数',
+			viewWindow: { min: 0 }
+		}, axis),
 		legend: 'none'
 	};
 }
