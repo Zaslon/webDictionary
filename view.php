@@ -25,7 +25,36 @@ function renderEntry(array $entry, $type, $mode, array $exampleIndex = array()){
 
 function renderWordForm(array $entry){
 	$form = $entry["entry"]["form"];
-	echo '<li class="wordForm"><span title="', h($form), '">', h($form), '</span></li>';
+	echo '<li class="wordForm"><span title="', h($form), '">', h($form), '</span>';
+	renderPronunciation($entry);
+	echo '</li>';
+}
+
+//辞書データに発音記号を持つのは綴りから導けない頭字語だけなので、
+//それ以外は見出し語を渡して空欄で置き、pronunciation.jsがsnoj規則から埋める
+function renderPronunciation(array $entry){
+	foreach ($entry["contents"] as $singleContent){
+		if ($singleContent["title"] !== PRONUNCIATION_TITLE){
+			continue;
+		}
+		$pronunciation = trim($singleContent["text"]);
+		if ($pronunciation !== ''){
+			echo '<span class="wordPronunciation">/', h($pronunciation), '/</span>';
+			return;
+		}
+	}
+	echo '<span class="wordPronunciation" data-form="', h($entry["entry"]["form"]), '"></span>';
+}
+
+//pronunciation.jsに渡す発音規則。辞書データのsnojをそのまま埋め込む
+//規則の中身に</script>があってもscript要素を閉じさせないよう、JSON_HEX_TAGで「<」を逃がす
+function renderPronunciationRules($rules){
+	if (!is_string($rules) || trim($rules) === ''){
+		return;
+	}
+	echo '<script type="application/json" id="snojRules">';
+	echo json_encode($rules, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+	echo '</script>';
 }
 
 //同じ品詞が続く間はひとつのリストにまとめる

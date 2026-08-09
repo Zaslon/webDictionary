@@ -402,6 +402,39 @@ renderEntry(makeEntry('mira', '名詞', array('水'), array(array('title' => '�
 $html = ob_get_clean();
 is_same('表示対象外の項目は要素ごと出さない', false, strpos($html, 'wordContents'));
 
+//発音記号
+ob_start();
+renderEntry(makeEntry('AVG', '名詞', array('水'), array(array('title' => '発音記号', 'text' => 'aːveg'))), 'both', 'prt');
+$html = ob_get_clean();
+is_same('辞書データの発音記号をそのまま出す', true, strpos($html, '<span class="wordPronunciation">/aːveg/</span>') !== false);
+is_same('辞書データに発音記号があればJSに任せない', false, strpos($html, 'data-form'));
+
+ob_start();
+renderEntry(makeEntry('mira', '名詞', array('水'), array(array('title' => '発音記号', 'text' => ''))), 'both', 'prt');
+$html = ob_get_clean();
+is_same('発音記号が空欄なら見出し語を渡して空で置く', true, strpos($html, '<span class="wordPronunciation" data-form="mira"></span>') !== false);
+
+ob_start();
+renderEntry(makeEntry('mira', '名詞', array('水')), 'both', 'prt');
+$html = ob_get_clean();
+is_same('発音記号の項目自体が無くても見出し語を渡す', true, strpos($html, '<span class="wordPronunciation" data-form="mira"></span>') !== false);
+
+ob_start();
+renderEntry(makeEntry('a"><script>', '名詞', array('水')), 'both', 'prt');
+$html = ob_get_clean();
+is_same('JSに渡す見出し語をエスケープする', false, strpos($html, '<script>'));
+
+ob_start();
+renderPronunciationRules('"a" -> /X/; # </script><script>alert(1)</script>');
+$html = ob_get_clean();
+is_same('発音規則から<script>を閉じさせない', false, strpos($html, '</script><script>'));
+is_same('発音規則をJSONとして埋め込む', '"a" -> /X/; # </script><script>alert(1)</script>',
+	json_decode(substr($html, strlen('<script type="application/json" id="snojRules">'), -strlen('</script>'))));
+
+ob_start();
+renderPronunciationRules(null);
+is_same('発音規則が無ければ要素ごと出さない', '', ob_get_clean());
+
 //ページ送り
 ob_start();
 renderNavigation(45, 2, array('a', 'b'), 'both', 'prt');

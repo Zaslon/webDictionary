@@ -1,7 +1,8 @@
 <?php
 //全ページ共通のヘッダ。読み込む前に以下の変数を設定できる。
 //  $pageMenu    : メニュー項目 array(ラベル => URL)。buildPageMenu()で組み立てる
-//  $pageScripts : <head>で読み込む追加スクリプトのURL
+//  $pageScripts : <head>で読み込む追加スクリプトのURL。描画前に効かせたいものだけ置く
+//  $pageDeferredScripts : deferで読み込む追加スクリプトのURL。描画を待たせたくないもの
 //ページ固有の見出し要素を続けて置けるよう、<header>は開いたまま返す。
 //読み込んだ側が</header>を閉じること。
 require_once __DIR__ . '/func.php';
@@ -9,6 +10,7 @@ require_once __DIR__ . '/func.php';
 $config = dictConfig();
 $pageMenu = isset($pageMenu) ? $pageMenu : array();
 $pageScripts = isset($pageScripts) ? $pageScripts : array();
+$pageDeferredScripts = isset($pageDeferredScripts) ? $pageDeferredScripts : array();
 ?>
 <!DOCTYPE html>
 <html lang="ja" dir="ltr">
@@ -41,6 +43,9 @@ $pageScripts = isset($pageScripts) ? $pageScripts : array();
 <script src="<?php echo h(assetUrl('script.js')); ?>"></script>
 <?php foreach ($pageScripts as $singleScript): ?>
 <script src="<?php echo h(assetUrl($singleScript)); ?>"></script>
+<?php endforeach; ?>
+<?php foreach ($pageDeferredScripts as $singleScript): ?>
+<script src="<?php echo h(assetUrl($singleScript)); ?>" defer></script>
 <?php endforeach; ?>
 <link rel="stylesheet" href="<?php echo h(assetUrl('dict.css')); ?>" />
 <link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48" />

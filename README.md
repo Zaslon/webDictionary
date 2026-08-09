@@ -19,6 +19,9 @@
 | `dict.css` | 全ページ共通のスタイル。色は zaslon.info 本体と同じ変数名で持つ |
 | `script.js` | 明暗（ライト／ダーク）の切り替え |
 | `dict.js` | イジェール文字表示の切り替え |
+| `pronunciation.js` | 発音記号の自動生成 |
+| `vendor/akrantiain.min.js` | akrantiain（第三者製）をブラウザ用にまとめたもの |
+| `vendor/LICENSE-*.txt` | 上にまとめた第三者製ソフトウェアのライセンス全文 |
 | `wordchart.js` | 単語数推移のグラフの描画 |
 | `idyer.json` | 辞書データ（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)で管理） |
 | `affixTable.csv` | 接辞テーブル。[0]対象品詞、[1]形態、[2]説明、[3]特殊処理 |
@@ -104,6 +107,49 @@ zaslon-site本体の `common/config.php` / `site_config()` に対応するファ
 見出し語の並び順は[辞書順について](https://zaslon.info/idyerin/%E8%BE%9E%E6%9B%B8%E9%A0%86%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/)の規則に従う。
 実装は `func.php` の `hksSortKey()` と `HKSCmpw()`、規則ごとのテストは `tests/run.php` にある。
 仕様書に載っている並び順の例も、そのままテストに入れてある。
+
+## 発音記号
+検索結果の見出し語の直後に `/miːla/` の形で併記する。値の決め方は次の通り。
+
+1. `idyer.json` の発音記号欄（`zpdicOnline.pronunciationTitle` の項目）に中身があれば、それをそのまま出す
+2. 無ければ、`idyer.json` の `snoj` にある[akrantiain](https://github.com/Ziphil/AkrantiainTypescript)の規則を
+   見出し語に適用して作る
+
+辞書データが発音記号を持つのは `AVG` → `aːveg` のような、綴りから機械的に導けない頭字語だけなので、
+それ以外は綴りから作る。発音記号欄が空文字列の単語も「無し」として扱う。
+
+akrantiainの実装はTypeScript版しか無く、規則も辞書データの中にあるため、変換はブラウザ側で行う。
+`vendor/akrantiain.min.js` が処理系、`pronunciation.js` が組み込み側で、`dict.php` がこの2つを
+`defer` で読み込む。規則は `view.php` の `renderPronunciationRules()` が
+`<script type="application/json" id="snojRules">` としてページに埋め込む。
+
+`view.php` は、辞書データに発音記号を持つ単語には値をそのまま出し、持たない単語には
+`<span class="wordPronunciation" data-form="見出し語"></span>` を置く。
+`pronunciation.js` はこの `data-form` を持つ要素だけを埋めるので、辞書データ側の値が上書きされることはない。
+規則の読み込みや変換に失敗した単語は、発音記号を空欄のままにする。
+
+### vendor/akrantiain.min.js
+[npmのakrantiain](https://www.npmjs.com/package/akrantiain)をesbuildでまとめたもので、手で編集しない。
+作り直すときは次のようにする。
+
+```
+npm install akrantiain@1.2.1
+npx esbuild node_modules/akrantiain/dist/index.js --bundle --format=iife \
+  --global-name=AkrantiainLib --minify --target=es2017 --legal-comments=eof \
+  --outfile=vendor/akrantiain.min.js
+```
+
+同梱されるのは akrantiain 1.2.1 と、その依存の parsimmon 1.18.1 の2つ
+（akrantiain のもうひとつの依存 codemirror はエディタ用の色付け定義でしか使われないため取り込まれない）。
+どちらもMITライセンスで、**著作権表示と許諾条項の全文を複製物に含めること**が条件なので、
+バンドルし直したら次の2つを必ずやり直すこと。**片方だけではライセンス条件を満たさない。**
+
+- `npm install` で入った各パッケージのライセンス全文を `vendor/LICENSE-akrantiain.txt` と
+  `vendor/LICENSE-parsimmon.txt` に写す
+- 同じ全文を `vendor/akrantiain.min.js` の先頭コメントにも入れる
+  （このファイル単体で配信されるため、ファイル自身が全文を持っている必要がある）
+
+バージョンを上げたときは、依存が増えていないかを確かめ、増えていれば同じように全文を足す。
 
 ## 例文
 `idyer.json` の `examples` を読んで表示する（閲覧のみで、編集はしない）。

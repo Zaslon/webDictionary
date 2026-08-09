@@ -49,6 +49,8 @@ $firstIndex = WORDS_PER_PAGE * ($page - 1);
 
 $pageMenu = buildPageMenu('dict');
 $pageScripts = array('dict.js');//表示前にフォントを確定させるため、head内で読み込む
+//発音記号の生成。検索結果より後で構わないため、描画を止めずに読み込む
+$pageDeferredScripts = array('vendor/akrantiain.min.js', 'pronunciation.js');
 require __DIR__ . '/header.php';
 ?>
 		<div class="dictVer">
@@ -89,6 +91,9 @@ require __DIR__ . '/header.php';
 
 		foreach (array_slice($hitKeys, $firstIndex, WORDS_PER_PAGE) as $entryKey){
 			renderEntry($words[$entryKey], $type, $mode, $exampleIndex);
+		}
+		if ($hitKeys){
+			renderPronunciationRules(isset($json['snoj']) ? $json['snoj'] : null);
 		}
 	}
 

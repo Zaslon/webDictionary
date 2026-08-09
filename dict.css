@@ -446,6 +446,16 @@ li.wordForm {
 	font-weight: bold;
 }
 
+/* 見出し語に併記する発音記号。イジェール文字表示のときもIPAはEndrataに無いため、
+   .idyer-font .wordForm の書体指定を本文の書体で打ち消す */
+span.wordPronunciation {
+	margin-left: 0.4em;
+	font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+	font-size: 62%;
+	font-weight: normal;
+	color: var(--text-soft);
+}
+
 /* 例文 */
 
 div.example {

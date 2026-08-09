@@ -7,6 +7,9 @@ date_default_timezone_set('Asia/Tokyo');
 const WORDS_PER_PAGE = 20;
 const EXAMPLES_PER_PAGE = 20;
 
+//辞書データ側の発音記号欄の見出し（idyer.jsonのzpdicOnline.pronunciationTitle）
+const PRONUNCIATION_TITLE = '発音記号';
+
 //////////////////////////////////////////////////
 //出力ヘルパ
 //////////////////////////////////////////////////
