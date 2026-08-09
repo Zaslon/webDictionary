@@ -9,7 +9,7 @@ $dictionaryFile = __DIR__ . '/idyer.json';
 $affixTableFile = __DIR__ . '/affixTable.csv';
 
 $json = loadDictionary($dictionaryFile);
-$affixTable = loadAffixTable($affixTableFile);//[0]対象品詞、[1]形態、[2]説明のcsv、[3]ある場合は特殊処理の記載
+$affixTable = loadAffixTable($affixTableFile);
 $words = $json["words"];
 $exampleIndex = makeExampleIndex($json);
 
@@ -23,7 +23,7 @@ $id = getParam("id");
 $id = ($id !== null && preg_match("/^[0-9]+$/", $id)) ? (int)$id : null;
 
 $page = getParam("page");
-$page = ($page !== null && preg_match("/^[0-9]+$/", $page)) ? max(1, (int)$page) : 1;//ページIDに数字以外を入力された場合、強制的に1とする。
+$page = ($page !== null && preg_match("/^[0-9]+$/", $page)) ? max(1, (int)$page) : 1;
 
 //訳語検索と前方一致はフォームから外しているため、次の検索では既定のラジオを選択させる
 $checkedType = ($type === "trans") ? "both" : $type;
@@ -35,7 +35,7 @@ $suggestions = array();
 $hitKeys = array();
 if ($keyWords){
 	if ($id !== null){
-		//全てに優先してid指定時の表示を行う。見つからない場合は0件とする
+		//id指定は関連語や例文からの1語リンクなので、検索条件より優先する
 		$entryKey = findEntryKeyById($words, $id);
 		$hitKeys = ($entryKey === null) ? array() : array($entryKey);
 	}else{
@@ -75,7 +75,7 @@ require __DIR__ . '/header.php';
 	<main id="main">
 	<?php
 	if (!$keyWords){
-		echo '<p>検索ワードを入力してください。</p>';//検索語が空なら警告を表示して終了する
+		echo '<p>検索ワードを入力してください。</p>';
 	}else{
 		renderSuggestions($suggestions, $type, $mode);
 

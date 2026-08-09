@@ -37,8 +37,7 @@ zaslon-site本体の `common/config.php` / `site_config()` に対応するファ
 
 ページ間メニュー（検索仕様・凡例・検索ページ・例文一覧・単語数推移・ホームへ戻る）は
 `func.php` の `buildPageMenu($currentPageKey)` が `config.php` の `pages` から自分自身の項目を
-除いて組み立てる。以前は `dict.php` / `chart.php` / `example.php` にそれぞれ同じ配列を
-書いていたため、リンクを直すのに3箇所触る必要があったが、今は `config.php` の1箇所で済む。
+除いて組み立てる。
 
 ## アクセス解析
 `header.php` が `config.php` の `ga_id` を使って zaslon.info 本体と同じGA4プロパティに計測タグを出す

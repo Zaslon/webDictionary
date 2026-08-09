@@ -6,7 +6,6 @@ require_once __DIR__ . '/../view.php';
 $passed = 0;
 $failed = 0;
 
-//期待値と実際の値を比べる
 function is_same($label, $expected, $actual){
 	global $passed, $failed;
 	if ($expected === $actual){
@@ -19,7 +18,6 @@ function is_same($label, $expected, $actual){
 	echo "  実際: ", json_encode($actual, JSON_UNESCAPED_UNICODE), "\n";
 }
 
-//テスト用の見出し語を組み立てる
 function makeEntry($form, $title, array $forms, array $contents = array(), $id = 1){
 	return array(
 		'entry'        => array('id' => $id, 'form' => $form),
@@ -153,7 +151,6 @@ is_same('存在しないidはnullを返す', null, findEntryKeyById($words, 999)
 //例文
 //////////////////////////////////////////////////
 
-//テスト用の辞書データを組み立てる
 $exampleJson = array(
 	'words' => array(
 		makeEntry('zere', '動詞', array('食べる'), array(), 10),
@@ -204,7 +201,6 @@ is_same('例文の使用単語をリンクにする', true, strpos($html, '&amp;
 is_same('表示中の単語自身は使用単語に並べない', false, strpos($html, '&amp;id=12">mira</a>'));
 is_same('辞書に無い単語IDは並べない', false, strpos($html, 'id=999'));
 
-//例文は見出し語の欄の一番下に置く
 $relatedEntry = makeEntry('mira', '名詞', array('水'), array(array('title' => '語法', 'text' => '解説')), 12);
 $relatedEntry['relations'] = array(array('title' => '参照', 'entry' => array('id' => 10, 'form' => 'zere')));
 ob_start();
@@ -212,7 +208,6 @@ renderEntry($relatedEntry, 'both', 'prt', $exampleIndex);
 $html = ob_get_clean();
 is_same('例文は関連語より下に出す', true, strpos($html, 'wordRelation') < strpos($html, 'wordExamples'));
 
-//例文を持たない単語では欄ごと出さない
 ob_start();
 renderEntry(makeEntry('kere', '動詞', array('する'), array(), 11), 'both', 'prt', $exampleIndex);
 $html = ob_get_clean();
@@ -226,7 +221,6 @@ is_same('例文一覧では例文にid属性を振る', true, strpos($html, 'id=
 is_same('例文一覧では全ての使用単語を並べる', true, strpos($html, '&amp;id=12">mira</a>') !== false);
 is_same('出典を出す', true, strpos($html, 'zpdicDaily #3') !== false);
 
-//同じ単語を複数回使う例文を二重に並べない
 is_same('同じ単語を複数回使っても例文は1回だけ紐づく', 2, count($exampleIndex['byWordId'][10]));
 
 //辞書データはエスケープして出力する
@@ -241,7 +235,6 @@ is_same('例文の訳文の改行を<br />にする', true, strpos($html, '一�
 is_same('例文のタグをエスケープする', true, strpos($html, 'a&amp;b') !== false);
 is_same('出典が無ければ出さない', false, strpos($html, 'exampleOffer'));
 
-//アンカー名に数字以外を通さない
 is_same('アンカー名は数字だけにする', 'example-1', exampleAnchor('1"><script>'));
 
 //例文一覧のページ送り
@@ -309,7 +302,6 @@ is_same('動詞の接尾辞は語末のeを外した語幹に付く', true, in_a
 //仕様：https://zaslon.info/idyerin/辞書順について/
 //////////////////////////////////////////////////
 
-//見出し語の配列を辞書順に並べ替える
 function hksSorted(array $forms){
 	$entries = array();
 	foreach ($forms as $index => $form){
@@ -400,13 +392,11 @@ $html = ob_get_clean();
 is_same('見出し語をエスケープする', false, strpos($html, '<script>'));
 is_same('訳語をエスケープする', true, strpos($html, 'a&amp;b') !== false);
 
-//用例の改行を保つ
 ob_start();
 renderEntry(makeEntry('mira', '名詞', array('水'), array(array('title' => '用例', 'text' => "一行目\n二行目"))), 'both', 'prt');
 $html = ob_get_clean();
 is_same('用例の改行を<br />にする', true, strpos($html, '一行目<br />') !== false);
 
-//表示対象外の項目で空の要素を作らない
 ob_start();
 renderEntry(makeEntry('mira', '名詞', array('水'), array(array('title' => '発音記号', 'text' => 'mira'))), 'both', 'prt');
 $html = ob_get_clean();

@@ -2,7 +2,6 @@
 //検索処理
 require_once __DIR__ . '/func.php';
 
-//一致判定に使う関数を指定する
 function setFunc($mode){
 	switch ($mode){
 		case "prt":
@@ -16,13 +15,11 @@ function setFunc($mode){
 	}
 }
 
-//検索処理
 //stripos は先頭一致で0を返すため、必ず !== false で判定して真偽値に揃える
 //$exampleText はこの見出し語を使う例文をつないだもの。全文検索のときだけ使う
 function isHit($singleEntry, $needle, $type, $mode, $exampleText = ''){
 	$func = setFunc($mode);
 
-	//見出し語を対象にする（訳語検索のみ対象外）
 	if ($type !== "trans" && $func($singleEntry["entry"]["form"], $needle) !== false){
 		return true;
 	}
@@ -31,7 +28,7 @@ function isHit($singleEntry, $needle, $type, $mode, $exampleText = ''){
 	}
 
 	foreach ($singleEntry["translations"] as $singleTranslation){
-		//全文検索のときは見出しと記号も含めて検索する
+		//全文検索のときは品詞名も対象にする
 		if ($type === "all" && $func($singleTranslation["title"], $needle) !== false){
 			return true;
 		}
@@ -58,32 +55,32 @@ function isHit($singleEntry, $needle, $type, $mode, $exampleText = ''){
 	return false;
 }
 
-//検索語を整形して、スペース区切りの配列に分解する
+//スペース区切りの検索語に分解する。空白の揺れは区切りの判定を狂わせるため先に均す
 function parseKeywords($keyBox, $type, $mode){
 	if ($keyBox === null || $keyBox === ''){
 		return array();
 	}
 
-	$keyWord = preg_replace('/[　]/u', ' ', $keyBox);	//全角スペースを半角スペースに変換
-	$keyWord = preg_replace('/\s\s+/u', ' ', $keyWord);	//スペース2つ以上であれば，1つに削減
-	$keyWord = preg_replace('/(^[\s]|[\s]$)/u', '', $keyWord);	//先頭と末尾のスペースを削除
+	$keyWord = preg_replace('/[　]/u', ' ', $keyBox);
+	$keyWord = preg_replace('/\s\s+/u', ' ', $keyWord);
+	$keyWord = preg_replace('/(^[\s]|[\s]$)/u', '', $keyWord);
 	if (!keepsSymbols($type, $mode)){
 		$keyWord = deleteNonIdyerinCharacters($keyWord);
 	}
 
-	$keyWords = str_getcsv($keyWord, ' ', "\"");	//スペースで区切られた検索語を分離して配列に格納。ただしダブルコーテーションの囲いをより優先する
+	//ダブルコーテーションで囲めば空白を含む語をひとつとして扱えるよう、CSVとして分解する
+	$keyWords = str_getcsv($keyWord, ' ', "\"");
 	if ($mode === 'perf'){
-		$keyWords = array(implode(" ", $keyWords));	//完全一致検索の場合は一つに戻す
+		$keyWords = array(implode(" ", $keyWords));//完全一致では空白ごと一致させる
 	}
 
-	//空要素を取り除く
 	$keyWords = array_values(array_filter($keyWords, function ($keyWord){
 		return $keyWord !== null && $keyWord !== '';
 	}));
 	return $keyWords;
 }
 
-//全文検索の場合、完全一致検索の場合は記号を削除しない
+//全文検索と完全一致検索では記号そのものを検索したいため、検索語からも見出し語からも記号を落とさない
 function keepsSymbols($type, $mode){
 	return $type === 'all' || $mode === 'perf';
 }
@@ -106,7 +103,6 @@ function searchEntries(array $words, array $keyWords, $type, $mode, $includeVoic
 		}
 	}
 
-	//キーワードの数だけ結果一時保存用の配列を用意
 	$hitsPerKeyword = array_fill(0, count($keyWords), array());
 	foreach ($words as $entryKey => $singleEntry){
 		$entryId = $singleEntry["entry"]["id"];
@@ -115,7 +111,6 @@ function searchEntries(array $words, array $keyWords, $type, $mode, $includeVoic
 		}
 		$exampleText = isset($exampleTexts[$entryId]) ? $exampleTexts[$entryId] : '';
 		foreach ($keyWords as $index => $singleKey){
-			//通常ヒット OR (連濁検索 AND 連濁ヒット)
 			if (isHit($singleEntry, $singleKey, $type, $mode, $exampleText)
 				|| ($includeVoicing && isHit($singleEntry, $voicedKeyWords[$index], $type, $mode, $exampleText))){
 				$hitsPerKeyword[$index][] = $entryKey;
@@ -123,15 +118,13 @@ function searchEntries(array $words, array $keyWords, $type, $mode, $includeVoic
 		}
 	}
 
-	//全ての検索語に一致したものだけを残す
 	$hitKeys = array_shift($hitsPerKeyword);
 	foreach ($hitsPerKeyword as $singleHits){
 		$hitKeys = array_intersect($hitKeys, $singleHits);
 	}
-	return array_values($hitKeys);//歯抜けを詰めて再番号付け
+	return array_values($hitKeys);//array_intersectが残す歯抜けの添字を、ページ送りが使えるよう詰め直す
 }
 
-//単語IDから見出し語のキーを探す。見つからない場合はnull
 function findEntryKeyById(array $words, $id){
 	foreach ($words as $entryKey => $singleEntry){
 		if ($singleEntry["entry"]["id"] === $id){
@@ -141,7 +134,6 @@ function findEntryKeyById(array $words, $id){
 	return null;
 }
 
-//接辞を付ける前の語幹を求める
 //返り値：array('suffix' => 接尾辞用の語幹, 'prefix' => 接頭辞用の語幹の配列)
 function derivationStems($singleEntry){
 	$wordForm = $singleEntry["entry"]["form"];
@@ -168,7 +160,6 @@ function derivationStems($singleEntry){
 	return array('suffix' => $stemForSuffix, 'prefix' => $stemsForPrefix);
 }
 
-//単語に接辞を付けた派生形の一覧を返す
 //返り値：array(array(対象品詞, 派生形, 説明), ...)
 function makeDerivationTable($singleEntry, array $affixTable){
 	$wordForm = $singleEntry["entry"]["form"];
@@ -179,7 +170,6 @@ function makeDerivationTable($singleEntry, array $affixTable){
 	$startsWithVowel = startsWithVowel($wordForm);
 	$endsWithVowel = endsWithVowel($wordForm);
 
-	//辞書のデータに対して接辞テーブルとの該当を調べる
 	$returnTable = array();
 	foreach ($affixTable as $singleAffix){
 		$texts = array();
@@ -230,7 +220,6 @@ function canDerive($keyWord, array $stems){
 	return false;
 }
 
-//検索語が既存語の派生形と一致する場合に、その元の語を返す
 //返り値：array(array('form' => 見出し語, 'id' => 単語ID, 'description' => 説明), ...)
 function findDerivationSuggestions(array $words, array $affixTable, $keyWord){
 	if ($keyWord === null || $keyWord === ''){

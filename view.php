@@ -2,7 +2,6 @@
 //検索結果の表示
 require_once __DIR__ . '/func.php';
 
-//接辞サジェストを表示する
 function renderSuggestions(array $suggestions, $type, $mode){
 	foreach ($suggestions as $singleSuggestion){
 		echo '<p class="suggest">もしかして、';
@@ -13,7 +12,6 @@ function renderSuggestions(array $suggestions, $type, $mode){
 	}
 }
 
-//見出し語1件分を表示する
 //$exampleIndex は makeExampleIndex() の返り値。渡すとその単語を使う例文も並べる
 function renderEntry(array $entry, $type, $mode, array $exampleIndex = array()){
 	echo '<ul class="wordEntry">';
@@ -25,13 +23,12 @@ function renderEntry(array $entry, $type, $mode, array $exampleIndex = array()){
 	echo '</ul>';
 }
 
-//見出し語
 function renderWordForm(array $entry){
 	$form = $entry["entry"]["form"];
 	echo '<li class="wordForm"><span title="', h($form), '">', h($form), '</span></li>';
 }
 
-//訳語。同じ品詞が続く間はひとつのリストにまとめる
+//同じ品詞が続く間はひとつのリストにまとめる
 function renderTranslations(array $entry){
 	if (!$entry["translations"]){
 		return;
@@ -53,7 +50,6 @@ function renderTranslations(array $entry){
 	echo '</li>';
 }
 
-//語法・用例などの解説欄
 function renderContents(array $entry){
 	foreach ($entry["contents"] as $singleContent){
 		$title = $singleContent["title"];
@@ -65,14 +61,14 @@ function renderContents(array $entry){
 		}elseif ($title === "文化" || $title === "語法" || $title === "用例"){
 			echo '<li class="wordContents">';
 			echo '<span class="wordContentTitle">', h($title), '</span><br />';
-			echo nl2br(h($singleContent["text"]));//原文の改行を保つ
+			echo nl2br(h($singleContent["text"]));//辞書データ側で整形された改行に意味があるため保つ
 			echo '</li>';
 		}
 		//発音記号など、上記以外の項目は表示対象外
 	}
 }
 
-//語源欄。デリミタで区切りつつ、単語とみなせる部分を検索リンクにする
+//語源欄。デリミタで区切り、単語とみなせる部分だけを検索リンクにする
 function renderEtymology($text){
 	$parts = preg_split('/([:\/*>+|])/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 	$partsAmount = count($parts);
@@ -109,7 +105,7 @@ function renderEtymology($text){
 	}
 }
 
-//見出し語に紐づく例文。例文を持たない語では欄ごと出さない
+//例文を持たない語では欄ごと出さない
 function renderExamples(array $entry, array $exampleIndex, $type, $mode){
 	$wordId = $entry["entry"]["id"];
 	if (!isset($exampleIndex['byWordId'][$wordId])){
@@ -118,13 +114,12 @@ function renderExamples(array $entry, array $exampleIndex, $type, $mode){
 	echo '<li class="wordExamples">';
 	echo '<span class="wordContentTitle">例文</span><br />';
 	foreach ($exampleIndex['byWordId'][$wordId] as $exampleKey){
-		//表示中の単語自身は「使用単語」に並べない
 		renderExample($exampleIndex['examples'][$exampleKey], $exampleIndex, $type, $mode, $wordId);
 	}
 	echo '</li>';
 }
 
-//例文1件分を表示する。単語欄と例文一覧ページの両方から使う
+//単語欄と例文一覧ページの両方から使う
 //$currentWordId は表示中の見出し語のID。例文一覧ページのようにどの単語の欄でもない場合はnull
 //ひとつの例文は複数の単語の欄に出るため、id属性は重複しない例文一覧ページ側にだけ振る
 function renderExample(array $example, array $exampleIndex, $type, $mode, $currentWordId = null){
@@ -132,12 +127,12 @@ function renderExample(array $example, array $exampleIndex, $type, $mode, $curre
 	echo '<div class="example"', $anchor, '>';
 
 	echo '<div class="exampleSentence">';
-	echo '<span class="exampleText">', h($example['sentence']), '</span>';//イジェール文字表示の切り替え対象
+	echo '<span class="exampleText">', h($example['sentence']), '</span>';//exampleTextはdict.jsがイジェール文字に切り替える対象
 	echo '<span class="wordId">', makeExampleLink($example['id']), '#', h($example['id']), '</a></span>';
 	echo '</div>';
 
 	if ($example['translation'] !== ''){
-		echo '<div class="exampleTranslation">', nl2br(h($example['translation'])), '</div>';//原文の改行を保つ
+		echo '<div class="exampleTranslation">', nl2br(h($example['translation'])), '</div>';//辞書データ側の改行に意味があるため保つ
 	}
 	if ($example['supplement'] !== ''){
 		echo '<div class="exampleSupplement">', nl2br(h($example['supplement'])), '</div>';
@@ -155,7 +150,7 @@ function renderExample(array $example, array $exampleIndex, $type, $mode, $curre
 	echo '</div>';
 }
 
-//例文が使っている単語。辞書に無いIDと、表示中の単語自身は並べない
+//辞書に無いIDと、表示中の単語自身は並べない
 function renderExampleWords(array $example, array $exampleIndex, $type, $mode, $currentWordId = null){
 	$formById = isset($exampleIndex['formById']) ? $exampleIndex['formById'] : array();
 	$links = array();
@@ -177,7 +172,6 @@ function renderExampleWords(array $example, array $exampleIndex, $type, $mode, $
 	echo '<div class="exampleWords"><span class="exampleLabel">使用単語</span>', implode('、', $links), '</div>';
 }
 
-//例文の出典
 function renderExampleOffer(array $example){
 	if (!isset($example['offer']['catalog'], $example['offer']['number'])){
 		return;
@@ -187,7 +181,6 @@ function renderExampleOffer(array $example){
 	echo '</div>';
 }
 
-//例文一覧のページ送り
 function renderExampleNavigation($exampleAmount, $page){
 	echo '<nav aria-label="ページ送り"><ul class="navigation">';
 	if ($exampleAmount > EXAMPLES_PER_PAGE){
@@ -203,7 +196,7 @@ function renderExampleNavigation($exampleAmount, $page){
 	echo '</ul></nav>';
 }
 
-//関連語。同じ見出しの語はまとめて読点で並べる
+//同じ見出しの関連語はまとめて読点で並べる
 function renderRelations(array $entry, $type, $mode){
 	$shownTitles = array();
 	$isOpen = false;
@@ -230,7 +223,6 @@ function renderRelations(array $entry, $type, $mode){
 	}
 }
 
-//ページ送り
 function renderNavigation($hitAmount, $page, array $keyWords, $type, $mode){
 	echo '<nav aria-label="ページ送り"><ul class="navigation">';
 	if ($hitAmount > WORDS_PER_PAGE){

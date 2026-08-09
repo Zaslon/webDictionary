@@ -1,12 +1,13 @@
 <?php
 	// 単語数を記録するスクリプト。cronからCLIで定期実行する。
 	//   php logger/idyer_logger.php
-	// 前回の記録から単語数が変わっていれば dictLog.csv に1行追記する。
 
 	// Web経由では実行させない。
 	// dictLog.csv はグラフがfetchで読むため logger/ を公開しておく必要があり、
 	// このスクリプトも公開ディレクトリに置かれてしまうので、ここで弾く。
-	if (PHP_SAPI !== 'cli') {
+	// cronがCGI版バイナリでPHPを起動する環境があり PHP_SAPI だけでは判定できないため、
+	// HTTPリクエスト由来の変数の有無で見る。
+	if (PHP_SAPI !== 'cli' && (isset($_SERVER['REQUEST_METHOD']) || isset($_SERVER['REMOTE_ADDR']))) {
 		http_response_code(403);
 		exit;
 	}
@@ -23,13 +24,11 @@
 	}
 
 	function csv_read($fname){
-		// ファイルの中身を配列で取得.
 		$csv = file($fname);
 
-		// ヘッダー削除
+		// 1行目は見出し行
 		$csvBody = array_splice($csv, 1);
 
-		// 各行を配列に直す
 		$arr = array();
 		foreach ($csvBody as $row => $rowContent) {
 			$rowArray = explode(',', $rowContent);
@@ -40,9 +39,7 @@
 
 	//更新があれば単語数, なければfalse を返す。
 	function check_change($dictionaryFile, $logFile){
-		//辞書読み込み
 		$dics = json_read($dictionaryFile);
-		//ログ読み込み
 		$logs = csv_read($logFile);
 		$i = array_key_last($logs);
 
@@ -55,29 +52,35 @@
 		return false;
 	}
 
-	//書き込んだ配列を返す（Y-m-d, 単語数）
+	//書き込んだ行（Y-m-d, 単語数）を返す
 	function idyer_logger($logFile, $wordCount){
 		$arr = array(date("Y-m-d"), $wordCount);
 		$fp = fopen($logFile, "a");
-		fputcsv($fp, $arr); //追記で書き込む
+		fputcsv($fp, $arr);
 		fclose($fp);
 		return $arr;
 	}
 
 	// ---- 実行部 ----
 
+	// STDERR定数はCLI SAPIでしか定義されない。
+	function err($message){
+		$fp = fopen('php://stderr', 'w');
+		fwrite($fp, $message);
+		fclose($fp);
+	}
+
 	if (!is_readable($dictionaryFile)) {
-		fwrite(STDERR, "辞書ファイルが読めません: {$dictionaryFile}\n");
+		err("辞書ファイルが読めません: {$dictionaryFile}\n");
 		exit(1);
 	}
 	if (!is_writable($logFile)) {
-		fwrite(STDERR, "ログファイルに書き込めません: {$logFile}\n");
+		err("ログファイルに書き込めません: {$logFile}\n");
 		exit(1);
 	}
 
 	$wordCount = check_change($dictionaryFile, $logFile);
 	if ($wordCount === false) {
-		// 単語数に変化なし。何も書かずに終了する
 		exit(0);
 	}
 

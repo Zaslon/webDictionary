@@ -13,7 +13,7 @@ $examples = $exampleIndex['examples'];
 //////リクエストパラメータの取り出し//////
 $exampleAmount = count($examples);
 $page = getParam("page");
-$page = ($page !== null && preg_match("/^[0-9]+$/", $page)) ? max(1, (int)$page) : 1;//ページIDに数字以外を入力された場合、強制的に1とする。
+$page = ($page !== null && preg_match("/^[0-9]+$/", $page)) ? max(1, (int)$page) : 1;
 $page = min($page, max(1, (int)ceil($exampleAmount / EXAMPLES_PER_PAGE)));//存在しないページを指定された場合は最終ページに寄せる
 $firstIndex = EXAMPLES_PER_PAGE * ($page - 1);
 

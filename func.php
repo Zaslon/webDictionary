@@ -4,36 +4,29 @@
 
 date_default_timezone_set('Asia/Tokyo');
 
-//1ページあたりの表示単語数
 const WORDS_PER_PAGE = 20;
-
-//1ページあたりの表示例文数
 const EXAMPLES_PER_PAGE = 20;
 
 //////////////////////////////////////////////////
 //出力ヘルパ
 //////////////////////////////////////////////////
 
-//HTMLエスケープした文字列を返す
 function h($str){
 	return htmlspecialchars((string)$str, ENT_QUOTES, 'UTF-8');
 }
 
-//エスケープしてechoする関数
 function echo_h($str){
 	echo h($str);
 }
 
-//条件が真ならchecked属性を返す
 function checkedAttr($isChecked){
 	return $isChecked ? ' checked' : '';
 }
 
-//静的ファイルのURLを返す
 //更新してもブラウザが古いCSSやJSを使い続けないよう、更新時刻を付ける
 function assetUrl($path){
 	if (preg_match('#^(https?:)?//#u', $path)){
-		return $path;//外部のURLはそのまま返す
+		return $path;
 	}
 	$file = __DIR__ . '/' . $path;
 	return is_file($file) ? $path . '?v=' . filemtime($file) : $path;
@@ -41,10 +34,9 @@ function assetUrl($path){
 
 //////////////////////////////////////////////////
 //設定・全ページ共通の情報
-//zaslon-site本体のcommon/lib.phpにあるsite_config()相当。config.phpを読み込んで使い回す
+//zaslon-site本体のcommon/lib.phpにあるsite_config()相当
 //////////////////////////////////////////////////
 
-//config.phpの内容を返す
 function dictConfig(){
 	static $config = null;
 	if ($config === null){
@@ -53,9 +45,8 @@ function dictConfig(){
 	return $config;
 }
 
-//ページ間メニューを組み立てる
 //$currentPageKey : 今開いているページのキー（config.phpの'pages'参照）。該当項目は自分自身への
-//リンクになるため取り除く。どの項目にも該当しないページ（トップの検索ページ以外の想定外ページ等）はnullでよい
+//リンクになるため取り除く。どの項目にも該当しないページはnullでよい
 function buildPageMenu($currentPageKey){
 	$config = dictConfig();
 	$siteUrl = rtrim($config['site_url'], '/');
@@ -75,7 +66,6 @@ function buildPageMenu($currentPageKey){
 	return $menu;
 }
 
-//コピーライト表記（終了年は常に今年）
 function copyrightText(){
 	$config = dictConfig();
 	$start = (int)$config['copyright_start'];
@@ -84,8 +74,7 @@ function copyrightText(){
 	return '© ' . $years . ' ' . $config['copyright_holder'];
 }
 
-//計測タグに使うGA4測定ID。未設定のとき、およびga_exclude_hostsに載っている
-//ホスト（手元のXAMPP等）で開いているときは''を返し、タグを出力させない
+//手元のXAMPP等での表示確認をGA4に混ぜないため、ga_exclude_hostsのホストでは''を返してタグを出させない
 //zaslon-site本体のga_measurement_id()と同じロジック
 function gaMeasurementId(){
 	$config = dictConfig();
@@ -95,7 +84,7 @@ function gaMeasurementId(){
 	}
 	$host = strtolower(trim(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ''));
 	$host = preg_replace('/:\d+$/', '', $host);//ポート番号を除く
-	$host = trim($host, '[]');//IPv6の[::1]形式を裸にする
+	$host = trim($host, '[]');//ga_exclude_hostsには裸の::1で書くため、IPv6の[::1]形式から括弧を外す
 	foreach ($config['ga_exclude_hosts'] as $excludeHost){
 		if ($host === strtolower($excludeHost)){
 			return '';
@@ -108,32 +97,28 @@ function gaMeasurementId(){
 //リクエストパラメータ
 //////////////////////////////////////////////////
 
-//GETパラメータを取得する。未指定・空文字列の場合はnullを返す
+//未指定と空文字列を区別せずnullにまとめる
 function getParam($name){
 	return (isset($_GET[$name]) && $_GET[$name] !== '') ? $_GET[$name] : null;
 }
 
-//typeパラメータを既知の値に正規化する
+//URLから渡る値をそのまま使わないよう、既知の値以外は既定値に落とす
 function normalizeType($type){
 	return in_array($type, array('word', 'trans', 'both', 'all'), true) ? $type : 'both';
 }
 
-//modeパラメータを既知の値に正規化する
 function normalizeMode($mode){
 	return in_array($mode, array('prt', 'fwd', 'perf'), true) ? $mode : 'prt';
 }
 
-//イジェール文字表示が要求されているか
 function isIdfRequested(){
 	return getParam('Idf') !== null;
 }
 
-//連濁派生語を検索対象に含めるかどうか
 function isVoicingRequested(){
 	return getParam('voicing') !== null;
 }
 
-//検索リンクの開始タグを返す
 //パラメータは必ずURLエンコードし、属性値は必ず引用符で囲う
 function makeLink($word, $type, $mode, $page = 1, $id = false){
 	$params = array(
@@ -158,7 +143,6 @@ function makeLink($word, $type, $mode, $page = 1, $id = false){
 //文字列判定
 //////////////////////////////////////////////////
 
-//前方一致検索
 function startsWith($haystack, $needle){
 	if ($needle){
 		return mb_stripos($haystack, $needle, 0) === 0;
@@ -167,7 +151,6 @@ function startsWith($haystack, $needle){
 	}
 }
 
-//最後尾文字チェック
 function endsWith($haystack, $needle){
 	if ($needle){
 		return substr($haystack, -strlen($needle)) === $needle;
@@ -176,24 +159,22 @@ function endsWith($haystack, $needle){
 	}
 }
 
-//完全一致検索
+//完全一致でも大文字小文字は区別しない
 function perfectHit($haystack, $needle){
-	$haystack = mb_strtolower($haystack, 'UTF-8');//検索の便宜のため小文字にする
-	$needle = mb_strtolower($needle, 'UTF-8');//検索の便宜のため小文字にする
+	$haystack = mb_strtolower($haystack, 'UTF-8');
+	$needle = mb_strtolower($needle, 'UTF-8');
 	return $haystack === $needle;
 }
 
-//母音で始まるかをチェック
 function startsWithVowel($haystack){
 	return (bool)preg_match('/^[eaoiu]/u', $haystack);
 }
 
-//母音で終わるかチェック
 function endsWithVowel($haystack){
 	return (bool)preg_match('/[eaoiu]$/u', $haystack);
 }
 
-//アルファベットのみで構成されているかの判定
+//名前に反して、全角文字を含むかどうかの判定
 function isDoublebyte($string){
 	return strlen($string) !== mb_strlen($string);
 }
@@ -208,7 +189,7 @@ function deleteNonIdyerinCharacters($string){
 	return preg_replace('/[-\(\)\#]/u', '', $string);
 }
 
-//頭文字の連濁
+//頭文字の連濁。異なる頭子音が同じ形に合流するため、この変換を戻す関数は作れない
 //同じ語幹に何度も適用されるため結果を再利用する
 function initialVoicing($string){
 	static $cache = array();
@@ -220,8 +201,6 @@ function initialVoicing($string){
 	return $cache[$string] = preg_replace($pattern, $replacement, $string);
 }
 
-//頭文字の連濁を戻す。この関数は使えない。連濁時に合流することで一対一対応が崩れているため。
-
 //////////////////////////////////////////////////
 //辞書順ソート
 //仕様：https://zaslon.info/idyerin/辞書順について/
@@ -230,7 +209,6 @@ function initialVoicing($string){
 //字母順。先頭は空白文字
 const HKS_ALPHABET = " eaoiuhkstcnrmpfgzdbv0123456789/,";
 
-//見出し語から辞書順の比較に必要な情報を組み立てる
 //ソート中は同じ見出し語が何度も比較されるため結果を再利用する
 function hksSortKey($form){
 	static $cache = array();
@@ -340,12 +318,11 @@ function HKSCmpw($strA, $strB){
 //キャッシュ
 //////////////////////////////////////////////////
 
-//キャッシュディレクトリのパスを返す
 function cacheDir(){
 	return __DIR__ . '/cache';
 }
 
-//元ファイルの更新時刻とサイズから、キャッシュの有効性を判定する印を作る
+//更新時刻とサイズが変わったことをもってキャッシュを無効とする
 function cacheStamp(array $sources){
 	$stamp = array();
 	foreach ($sources as $source){
@@ -354,7 +331,7 @@ function cacheStamp(array $sources){
 	return implode('|', $stamp);
 }
 
-//元ファイルが更新されていなければキャッシュの内容を返す。利用できない場合はnull
+//キャッシュが壊れていても呼び出し元がその場で作り直せるよう、読めない場合はnullを返すだけにする
 function readCache($name, array $sources){
 	$file = cacheDir() . '/' . $name . '.cache';
 	if (!is_file($file)){
@@ -371,7 +348,7 @@ function readCache($name, array $sources){
 	return ($data['stamp'] === cacheStamp($sources)) ? $data['value'] : null;
 }
 
-//キャッシュを書き出す。失敗しても処理は続行できるため、エラーは無視する
+//書けなくてもソートし直せば動くため、失敗は握りつぶす
 function writeCache($name, $value, array $sources){
 	$dir = cacheDir();
 	if (!is_dir($dir) && !@mkdir($dir, 0777, true)){
@@ -392,7 +369,6 @@ function writeCache($name, $value, array $sources){
 //データ読み込み
 //////////////////////////////////////////////////
 
-//辞書データを辞書順にソートして読み込む
 //ソートは重いため結果を再利用するが、辞書データだけでなく比較関数を含むこのファイルも
 //無効化の対象にしないと、並び順の仕様を変えたときに古い順序が残ってしまう
 function loadDictionary($path){
@@ -416,7 +392,6 @@ function loadDictionary($path){
 	return $json;
 }
 
-//例文を引くための索引を組み立てる
 //辞書データ側では例文と単語がIDで結ばれているだけなので、表示にも検索にも使える形にここでまとめる
 //返り値：array(
 //  'examples'      => id順に並べた例文。任意項目は空で埋めてある
@@ -485,18 +460,16 @@ function makeExampleIndex(array $json){
 	return $index;
 }
 
-//例文へのリンクの開始タグを返す
 function makeExampleLink($exampleId){
 	return '<a href="example.php#' . h(exampleAnchor($exampleId)) . '">';
 }
 
-//例文1件を指すアンカー名を返す
+//IDは属性値に入るため、数字以外を通さない
 function exampleAnchor($exampleId){
 	return 'example-' . preg_replace('/[^0-9]/', '', (string)$exampleId);
 }
 
-//プログラムの更新日を返す
-//ファイルを分割しているため、最も新しいソースの更新時刻を採用する
+//ファイルを分割しているため、最も新しいソースの更新時刻をプログラムの更新日とする
 function programUpdatedAt(){
 	$files = array_merge(
 		glob(__DIR__ . '/*.php'),
@@ -510,7 +483,6 @@ function programUpdatedAt(){
 	return $newest;
 }
 
-//接辞テーブルを読み込む
 //派生形の生成で単語ごとに使い回すため、接辞側の加工はここで済ませておく
 //csvは[0]対象品詞、[1]形態、[2]説明、[3]ある場合は特殊処理の記載
 function loadAffixTable($path){
