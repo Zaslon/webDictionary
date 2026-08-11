@@ -98,40 +98,63 @@ function renderContents(array $entry){
 }
 
 //語源欄。デリミタで区切り、単語とみなせる部分だけを検索リンクにする
+//辞書データの凡例にある {造語者/言語略称:単語|意味} の書式に沿って読む。
+//イジェール文字に切り替えてよいのはイジェール語の綴りだけなので、
+//単語部分には直前に置かれた言語略称を持ち回って判定する
 function renderEtymology($text){
 	$parts = preg_split('/([:\/*>+|])/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 	$partsAmount = count($parts);
 	$isNextLink = true;
+	$language = '';       //空文字は略称なし。造語者がイジェール語の要素から作ったことを表す
+	$previousPart = '';
 	foreach ($parts as $index => $singlePart){
 		$isLink = $isNextLink;
 		$isNextLink = true;
+		$isWord = true;
 
 		//「.」を文字列に含むとき
 		if (stripos($singlePart, '.') !== false){
-			$isLink = false;
+			$isWord = false;
 		//文字列が日本語を含むとき
 		}elseif (isDoublebyte($singlePart)){
-			$isLink = false;
+			$isWord = false;
 		//文字列がデリミタで、次に影響を及ぼさないもののとき
 		}elseif (preg_match('/[:\/>+]/u', $singlePart) === 1){
-			$isLink = false;
+			$isWord = false;
+			//「:」の左が言語略称。「/」「>」「+」は要素の切れ目なので略称なしに戻す
+			$language = ($singlePart === ':') ? $previousPart : '';
 		//文字列がデリミタで、次に影響を及ぼすもののとき
 		}elseif (preg_match('/[*|]/u', $singlePart) === 1){
-			$isLink = false;
+			$isWord = false;
 			$isNextLink = false;
 		//右端以外のとき、ひとつ右を見る
 		}elseif ($index + 1 < $partsAmount){
 			if (preg_match('/[:\/]/u', $parts[$index + 1]) === 1){
-				$isLink = false;
+				$isWord = false;
 			}
 		}
+		$previousPart = $singlePart;
 
-		if ($isLink){
+		//「*」付きの廃用語はリンクにならないがイジェール語なので、書体だけは切り替える
+		$isIdyer = $isWord && isIdyerLanguage($language);
+		if ($isIdyer){
+			echo '<span class="etymologyWord">';
+		}
+		if ($isWord && $isLink){
 			echo makeLink($singlePart, 'both', 'fwd', 1), h($singlePart), '</a>';
 		}else{
 			echo h($singlePart);
 		}
+		if ($isIdyer){
+			echo '</span>';
+		}
 	}
+}
+
+//語源欄の言語略称のうち、イジェール語を指すもの。
+//i.a（宗教語）やi.s（セコーレ方言）のような方言・位相の略称も同じ文字を使う
+function isIdyerLanguage($language){
+	return ($language === '' || $language === 'i' || strpos($language, 'i.') === 0);
 }
 
 //例文を持たない語では欄ごと出さない

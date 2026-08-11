@@ -21,7 +21,8 @@
 | `dict.js` | イジェール文字表示の切り替え |
 | `pronunciation.js` | 発音記号の自動生成 |
 | `vendor/akrantiain.min.js` | akrantiain（第三者製）をブラウザ用にまとめたもの |
-| `vendor/LICENSE-*.txt` | 上にまとめた第三者製ソフトウェアのライセンス全文 |
+| `vendor/DoulosSIL-Regular.woff2` | 発音記号の書体（第三者製）。配布物をそのまま置く |
+| `vendor/LICENSE-*.txt` | 上記の第三者製ソフトウェア・フォントのライセンス全文 |
 | `wordchart.js` | 単語数推移のグラフの描画 |
 | `idyer.json` | 辞書データ（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)で管理） |
 | `affixTable.csv` | 接辞テーブル。[0]対象品詞、[1]形態、[2]説明、[3]特殊処理 |
@@ -80,7 +81,7 @@ zaslon-site本体の `common/config.php` / `site_config()` に対応するファ
 | 行間 | `1.85`（768px以下は `1.8`） | 一覧（`wordEntry` / `menu` / `navigation`）は本体の `.post-list` と同じ `1.6` に戻す |
 | サイト名（`h1`） | `Georgia,"Times New Roman",serif` | 大きさは本体（60px）に揃えず200%のまま。和文で長く、60pxだと折り返すため |
 
-イジェール文字の `Endrata` だけは辞書固有なので、上の指定より優先される。
+イジェール文字の `Endrata` と発音記号の `Doulos SIL` だけは辞書固有なので、上の指定より優先される。
 
 ### ダークモード
 切り替えは `script.js` が担当し、ヘッダ右上のボタン（`header.php`）で選ぶ。
@@ -150,6 +151,21 @@ npx esbuild node_modules/akrantiain/dist/index.js --bundle --format=iife \
   （このファイル単体で配信されるため、ファイル自身が全文を持っている必要がある）
 
 バージョンを上げたときは、依存が増えていないかを確かめ、増えていれば同じように全文を足す。
+
+### 書体（vendor/DoulosSIL-Regular.woff2）
+発音記号は `dict.css` の `span.wordPronunciation` で `Doulos SIL` にしてある。
+本文の書体はIPAの字を十分に持たないため、環境によって字が抜けたり別の書体で代替される。
+
+閲覧者の環境に無くても同じ見た目になるよう、
+[SIL公式配布](https://github.com/silnrsi/font-doulos/releases)の 7.000 の
+`web/DoulosSIL-Regular.woff2` を無改変で置き、`@font-face` で読む。
+`src` は `local()` を先に書いてあるので、端末に入っている環境では読み込まない。
+サブセット化はしていない（約310KB）。
+
+SIL Open Font License 1.1 で、**著作権表示とライセンス全文を複製物に含めること**が条件なので、
+差し替えるときは配布物の `OFL.txt` も `vendor/LICENSE-DoulosSIL.txt` に写し直すこと。
+同ライセンスは予約名（Reserved Font Name）の `Doulos` `SIL` を含む名前での改変版配布を禁じているため、
+フォント自体は加工せずそのまま置く。
 
 ## 例文
 `idyer.json` の `examples` を読んで表示する（閲覧のみで、編集はしない）。

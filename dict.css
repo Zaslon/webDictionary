@@ -26,9 +26,27 @@ Author URI: https://zaslon.info
 	url('Endrata-bold.ttf') format('truetype');
 }
 
-/* イジェール文字表示。dict.jsが<html>にクラスを付ける */
+/* 発音記号（IPA）用。端末に入っていればlocal()で拾い、無いときだけ落とす。
+   規則版のみで太字を持たないため、weightは400に限る（合成太字を避ける） */
+@font-face {
+	font-family: 'Doulos SIL';
+	src:
+	local('Doulos SIL'),
+	local('DoulosSIL'),
+	url('vendor/DoulosSIL-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* イジェール文字表示。dict.jsが<html>にクラスを付ける
+   関連語・使用単語は欄ごとではなくリンクだけを対象にする。
+   欄には見出し（span.wordRelation・span.exampleLabel）と区切りの読点が地の文として混ざるため */
 .idyer-font .wordForm,
-.idyer-font .exampleText {
+.idyer-font .exampleText,
+.idyer-font li.wordRelation a,
+.idyer-font div.exampleWords a,
+.idyer-font span.etymologyWord {
 	font-family: 'Endrata';
 }
 
@@ -447,11 +465,11 @@ li.wordForm {
 }
 
 /* 見出し語に併記する発音記号。イジェール文字表示のときもIPAはEndrataに無いため、
-   .idyer-font .wordForm の書体指定を本文の書体で打ち消す */
+   .idyer-font .wordForm の書体指定をここで打ち消す */
 span.wordPronunciation {
 	margin-left: 0.4em;
-	font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
-	font-size: 62%;
+	font-family:'Doulos SIL',"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+	font-size: 70%;
 	font-weight: normal;
 	color: var(--text-soft);
 }
