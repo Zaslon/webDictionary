@@ -96,6 +96,40 @@ function gaMeasurementId(){
 	return $id;
 }
 
+//今開いているページ（$pathを渡せばそのサイト内パス）の正規URL。site_urlが空なら''を返す
+//検索条件で内容が変わるページでも同じURLを指すよう、クエリは含めない
+//zaslon-site本体のcanonical_url()と同じロジック
+function canonicalUrl($path = null){
+	$config = dictConfig();
+	if (trim($config['site_url']) === ''){
+		return '';
+	}
+	if ($path === null){
+		$path = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/', PHP_URL_PATH);
+	}
+	return rtrim($config['site_url'], '/') . (($path !== null && $path !== '') ? $path : '/');
+}
+
+//サイト内パスの絶対URL。$pathを省略すると今開いているページ。
+//SNSのカード画像やog:urlのように、絶対URLでないと読まれない場所で使う。
+//site_url未設定でも空にならないよう、その場合は見ているホストから組み立てる
+//zaslon-site本体のabsolute_url()と同じロジック
+function absoluteUrl($path = null){
+	$url = canonicalUrl($path);
+	if ($url !== ''){
+		return $url;
+	}
+	$host = isset($_SERVER['HTTP_HOST']) ? (string)$_SERVER['HTTP_HOST'] : '';
+	if ($host === ''){
+		return '';
+	}
+	$scheme = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') ? 'https' : 'http';
+	if ($path === null){
+		$path = parse_url(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/', PHP_URL_PATH);
+	}
+	return $scheme . '://' . $host . (($path !== null && $path !== '') ? $path : '/');
+}
+
 //////////////////////////////////////////////////
 //リクエストパラメータ
 //////////////////////////////////////////////////

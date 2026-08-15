@@ -5,13 +5,14 @@
 このリポジトリはイジェール語のオンライン辞書システムを管理するものです。
 
 ## ファイル構成
+このオンライン辞書は`親ディレクトリ/dict/`内に置くことを想定している。
 
 | ファイル | 役割 |
 | --- | --- |
 | `dict.php` | 検索ページ。パラメータの解釈と組み立てのみを行う |
 | `example.php` | 例文の一覧ページ |
 | `chart.php` | 単語数推移のグラフページ |
-| `config.php` | サイト共通設定（サイト名・アクセス解析ID・コピーライト・ページ間メニュー） |
+| `config.php` | サイト共通設定（サイト名・説明文・サイトURL・カード画像・アクセス解析ID・コピーライト・ページ間メニュー） |
 | `func.php` | 設定読み込み、文字列処理、HKS順ソート、データ読み込み、キャッシュ |
 | `search.php` | 検索と接辞サジェスト |
 | `view.php` | 検索結果のHTML出力 |
@@ -29,25 +30,38 @@
 | `logger/dictLog.csv` | 単語数の記録。グラフの元データ |
 | `logger/idyer_logger.php` | 単語数を記録するスクリプト。cronから定期実行する |
 | `tests/run.php` | テスト |
+| `../favicon.ico` `../icon-512.png` `../apple-touch-icon.png` | サイトアイコン（親サイトに設置） |
 
 `Endrata` フォント（`*.woff` / `*.ttf`）は意図的にリポジトリに含めていないため、
 クローンした環境では「イジェール文字表示」は既定のフォントで表示される。
 
 ## 共通設定（config.php）
-サイト名・zaslon.info本体のURL・アクセス解析ID・コピーライト表記・ページ間メニューは
+サイト名・説明文・zaslon.info本体のURL・カード画像・アクセス解析ID・コピーライト表記・ページ間メニューは
 `config.php` に集約している。値は `func.php` の `dictConfig()` で読み込んで使い回す。
 zaslon-site本体の `common/config.php` / `site_config()` に対応するファイルで、
 本体と揃える必要がある値（`site_url`・`ga_id`・コピーライトの表記形式）は本体側と一致させること。
 
 ページ間メニュー（検索仕様・凡例・検索ページ・例文一覧・単語数推移・ホームへ戻る）は
-`func.php` の `buildPageMenu($currentPageKey)` が `config.php` の `pages` から自分自身の項目を
-除いて組み立てる。
+`func.php` の `buildPageMenu($currentPageKey)` が `config.php` の `pages` から自分自身の項目を除いて組み立てる。
 
 ## アクセス解析
 `header.php` が `config.php` の `ga_id` を使って zaslon.info 本体と同じGA4プロパティに計測タグを出す
 （本体の `common/header.php` / `ga_measurement_id()` と同じ仕組み）。
 `ga_exclude_hosts` に載っているホスト（`localhost` 等、手元のXAMPPでの確認用）では出力されない。
 `ga_id` を空にすれば全体で計測タグ自体を出さない。
+
+## SNSカード・正規URL（OGP）
+`header.php` が zaslon-site本体（`common/header.php`）と同じ形でOGPタグと `canonical` を出す。
+URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `site_url` と今開いているページのパスから組み立てるため、辞書のどのページを貼っても そのページのURLになる
+（検索条件でカードが変わらないよう、クエリは含めない）。
+カードは正方形の小さいカード（`summary`）で、画像は `config.php` の `og_image`。
+説明文は `site_tagline` で、`meta name="description"` と `og:description` の両方に出る。
+
+## アイコン
+ファビコン・アイコン・カード画像は、辞書側に持たず zaslon.info 本体のサイト直下（`/favicon.ico`・
+`/icon-512.png`・`/apple-touch-icon.png`）を共用する。同じドメインの `/dict/` に置く前提のため、
+`header.php` からはルートからの絶対パスで指す。
+辞書だけを別の場所（`localhost/webDictionary/` 等）で開くとアイコンは表示されないが、表示内容には影響しない。
 
 ## イジェール文字表示
 検索ページと例文一覧ページの「イジェール文字表示」は `dict.js` が担当する。

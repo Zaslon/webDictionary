@@ -17,14 +17,33 @@ $pageDeferredScripts = isset($pageDeferredScripts) ? $pageDeferredScripts : arra
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
-<meta name="description" content="イジェール語オンライン辞書" />
+<meta name="description" content="<?php echo h($config['site_tagline']); ?>" />
 <meta name="keywords" content="人工言語,辞書" />
+<?php $canonicalUrl = canonicalUrl(); if ($canonicalUrl !== ''): ?>
+<link rel="canonical" href="<?php echo h($canonicalUrl); ?>" />
+<?php endif; ?>
+<?php
+//X・Facebook等に貼ったときのカード。zaslon-site本体（common/header.php）と同じ作りで、
+//画像はサイトのアイコンを使い、正方形の小さいカード（summary）で出す。横長の大きいカード
+//（summary_large_image）は2:1の画像が要るので、正方形のicon-512.pngでは左右が切られてしまう。
+//画像・URLは絶対URLでないと読まれないのでabsoluteUrl()を通す。
+$ogUrl = absoluteUrl();
+$ogImage = absoluteUrl($config['og_image']);
+?>
 <meta property="og:type" content="website" />
-<meta property="og:title" content="<?php echo h($config['site_title']); ?>" />
-<meta property="og:description" content="イジェール語 オンライン辞書" />
-<meta property="og:url" content="https://zaslon.info/dict/dict.php" />
 <meta property="og:site_name" content="<?php echo h($config['site_title']); ?>" />
-<meta property="og:image" content="https://zaslon.info/wordpress/wp-content/uploads/2020/08/cropped-ZaslonI-1.png" />
+<meta property="og:title" content="<?php echo h($config['site_title']); ?>" />
+<meta property="og:description" content="<?php echo h($config['site_tagline']); ?>" />
+<?php if ($ogUrl !== ''): ?>
+<meta property="og:url" content="<?php echo h($ogUrl); ?>" />
+<?php endif; ?>
+<?php if ($ogImage !== ''): ?>
+<meta property="og:image" content="<?php echo h($ogImage); ?>" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="512" />
+<meta property="og:image:height" content="512" />
+<meta property="og:image:alt" content="<?php echo h($config['site_title']); ?>" />
+<?php endif; ?>
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:site" content="@Zaslon" />
 <?php //スマホのブラウザ枠の色。今の明暗に合わせてscript.jsが書き換える ?>
@@ -48,9 +67,10 @@ $pageDeferredScripts = isset($pageDeferredScripts) ? $pageDeferredScripts : arra
 <script src="<?php echo h(assetUrl($singleScript)); ?>" defer></script>
 <?php endforeach; ?>
 <link rel="stylesheet" href="<?php echo h(assetUrl('dict.css')); ?>" />
-<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48" />
-<link rel="icon" href="icon-512.png" type="image/png" sizes="512x512" />
-<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<?php //アイコンはzaslon.info本体（サイト直下）の物を共用する。辞書側に同じ画像を置かない ?>
+<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+<link rel="icon" href="/icon-512.png" type="image/png" sizes="512x512" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 <title><?php echo h($config['site_title']); ?></title>
 </head>
 <body>

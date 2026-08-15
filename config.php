@@ -5,8 +5,14 @@
 return array(
 	'site_title' => 'イジェール語 オンライン辞書',
 
+	//本体側のsite_taglineと同じ役割。meta descriptionとog:descriptionに出る
+	'site_tagline' => 'イジェール語の単語と例文を検索できるオンライン辞書',
+
 	//メニューやOGタグに連結して使うため、末尾スラッシュは付けない
 	'site_url' => 'https://zaslon.info',
+
+	//SNSのカード画像。zaslon.info本体のアイコンを共用するため、site_urlからの絶対URLに直して渡す
+	'og_image' => '/icon-512.png',
 
 	//本体（zaslon-site）と同じプロパティで計測する。空にすると計測タグを出力しない
 	'ga_id' => 'G-3EQ8FM89JD',
