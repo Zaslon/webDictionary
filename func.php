@@ -50,21 +50,22 @@ function dictConfig(){
 
 //$currentPageKey : 今開いているページのキー（config.phpの'pages'参照）。該当項目は自分自身への
 //リンクになるため取り除く。どの項目にも該当しないページはnullでよい
+//リンクはsite_urlを付けずサイト内の絶対パスのまま出す。手元のXAMPPでの表示確認中に
+//メニューから公開サイトへ飛ばされないようにするため（zaslon-site本体のメニューと同じ）
 function buildPageMenu($currentPageKey){
 	$config = dictConfig();
-	$siteUrl = rtrim($config['site_url'], '/');
 	$menu = array();
 	foreach ($config['menu_before'] as $label => $path){
-		$menu[$label] = $siteUrl . $path;
+		$menu[$label] = $path;
 	}
 	foreach ($config['pages'] as $pageKey => $page){
 		if ($pageKey === $currentPageKey){
 			continue;
 		}
-		$menu[$page['label']] = $siteUrl . $page['path'];
+		$menu[$page['label']] = $page['path'];
 	}
 	foreach ($config['menu_after'] as $label => $path){
-		$menu[$label] = $siteUrl . $path;
+		$menu[$label] = $path;
 	}
 	return $menu;
 }

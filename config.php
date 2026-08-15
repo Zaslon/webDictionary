@@ -8,7 +8,7 @@ return array(
 	//本体側のsite_taglineと同じ役割。meta descriptionとog:descriptionに出る
 	'site_tagline' => 'イジェール語の単語と例文を検索できるオンライン辞書',
 
-	//メニューやOGタグに連結して使うため、末尾スラッシュは付けない
+	//canonicalやOGタグに連結して使うため、末尾スラッシュは付けない
 	'site_url' => 'https://zaslon.info',
 
 	//SNSのカード画像。zaslon.info本体のアイコンを共用するため、site_urlからの絶対URLに直して渡す
@@ -25,6 +25,7 @@ return array(
 	'copyright_holder' => 'Zaslon',
 
 	//並び順がそのままメニューの並び順になる。キーはbuildPageMenu()に渡すページの識別子
+	//pathはそのままhrefに出るため、サイト内の絶対パスで書く
 	'pages' => array(
 		'dict'    => array('label' => '検索ページへ戻る', 'path' => '/dict/dict.php'),
 		'example' => array('label' => '例文一覧',         'path' => '/dict/example.php'),
