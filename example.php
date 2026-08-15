@@ -22,6 +22,7 @@ $pageScripts = array('dict.js');//表示前にフォントを確定させるた�
 require __DIR__ . '/header.php';
 ?>
 		<div class="dictVer">
+			<p>プログラム更新日：<?php echo h(date("Y/m/d", programUpdatedAt())); ?></p>
 			<p>辞書更新日：<?php echo h(date("Y/m/d", filemtime($dictionaryFile))); ?><br />
 			例文数：<?php echo h($exampleAmount); ?></p>
 		</div>
