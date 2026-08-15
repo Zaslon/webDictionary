@@ -264,38 +264,99 @@ is_same('母音で始まる語はそのまま', 'eref', initialVoicing('eref'));
 //////////////////////////////////////////////////
 
 $affixTable = loadAffixTable(__DIR__ . '/../affixTable.csv');
-is_same('接辞テーブルを読み込める', 33, count($affixTable));
+is_same('接辞テーブルを読み込める', 43, count($affixTable));
+
+function derivedForms($wordForm, $pos, array $affixTable){
+	$forms = array();
+	foreach (makeDerivations($wordForm, $pos, $affixTable) as $singleDerivation){
+		$forms[] = $singleDerivation['form'];
+	}
+	return $forms;
+}
 
 //名詞 mira + -(e)f（主格）。母音で終わるのでカッコ内は落ちる
-$derivations = array();
-foreach (makeDerivationTable(makeEntry('mira', '名詞', array('水')), $affixTable) as $singleDerivation){
-	$derivations[] = $singleDerivation[1];
-}
+$derivations = derivedForms('mira', '名詞', $affixTable);
 is_same('母音で終わる名詞にはカッコ内を落とした接尾辞が付く', true, in_array('miraf', $derivations, true));
 is_same('母音で終わる名詞には対格が付く', true, in_array('mirau', $derivations, true));
 
 //子音で終わる名詞 sampan にはカッコ内が残る
-$derivations = array();
-foreach (makeDerivationTable(makeEntry('sampan', '名詞', array('心')), $affixTable) as $singleDerivation){
-	$derivations[] = $singleDerivation[1];
-}
+$derivations = derivedForms('sampan', '名詞', $affixTable);
 is_same('子音で終わる名詞にはカッコ内を残した接尾辞が付く', true, in_array('sampanef', $derivations, true));
+is_same('名詞は語形のまま動詞化する', true, in_array('sampane', $derivations, true));
+is_same('品詞を変えない接頭辞は語形に付く', true, in_array('mozampan', $derivations, true));
 
-//記述詞は -n を外した語幹と -in を外した語幹の両方に接頭辞が付く
-$derivations = array();
-foreach (makeDerivationTable(makeEntry('kasin', '記述詞', array('赤い')), $affixTable) as $singleDerivation){
-	$derivations[] = $singleDerivation[1];
-}
+//記述詞は -n を外した語幹と -in を外した語幹の両方が語幹の候補になる
+$derivations = derivedForms('kasin', '記述詞', $affixTable);
 is_same('記述詞は-nを外した語幹に接頭辞が付く', true, in_array('tegasi', $derivations, true));
 is_same('記述詞は-inを外した語幹にも接頭辞が付く', true, in_array('tegas', $derivations, true));
+is_same('記述詞は語幹から動詞を派生する', true, in_array('kasie', $derivations, true));
+is_same('品詞を変えない接頭辞は記述詞の語尾を残す', true, in_array('amgasin', $derivations, true));
 
 //NO_VOICING 指定の接辞は連濁させない
-$derivations = array();
-foreach (makeDerivationTable(makeEntry('kere', '動詞', array('する')), $affixTable) as $singleDerivation){
-	$derivations[] = $singleDerivation[1];
-}
+$derivations = derivedForms('kere', '動詞', $affixTable);
 is_same('NO_VOICING指定の接頭辞は連濁させない', true, in_array('mirkere', $derivations, true));
 is_same('動詞の接尾辞は語末のeを外した語幹に付く', true, in_array('keresk', $derivations, true));
+is_same('接尾辞のカッコ内母音は語幹の末尾で決まる', true, in_array('kerin', $derivations, true));
+is_same('接尾辞のカッコ内母音を見出し語の末尾で決めない', false, in_array('kern', $derivations, true));
+
+//eで終わらない動詞、nで終わらない記述詞から余分な1文字を落とさない
+$derivations = derivedForms('ennast', '動詞', $affixTable);
+is_same('eで終わらない動詞は語形がそのまま語幹になる', true, in_array('ennastesk', $derivations, true));
+$derivations = derivedForms('poko', '記述詞', $affixTable);
+is_same('nで終わらない記述詞は語形がそのまま語幹になる', true, in_array('teboko', $derivations, true));
+
+//複数の品詞を持つ見出し語は、全ての品詞の派生形を出す
+$multiPos = makeEntry('kasin', '記述詞', array('赤い'));
+$multiPos['translations'][] = array('title' => '名詞', 'forms' => array('赤'));
+$multiPos['translations'][] = array('title' => '記述詞', 'forms' => array('赤く'));
+is_same('同じ品詞が複数の訳語欄にあっても一度だけ扱う', array('記述詞', '名詞'), entryPosList($multiPos));
+$derivations = array();
+foreach (entryPosList($multiPos) as $singlePos){
+	$derivations = array_merge($derivations, derivedForms('kasin', $singlePos, $affixTable));
+}
+is_same('1つ目の訳語欄の品詞で派生する', true, in_array('tegasi', $derivations, true));
+is_same('2つ目以降の訳語欄の品詞も派生の対象にする', true, in_array('kasinef', $derivations, true));
+
+//////////////////////////////////////////////////
+//接辞サジェスト
+//////////////////////////////////////////////////
+
+function suggestionLabels(array $words, array $affixTable, array $keyWords, $maxDepth = DERIVATION_MAX_DEPTH){
+	$labels = array();
+	foreach (findDerivationSuggestions($words, $affixTable, $keyWords, $maxDepth) as $singleSuggestion){
+		$labels[] = $singleSuggestion['form'] . '#' . $singleSuggestion['id'] . ' の ' . $singleSuggestion['description'];
+	}
+	return $labels;
+}
+
+$verbOnly = array(makeEntry('kere', '動詞', array('する'), array(), 1));
+
+is_same('1段の派生形を辿る', array('kere#1 の 対格にあたる名詞派生'),
+	suggestionLabels($verbOnly, $affixTable, array('keresk')));
+is_same('接頭辞と接尾辞を同時に適用した形を辿る', array('kere#1 の 再帰自動詞形 の 対格にあたる名詞派生'),
+	suggestionLabels($verbOnly, $affixTable, array('mirkeresk')));
+is_same('3段重ねた形も辿る', array('kere#1 の 再帰自動詞形 の 対格にあたる名詞派生 の 主格'),
+	suggestionLabels($verbOnly, $affixTable, array('mirkereskef')));
+is_same('段数の上限を超える形は辿らない', array(),
+	suggestionLabels($verbOnly, $affixTable, array('mirkereskef'), 2));
+is_same('派生後の品詞が空の接辞からは更に派生させない', array(),
+	suggestionLabels($verbOnly, $affixTable, array('mirkereskefu')));
+is_same('同じ形になる別の接辞はそれぞれ出す',
+	array('kere#1 の 命令形', 'kere#1 の 再帰自動詞形の主格にあたる名詞派生'),
+	suggestionLabels($verbOnly, $affixTable, array('kera')));
+is_same('検索語と関係のない語からは辿らない', array(),
+	suggestionLabels($verbOnly, $affixTable, array('zzzzz')));
+
+//語幹を共有する見出し語が複数ある場合、遠回りの解釈は出さない
+$sharedStem = array(
+	makeEntry('kere', '動詞', array('する'), array(), 1),
+	makeEntry('ker', '名詞', array('こと'), array(), 2),
+);
+is_same('既にある見出し語を経由する解釈は出さない', array('kere#1 の 対格にあたる名詞派生'),
+	suggestionLabels($sharedStem, $affixTable, array('keresk')));
+is_same('検索語が複数あるときは全ての語について辿る',
+	array('kere#1 の 対格にあたる名詞派生', 'ker#2 の 主格'),
+	suggestionLabels($sharedStem, $affixTable, array('keresk', 'keref')));
 
 //////////////////////////////////////////////////
 //辞書順ソート

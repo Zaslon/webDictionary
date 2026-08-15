@@ -39,7 +39,7 @@ if ($keyWords){
 		$entryKey = findEntryKeyById($words, $id);
 		$hitKeys = ($entryKey === null) ? array() : array($entryKey);
 	}else{
-		$suggestions = findDerivationSuggestions($words, $affixTable, $keyWords[0]);
+		$suggestions = findDerivationSuggestions($words, $affixTable, $keyWords);
 		$hitKeys = searchEntries($words, $keyWords, $type, $mode, $includeVoicing, $exampleIndex);
 	}
 }

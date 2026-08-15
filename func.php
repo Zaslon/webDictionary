@@ -522,7 +522,7 @@ function programUpdatedAt(){
 }
 
 //派生形の生成で単語ごとに使い回すため、接辞側の加工はここで済ませておく
-//csvは[0]対象品詞、[1]形態、[2]説明、[3]ある場合は特殊処理の記載
+//csvは[0]対象品詞、[1]形態、[2]説明、[3]ある場合は特殊処理の記載、[4]派生後の品詞
 function loadAffixTable($path){
 	$table = array();
 	$file = new SplFileObject($path);
@@ -531,11 +531,15 @@ function loadAffixTable($path){
 		if (!is_array($row) || !isset($row[0], $row[1], $row[2]) || $row[1] === ''){
 			continue;
 		}
+		$resultPos = isset($row[4]) ? $row[4] : '';
 		$table[] = array(
 			'pos'            => $row[0],
 			'form'           => $row[1],
 			'description'    => $row[2],
 			'noVoicing'      => isset($row[3]) && $row[3] === 'NO_VOICING',
+			'resultPos'      => $resultPos,//空欄はこれ以上派生しないことを表す
+			//品詞を決めるのは動詞の-eや記述詞の-(i)nといった語尾なので、品詞を変える接辞はその語尾を置き換える
+			'changesPos'     => $resultPos !== '' && $resultPos !== $row[0],
 			'isSuffix'       => startsWith($row[1], '-'),
 			'isPrefix'       => endsWith($row[1], '-'),
 			'withoutBracket' => preg_replace('/\(.*?\)/u', '', $row[1]),//カッコつき接辞のカッコ内をカッコごとなくした形
