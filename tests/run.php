@@ -496,6 +496,32 @@ ob_start();
 renderPronunciationRules(null);
 is_same('発音規則が無ければ要素ごと出さない', '', ob_get_clean());
 
+//凡例
+ob_start();
+renderLegend("書式\n【類義語】\n【対義語】対となる単語を挙げる。\n\nタグ");
+$html = ob_get_clean();
+is_same('凡例の塊ごとに1行目を見出しにする', 2, substr_count($html, '<section class="legendSection">'));
+is_same('凡例の見出しを立てる', true, strpos($html, '<h2>書式</h2>') !== false);
+is_same('凡例の本文の改行を<br />にする', true, strpos($html, '【類義語】<br />') !== false);
+is_same('見出しだけの塊では本文を出さない', true, strpos($html, '<h2>タグ</h2></section>') !== false);
+
+ob_start();
+renderLegend("書式\r\n【類義語】\r\n\r\n品詞タグ\r\n【名詞】");
+is_same('CRLFの辞書データでも塊を区切る', 2, substr_count(ob_get_clean(), '<section class="legendSection">'));
+
+ob_start();
+renderLegend("<script>alert(1)</script>\n凡例の本文<script>");
+$html = ob_get_clean();
+is_same('凡例をエスケープする', false, strpos($html, '<script>'));
+
+ob_start();
+renderLegend(null);
+is_same('凡例が無ければその旨を出す', '<p>凡例はまだ登録されていません。</p>', ob_get_clean());
+
+ob_start();
+renderLegend("   \n\n  ");
+is_same('凡例が空白だけでもその旨を出す', '<p>凡例はまだ登録されていません。</p>', ob_get_clean());
+
 //ページ送り
 ob_start();
 renderNavigation(45, 2, array('a', 'b'), 'both', 'prt');

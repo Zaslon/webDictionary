@@ -534,6 +534,25 @@ span.exampleTag {
 	font-size: 85%;
 }
 
+/* 凡例。単語1件・例文1件と同じ見出しの立て方で、塊ごとに区切る */
+section.legendSection {
+	padding: 10px;
+	padding-top: 0.8em;
+	border-bottom: var(--rule-light) 1px solid;
+}
+
+section.legendSection h2 {
+	font-size: 120%;
+	margin: 0 0 0.2em 0;
+	line-height: 1.4;
+}
+
+/* 見出しの下にぶら下げる。#main p の左右の余白を打ち消すため、こちらもidから書く */
+#main section.legendSection p {
+	margin: 0 0 0 1em;
+	padding: 0;
+}
+
 @media screen and (max-width: 500px) {
 	#header,
 	#main {

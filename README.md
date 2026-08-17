@@ -11,6 +11,7 @@
 | --- | --- |
 | `dict.php` | 検索ページ。パラメータの解釈と組み立てのみを行う |
 | `example.php` | 例文の一覧ページ |
+| `legend.php` | 凡例のページ。中身は辞書データの `legend` を読む |
 | `chart.php` | 単語数推移のグラフページ |
 | `config.php` | サイト共通設定（サイト名・説明文・サイトURL・カード画像・アクセス解析ID・コピーライト・ページ間メニュー） |
 | `func.php` | 設定読み込み、文字列処理、HKS順ソート、データ読み込み、キャッシュ |
@@ -68,6 +69,7 @@ zaslon-site本体の `common/config.php` / `site_config()` に対応するファ
 
 ページ間メニュー（検索仕様・凡例・検索ページ・例文一覧・単語数推移・ホームへ戻る）は
 `func.php` の `buildPageMenu($currentPageKey)` が `config.php` の `pages` から自分自身の項目を除いて組み立てる。
+辞書の中のページは `pages` に、文法書側の記事など辞書の外へのリンクは `menu_before` / `menu_after` に書く。
 
 ## アクセス解析
 `header.php` が `config.php` の `ga_id` を使って zaslon.info 本体と同じGA4プロパティに計測タグを出す
@@ -218,6 +220,17 @@ SIL Open Font License 1.1 で、**著作権表示とライセンス全文を複�
   ヒットした例文が紐づく単語が検索結果に出る
 
 `sentence` 以外の項目は辞書データ側で省略できるため、`makeExampleIndex()` で空を埋めて形を揃えている。
+
+## 凡例
+`legend.php` が `idyer.json` の `legend` を読んで表示する。
+以前は文法書側の記事（`/idyerin/辞書凡例/`）へのリンクだったが、
+凡例は辞書データと一体で管理されている（[辞書のリポジトリ](https://github.com/Zaslon/IdyerinDictionary)）ため、
+辞書データ側の記述をそのまま出す形にした。記事側とずれることが無くなる。
+
+`legend` は平文（辞書データ側の `zpdicOnline.enableMarkdown` が `false`）なので、
+`view.php` の `renderLegend()` は記法を解釈せず、空行で区切られた塊の1行目を見出し（`h2`）にして、
+残りの行を改行を保ったまま並べるだけにしてある。
+辞書データに `legend` が無い場合は、その旨だけを出す。
 
 ## キャッシュ
 辞書のソートは重いため、結果を `cache/` に保存して使い回している。

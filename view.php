@@ -275,6 +275,26 @@ function renderRelations(array $entry, $type, $mode){
 	}
 }
 
+//凡例。辞書データのlegendは平文（辞書データ側のzpdicOnline.enableMarkdownがfalse）なので、
+//記法は解釈せず、空行で区切られた塊の1行目を見出しとして立てるだけにする
+function renderLegend($legend){
+	if (!is_string($legend) || trim($legend) === ''){
+		echo '<p>凡例はまだ登録されていません。</p>';
+		return;
+	}
+	//辞書データ側の改行コードで塊の切れ目を取り逃さないよう、LFに揃えてから区切る
+	$normalized = str_replace(array("\r\n", "\r"), "\n", $legend);
+	foreach (preg_split('/\n[ \t]*\n+/u', trim($normalized)) as $singleBlock){
+		$lines = explode("\n", trim($singleBlock));
+		echo '<section class="legendSection">';
+		echo '<h2>', h(array_shift($lines)), '</h2>';
+		if ($lines){
+			echo '<p>', nl2br(h(implode("\n", $lines))), '</p>';//辞書データ側で整形された改行に意味があるため保つ
+		}
+		echo '</section>';
+	}
+}
+
 function renderNavigation($hitAmount, $page, array $keyWords, $type, $mode){
 	echo '<nav aria-label="ページ送り"><ul class="navigation">';
 	if ($hitAmount > WORDS_PER_PAGE){
