@@ -667,13 +667,6 @@ span.exampleTag {
 	font-size: 1em;
 }
 
-/* 本体が無い環境ではMarkdownを変換せず原文をそのまま出す。
-   表の桁が崩れないよう等幅で置き、長い行は横スクロールさせる */
-.legend pre.legendSource {
-	font-family: "Courier New", Courier, monospace;
-	white-space: pre;
-}
-
 .legend blockquote {
 	margin: 1.6em 0;
 	padding: 0.9em 1.3em;
