@@ -496,6 +496,86 @@ ob_start();
 renderPronunciationRules(null);
 is_same('発音規則が無ければ要素ごと出さない', '', ob_get_clean());
 
+//////////////////////////////////////////////////
+//簡易なMarkdown変換（本体が無い環境用）
+//////////////////////////////////////////////////
+
+is_same('見出しを階層どおりに出す', '<h1>凡例</h1><h3>見出し語</h3>', markdownToHtml("# 凡例\n### 見出し語"));
+is_same('#に続く空白が無ければ見出しにしない', '<p>#凡例</p>', markdownToHtml('#凡例'));
+is_same('見出しの直後の空行なしでも地の文を分ける', '<h2>品詞</h2><p>各単語の品詞を示す。</p>',
+	markdownToHtml("## 品詞\n各単語の品詞を示す。"));
+is_same('地の文の改行を<br />にする', '<p>一行目<br />二行目</p>', markdownToHtml("一行目\n二行目"));
+is_same('空行で段落を分ける', '<p>一段落目</p><p>二段落目</p>', markdownToHtml("一段落目\n\n二段落目"));
+is_same('CRLFの辞書データでも段落を分ける', '<p>一段落目</p><p>二段落目</p>', markdownToHtml("一段落目\r\n\r\n二段落目"));
+is_same('箇条書きをまとめる', '<ul><li>品詞</li><li>訳語</li></ul>', markdownToHtml("- 品詞\n- 訳語"));
+is_same('番号付きの箇条書きを分ける', '<ul><li>あ</li></ul><ol><li>い</li></ol>', markdownToHtml("- あ\n1. い"));
+is_same('区切り線を出す', '<hr />', markdownToHtml('---'));
+
+is_same('表を組み立てる',
+	'<table><thead><tr><th>略称</th><th>造語者</th></tr></thead><tbody><tr><td>cal</td><td>かりぐら</td></tr></tbody></table>',
+	markdownToHtml("| 略称 | 造語者 |\n| --- | --- |\n| cal | かりぐら |"));
+is_same('見出しの直後の表も読む', true,
+	strpos(markdownToHtml("### 造語者\n| 略称 | 造語者 |\n| --- | --- |\n| cal | かりぐら |"), '<table>') !== false);
+is_same('区切り行が無ければ表にしない', false, strpos(markdownToHtml("| a | b |\n| c | d |"), '<table>'));
+//語源欄の説明のように、地の文に「|」が出るだけの行を表にしない
+is_same('地の文の「|」を表にしない', false,
+	strpos(markdownToHtml('語源欄は『造語者/言語略称:単語|意味』を一単位とする。'), '<table>'));
+is_same('セルの数が足りない行も列に合わせる', true,
+	strpos(markdownToHtml("| a | b |\n| --- | --- |\n| 1 |"), '<td>1</td><td></td>') !== false);
+is_same('表の後の行を表に含めない', '<table><thead><tr><th>a</th></tr></thead><tbody></tbody></table><h2>次</h2>',
+	markdownToHtml("| a |\n| --- |\n## 次"));
+
+is_same('行内コードを出す', '<p>語尾の<code>-e</code>が付く</p>', markdownToHtml('語尾の`-e`が付く'));
+is_same('行内コードの中では他の記法を読まない', '<p><code>**強調にしない**</code></p>', markdownToHtml('`**強調にしない**`'));
+is_same('強調と取り消し線を出す', '<p><strong>太</strong><em>斜</em><del>消</del></p>', markdownToHtml('**太***斜*~~消~~'));
+is_same('リンクを出す', '<p><a href="https://zaslon.info/">本体</a></p>', markdownToHtml('[本体](https://zaslon.info/)'));
+is_same('危険なURLはリンクにしない', '<p>[押す](javascript:alert(1))</p>', markdownToHtml('[押す](javascript:alert(1))'));
+is_same('コードブロックを出す', '<pre><code>a &lt; b</code></pre>', markdownToHtml("```\na < b\n```"));
+
+is_same('辞書データをエスケープする', '<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>', markdownToHtml('<script>alert(1)</script>'));
+is_same('表の中もエスケープする', true, strpos(markdownToHtml("| <script> |\n| --- |\n| a |"), '&lt;script&gt;') !== false);
+
+//////////////////////////////////////////////////
+//凡例
+//////////////////////////////////////////////////
+
+//本体（zaslon-site）が隣にあるかどうかで結果が変わるため、無いことにするパスを渡して確かめる
+const NO_RENDERER = '/no/such/common/markdown.php';
+
+ob_start();
+renderLegend("# 凡例\n本文\n\n| a | b |\n| --- | --- |\n| 1 | 2 |", NO_RENDERER);
+$html = ob_get_clean();
+is_same('本体が無ければ辞書側の変換で出す', true, strpos($html, '<div class="legend"><h1>凡例</h1>') === 0);
+is_same('本体が無くても表をHTMLにする', true, strpos($html, '<table>') !== false);
+
+ob_start();
+renderLegend("<script>alert(1)</script>", NO_RENDERER);
+is_same('辞書側の変換でも凡例をエスケープする', false, strpos(ob_get_clean(), '<script>'));
+
+ob_start();
+renderLegend(null);
+is_same('凡例が無ければその旨を出す', '<p>凡例はまだ登録されていません。</p>', ob_get_clean());
+
+ob_start();
+renderLegend("   \n\n  ");
+is_same('凡例が空白だけでもその旨を出す', '<p>凡例はまだ登録されていません。</p>', ob_get_clean());
+
+//本体を隣に置いた環境（公開時と同じ配置）でだけ、変換そのものを確かめる
+$siteRenderer = __DIR__ . '/../../common/markdown.php';
+if (is_file($siteRenderer) && is_file(__DIR__ . '/../../vendor/autoload.php')){
+	ob_start();
+	renderLegend("# 凡例\n本文の`-e`\n\n| 発音記号 | 説明 |\n| --- | --- |\n| y | IPAの [j]。 |");
+	$html = ob_get_clean();
+	is_same('本体があれば見出しをHTMLにする', true, strpos($html, '<h1>凡例</h1>') !== false);
+	is_same('本体があれば表をHTMLにする', true, strpos($html, '<table>') !== false);
+	is_same('本体があれば行内コードをHTMLにする', true, strpos($html, '<code>-e</code>') !== false);
+
+	//語源欄の説明のように、地の文に「|」が出るだけの行を表にしない
+	ob_start();
+	renderLegend('語源欄は『造語者/言語略称:単語|意味』を一単位とする。');
+	is_same('地の文の「|」を表にしない', false, strpos(ob_get_clean(), '<table'));
+}
+
 //ページ送り
 ob_start();
 renderNavigation(45, 2, array('a', 'b'), 'both', 'prt');

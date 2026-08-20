@@ -27,6 +27,7 @@ return array(
 	//並び順がそのままメニューの並び順になる。キーはbuildPageMenu()に渡すページの識別子
 	//pathはそのままhrefに出るため、サイト内の絶対パスで書く
 	'pages' => array(
+		'legend'  => array('label' => '凡例',             'path' => '/dict/legend.php'),
 		'dict'    => array('label' => '検索ページへ戻る', 'path' => '/dict/dict.php'),
 		'example' => array('label' => '例文一覧',         'path' => '/dict/example.php'),
 		'chart'   => array('label' => '単語数推移',       'path' => '/dict/chart.php'),
@@ -35,7 +36,6 @@ return array(
 	//どのページでも出す項目。'pages'の前後に挟まれる
 	'menu_before' => array(
 		'検索仕様' => '/idyerin/%e6%a4%9c%e7%b4%a2%e4%bb%95%e6%a7%98/',
-		'凡例'     => '/idyerin/%e8%be%9e%e6%9b%b8%e5%87%a1%e4%be%8b/',
 	),
 	'menu_after' => array(
 		'ホームへ戻る' => '/idyer',

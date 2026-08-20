@@ -1,6 +1,7 @@
 <?php
 //検索結果の表示
 require_once __DIR__ . '/func.php';
+require_once __DIR__ . '/markdown.php';//凡例用。本体（zaslon-site）が無い環境での変換に使う
 
 function renderSuggestions(array $suggestions, $type, $mode){
 	foreach ($suggestions as $singleSuggestion){
@@ -273,6 +274,49 @@ function renderRelations(array $entry, $type, $mode){
 	if ($isOpen){
 		echo '</li>';
 	}
+}
+
+//本体（zaslon-site）のmarkdown.phpは、保存させたいリンクの判定で本体のsite_config()を呼ぶ。
+//辞書側はcommon/lib.phpを読み込めない（後述）ため、同じ役割の辞書側の設定を返す代わりを置く
+if (!function_exists('site_config')){
+	function site_config(){
+		return dictConfig();
+	}
+}
+
+//辞書データのlegendのMarkdownをHTMLにする。
+//記法の再実装を避け、文法書側の記事と同じ見た目にするため、本体（zaslon-site）があればそちらに任せる。
+//辞書はFTPで別に置けるようにしてあるので、本体が無ければ辞書側の簡易な変換（markdown.php）に落とす
+//（本体もサイトマップで辞書のconfig.phpをis_fileで確かめてから読む。index.phpのsitemap_dict_urls()）。
+//本体側の呼び出し口はcommon/lib.phpのmarkdown_to_html()だが、lib.phpは辞書側と同じh()を定義するため
+//読み込めない。名前空間付きの関数を直接呼ぶこと。
+//$rendererPath : 本体のmarkdown.phpの場所。テストから差し替えるためだけの引数
+function legendMarkdownToHtml($markdown, $rendererPath = null){
+	if (!is_string($markdown)){
+		return '';
+	}
+	if ($rendererPath === null){
+		$rendererPath = __DIR__ . '/../common/markdown.php';//辞書はサイト直下の/dict/に置く
+	}
+	$autoloadPath = dirname($rendererPath) . '/../vendor/autoload.php';//markdown.phpが自分で読むが、無ければ致命的エラーになる
+	if (is_file($rendererPath) && is_file($autoloadPath)){
+		try{
+			require_once $rendererPath;
+			return \Zaslon\Markdown\to_html($markdown);
+		}catch (Throwable $error){
+			//変換に失敗しても凡例のページは出せるよう、辞書側の変換に落とす
+		}
+	}
+	return markdownToHtml($markdown);
+}
+
+//凡例。辞書データのlegendはMarkdownなので、HTMLに変換して出す
+function renderLegend($legend, $rendererPath = null){
+	if (!is_string($legend) || trim($legend) === ''){
+		echo '<p>凡例はまだ登録されていません。</p>';
+		return;
+	}
+	echo '<div class="legend">', legendMarkdownToHtml($legend, $rendererPath), '</div>';
 }
 
 function renderNavigation($hitAmount, $page, array $keyWords, $type, $mode){
