@@ -275,24 +275,55 @@ function renderRelations(array $entry, $type, $mode){
 	}
 }
 
-//凡例。辞書データのlegendは平文（辞書データ側のzpdicOnline.enableMarkdownがfalse）なので、
-//記法は解釈せず、空行で区切られた塊の1行目を見出しとして立てるだけにする
-function renderLegend($legend){
+//本体（zaslon-site）のmarkdown.phpは、保存させたいリンクの判定で本体のsite_config()を呼ぶ。
+//辞書側はcommon/lib.phpを読み込めない（後述）ため、同じ役割の辞書側の設定を返す代わりを置く
+if (!function_exists('site_config')){
+	function site_config(){
+		return dictConfig();
+	}
+}
+
+//辞書データのlegendのMarkdownを本体（zaslon-site）のレンダラでHTMLにする。
+//記法の再実装を避け、文法書側の記事と同じ見た目にするため、変換は本体に任せる。
+//辞書はFTPで別に置けるようにしてあるので、本体が無ければnullを返して呼び出し元で原文表示に落とす
+//（本体もサイトマップで辞書のconfig.phpをis_fileで確かめてから読む。index.phpのsitemap_dict_urls()）。
+//本体側の呼び出し口はcommon/lib.phpのmarkdown_to_html()だが、lib.phpは辞書側と同じh()を定義するため
+//読み込めない。名前空間付きの関数を直接呼ぶこと。
+//$rendererPath : 本体のmarkdown.phpの場所。テストから差し替えるためだけの引数
+function legendMarkdownToHtml($markdown, $rendererPath = null){
+	if (!is_string($markdown)){
+		return null;
+	}
+	if ($rendererPath === null){
+		$rendererPath = __DIR__ . '/../common/markdown.php';//辞書はサイト直下の/dict/に置く
+	}
+	$autoloadPath = dirname($rendererPath) . '/../vendor/autoload.php';//markdown.phpが自分で読むが、無ければ致命的エラーになる
+	if (!is_file($rendererPath) || !is_file($autoloadPath)){
+		return null;
+	}
+	try{
+		require_once $rendererPath;
+		return \Zaslon\Markdown\to_html($markdown);
+	}catch (Throwable $error){
+		return null;//変換に失敗しても凡例のページ自体は出す
+	}
+}
+
+//凡例。辞書データのlegendはMarkdownなので、本体のレンダラに通したHTMLを出す。
+//本体が無い環境では変換せず、原文をそのまま読める形で出す
+function renderLegend($legend, $rendererPath = null){
 	if (!is_string($legend) || trim($legend) === ''){
 		echo '<p>凡例はまだ登録されていません。</p>';
 		return;
 	}
-	//辞書データ側の改行コードで塊の切れ目を取り逃さないよう、LFに揃えてから区切る
-	$normalized = str_replace(array("\r\n", "\r"), "\n", $legend);
-	foreach (preg_split('/\n[ \t]*\n+/u', trim($normalized)) as $singleBlock){
-		$lines = explode("\n", trim($singleBlock));
-		echo '<section class="legendSection">';
-		echo '<h2>', h(array_shift($lines)), '</h2>';
-		if ($lines){
-			echo '<p>', nl2br(h(implode("\n", $lines))), '</p>';//辞書データ側で整形された改行に意味があるため保つ
-		}
-		echo '</section>';
+	$html = legendMarkdownToHtml($legend, $rendererPath);
+	echo '<div class="legend">';
+	if ($html !== null){
+		echo $html;
+	}else{
+		echo '<pre class="legendSource">', h($legend), '</pre>';
 	}
+	echo '</div>';
 }
 
 function renderNavigation($hitAmount, $page, array $keyWords, $type, $mode){

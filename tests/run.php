@@ -497,22 +497,23 @@ renderPronunciationRules(null);
 is_same('発音規則が無ければ要素ごと出さない', '', ob_get_clean());
 
 //凡例
-ob_start();
-renderLegend("書式\n【類義語】\n【対義語】対となる単語を挙げる。\n\nタグ");
-$html = ob_get_clean();
-is_same('凡例の塊ごとに1行目を見出しにする', 2, substr_count($html, '<section class="legendSection">'));
-is_same('凡例の見出しを立てる', true, strpos($html, '<h2>書式</h2>') !== false);
-is_same('凡例の本文の改行を<br />にする', true, strpos($html, '【類義語】<br />') !== false);
-is_same('見出しだけの塊では本文を出さない', true, strpos($html, '<h2>タグ</h2></section>') !== false);
+//本体（zaslon-site）が隣にあるかどうかで結果が変わるため、無いことにするパスを渡して確かめる
+const NO_RENDERER = '/no/such/common/markdown.php';
+
+is_same('本体が無ければ変換しない', null, legendMarkdownToHtml('# 見出し', NO_RENDERER));
+is_same('文字列以外は変換しない', null, legendMarkdownToHtml(null, NO_RENDERER));
 
 ob_start();
-renderLegend("書式\r\n【類義語】\r\n\r\n品詞タグ\r\n【名詞】");
-is_same('CRLFの辞書データでも塊を区切る', 2, substr_count(ob_get_clean(), '<section class="legendSection">'));
+renderLegend("# 凡例\n本文\n\n| a | b |\n| --- | --- |\n| 1 | 2 |", NO_RENDERER);
+$html = ob_get_clean();
+is_same('本体が無ければ原文をそのまま出す', true, strpos($html, '<pre class="legendSource">') !== false);
+is_same('原文の記法をHTMLにしない', false, strpos($html, '<table'));
+is_same('原文の改行を保つ', true, strpos($html, "# 凡例\n本文") !== false);
 
 ob_start();
-renderLegend("<script>alert(1)</script>\n凡例の本文<script>");
+renderLegend("<script>alert(1)</script>\n凡例の本文<script>", NO_RENDERER);
 $html = ob_get_clean();
-is_same('凡例をエスケープする', false, strpos($html, '<script>'));
+is_same('原文表示でも凡例をエスケープする', false, strpos($html, '<script>'));
 
 ob_start();
 renderLegend(null);
@@ -521,6 +522,22 @@ is_same('凡例が無ければその旨を出す', '<p>凡例はまだ登録さ�
 ob_start();
 renderLegend("   \n\n  ");
 is_same('凡例が空白だけでもその旨を出す', '<p>凡例はまだ登録されていません。</p>', ob_get_clean());
+
+//本体を隣に置いた環境（公開時と同じ配置）でだけ、変換そのものを確かめる
+$siteRenderer = __DIR__ . '/../../common/markdown.php';
+if (is_file($siteRenderer) && is_file(__DIR__ . '/../../vendor/autoload.php')){
+	ob_start();
+	renderLegend("# 凡例\n本文の`-e`\n\n| 発音記号 | 説明 |\n| --- | --- |\n| y | IPAの [j]。 |");
+	$html = ob_get_clean();
+	is_same('本体があれば見出しをHTMLにする', true, strpos($html, '<h1>凡例</h1>') !== false);
+	is_same('本体があれば表をHTMLにする', true, strpos($html, '<table>') !== false);
+	is_same('本体があれば行内コードをHTMLにする', true, strpos($html, '<code>-e</code>') !== false);
+
+	//語源欄の説明のように、地の文に「|」が出るだけの行を表にしない
+	ob_start();
+	renderLegend('語源欄は『造語者/言語略称:単語|意味』を一単位とする。');
+	is_same('地の文の「|」を表にしない', false, strpos(ob_get_clean(), '<table'));
+}
 
 //ページ送り
 ob_start();

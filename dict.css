@@ -66,12 +66,18 @@ Author URI: https://zaslon.info
 	--text:       #111;
 	--text-soft:  #444;      /* 更新日・単語数など、少し落とした文字 */
 	--muted:      #777;      /* 語ID・出典など補助情報 */
+	--rule:       #999;      /* 見出しの罫・縦棒（凡例） */
 	--rule-light: #ddd;      /* 一覧の区切り線 */
 	--border:     #ccc;      /* 枠線（ボタン・入力欄・チップ） */
 	--chip:       #EEE;      /* ボタン・タグの地色 */
 	--chip-hover: #CCC;      /* 同・hover */
+	--tint:       #F0EFEB;   /* 引用のごく薄い地色（凡例） */
 	--link:       #1a5fb4;   /* 見出し語・関連語などへのリンク */
 	--input-bg:   #fff;      /* 入力欄の地色 */
+	--code-bg:    #EAEAE6;   /* インラインコードの地色（凡例） */
+	--th-bg:      #DDD;      /* 表の見出し行（凡例） */
+	--row-alt:    #F4F3F0;   /* 表の偶数行の縞（凡例） */
+	--quote-border: #E2E0DA; /* 引用の枠（太い左辺以外）（凡例） */
 	--focus:      #555;      /* キーボード操作時の輪郭 */
 
 	/* 明暗の切り替えボタンの大きさ。h1が空ける場所もこの値から決めるので、
@@ -100,12 +106,18 @@ Author URI: https://zaslon.info
 		--text:       #E8E6E2;
 		--text-soft:  #C2BFBA;
 		--muted:      #8E8B86;
+		--rule:       #6D7076;
 		--rule-light: #35383D;
 		--border:     #4A4D53;
 		--chip:       #2A2D32;
 		--chip-hover: #3B3F45;
+		--tint:       #24262A;
 		--link:       #85B4F0;
 		--input-bg:   #17191C;
+		--code-bg:    #2B2E33;
+		--th-bg:      #33363C;
+		--row-alt:    #232529;
+		--quote-border: #3B3E44;
 		--focus:      #9AA0A8;
 	}
 }
@@ -117,12 +129,18 @@ Author URI: https://zaslon.info
 	--text:       #E8E6E2;
 	--text-soft:  #C2BFBA;
 	--muted:      #8E8B86;
+	--rule:       #6D7076;
 	--rule-light: #35383D;
 	--border:     #4A4D53;
 	--chip:       #2A2D32;
 	--chip-hover: #3B3F45;
+	--tint:       #24262A;
 	--link:       #85B4F0;
 	--input-bg:   #17191C;
+	--code-bg:    #2B2E33;
+	--th-bg:      #33363C;
+	--row-alt:    #232529;
+	--quote-border: #3B3E44;
 	--focus:      #9AA0A8;
 }
 
@@ -534,23 +552,148 @@ span.exampleTag {
 	font-size: 85%;
 }
 
-/* 凡例。単語1件・例文1件と同じ見出しの立て方で、塊ごとに区切る */
-section.legendSection {
+/* 凡例。中身は辞書データのMarkdownを本体（zaslon-site）のレンダラに通したHTMLなので、
+   見た目も本体の記事本文（css/style.css の見出し・表・コード・引用）と同じ規則を写す。
+   辞書の他のページに影響しないよう、すべて .legend の下に閉じておく。 */
+.legend {
 	padding: 10px;
-	padding-top: 0.8em;
-	border-bottom: var(--rule-light) 1px solid;
+	padding-top: 0;
 }
 
-section.legendSection h2 {
-	font-size: 120%;
-	margin: 0 0 0.2em 0;
-	line-height: 1.4;
+/* 見出しは左の縦棒の太さで階層を示す（h1=10px / h2=5px / h3以下=下罫のみ）。
+   下の余白より上の余白を大きく取り、見出しが次の本文に属して見えるようにする。
+   凡例本文の先頭は「# 凡例」なので、サイト名のh1（上のh1）と重ならないようここで上書きする。 */
+.legend h1 {
+	margin: 0 0 0.7em;
+	padding: 0 0 0.15em 0.5em;
+	border: solid var(--rule); border-width: 0 0 1px 10px;
+	font-size: 1.7rem; line-height: 1.4;
+	min-height: 0;
+	font-family: inherit;
 }
 
-/* 見出しの下にぶら下げる。#main p の左右の余白を打ち消すため、こちらもidから書く */
-#main section.legendSection p {
-	margin: 0 0 0 1em;
+.legend h2 {
+	margin: 2em 0 0.6em;
+	padding: 0 0 0.15em 0.5em;
+	border: solid var(--rule); border-width: 0 0 1px 5px;
+	font-size: 1.35rem; line-height: 1.4;
+}
+
+.legend h3 {
+	margin: 1.7em 0 0.5em;
+	padding: 0 0 0.15em 0.5em;
+	border: solid var(--rule); border-width: 0 0 1px;
+	font-size: 1.15rem; line-height: 1.4;
+}
+
+.legend h4,
+.legend h5,
+.legend h6 {
+	margin: 1.5em 0 0.4em;
+	padding: 0 0 0.1em 0.5em;
+	border: solid var(--rule); border-width: 0 0 1px;
+	font-size: 1.05rem; line-height: 1.4;
+}
+
+/* 先頭の見出しの上の余白は要らない */
+.legend > :first-child {
+	margin-top: 0;
+}
+
+/* 地の文。#main p の左右の余白は入れ物側で持つので、こちらもidから書いて打ち消す */
+#main .legend p {
+	margin: 1em 0;
 	padding: 0;
+}
+
+.legend ul,
+.legend ol {
+	margin: 1em 0;
+	padding-left: 1.5em;
+}
+
+.legend a {
+	color: var(--link);
+}
+
+/* 幅の広い表は表自体を横スクロールさせる（display:block）。
+   ただし width:fit-content を併せないと枠線が本文幅いっぱいに伸びてしまう。 */
+.legend table {
+	display: block; overflow-x: auto;
+	width: fit-content; max-width: 100%; margin: 1.6em auto;
+	border-collapse: collapse;
+	border: 1px solid var(--rule);
+	text-align: left; line-height: 1.6;
+}
+
+.legend th,
+.legend td {
+	padding: 0.4em 0.9em;
+	border: 1px solid var(--rule);
+}
+
+.legend th {
+	font-weight: bold;
+	background: var(--th-bg);
+}
+
+/* 行数の多い表を横に目で追えるように。縞は「あるとわずかに助かる」程度の濃さに留める */
+.legend tbody tr:nth-child(even) {
+	background: var(--row-alt);
+}
+
+.legend code {
+	font-family: "Courier New", Courier, monospace;
+	letter-spacing: 0;
+	background: var(--code-bg);
+	border-radius: 3px;
+	padding: 0.1em 0.35em;
+	font-size: 0.92em;
+}
+
+.legend pre {
+	padding: 1em;
+	background: var(--chip);
+	border: 1px solid var(--border);
+	border-radius: 3px;
+	line-height: 1.55;
+	overflow-x: auto;
+}
+
+.legend pre code {
+	background: none;
+	border: none;
+	padding: 0;
+	font-size: 1em;
+}
+
+/* 本体が無い環境ではMarkdownを変換せず原文をそのまま出す。
+   表の桁が崩れないよう等幅で置き、長い行は横スクロールさせる */
+.legend pre.legendSource {
+	font-family: "Courier New", Courier, monospace;
+	white-space: pre;
+}
+
+.legend blockquote {
+	margin: 1.6em 0;
+	padding: 0.9em 1.3em;
+	background: var(--tint);
+	border: 1px solid var(--quote-border); border-left: 5px solid var(--border);
+	color: var(--text-soft);
+}
+
+/* 引用の中身は上下に余白を作らない（枠の内側の余白だけで見せる） */
+.legend blockquote > :first-child { margin-top: 0; }
+.legend blockquote > :last-child { margin-bottom: 0; }
+
+.legend figure {
+	margin: 1.5em 0;
+	text-align: center;
+}
+
+.legend img {
+	max-width: 100%;
+	height: auto;
 }
 
 @media screen and (max-width: 500px) {
@@ -601,6 +744,21 @@ section.legendSection h2 {
 	--toggle-size: 44px;
 	--toggle-gap: 8px;
 	--toggle-right: 8px;
+	}
+
+	/* 凡例の地の文の要素は、画面が狭いぶん余白を詰める（本体の記事本文と同じ） */
+	.legend th,
+	.legend td {
+	padding: 0.35em 0.7em;
+	}
+
+	.legend blockquote {
+	margin: 1.3em 0;
+	padding: 0.8em 1em;
+	}
+
+	.legend pre {
+	padding: 0.8em;
 	}
 
 }

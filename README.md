@@ -11,7 +11,7 @@
 | --- | --- |
 | `dict.php` | 検索ページ。パラメータの解釈と組み立てのみを行う |
 | `example.php` | 例文の一覧ページ |
-| `legend.php` | 凡例のページ。中身は辞書データの `legend` を読む |
+| `legend.php` | 凡例のページ。中身は辞書データの `legend`（Markdown）を読む |
 | `chart.php` | 単語数推移のグラフページ |
 | `config.php` | サイト共通設定（サイト名・説明文・サイトURL・カード画像・アクセス解析ID・コピーライト・ページ間メニュー） |
 | `func.php` | 設定読み込み、文字列処理、HKS順ソート、データ読み込み、キャッシュ |
@@ -227,10 +227,33 @@ SIL Open Font License 1.1 で、**著作権表示とライセンス全文を複�
 凡例は辞書データと一体で管理されている（[辞書のリポジトリ](https://github.com/Zaslon/IdyerinDictionary)）ため、
 辞書データ側の記述をそのまま出す形にした。記事側とずれることが無くなる。
 
-`legend` は平文（辞書データ側の `zpdicOnline.enableMarkdown` が `false`）なので、
-`view.php` の `renderLegend()` は記法を解釈せず、空行で区切られた塊の1行目を見出し（`h2`）にして、
-残りの行を改行を保ったまま並べるだけにしてある。
-辞書データに `legend` が無い場合は、その旨だけを出す。
+`legend` はMarkdownで書かれている。対応記法はzaslon-site本体のREADMEの「Markdown対応記法」を参照
+（CommonMark + GFM ＋ サイト固有の拡張。辞書データ側の `zpdicOnline.enableMarkdown` はZpDIC側の
+**単語欄**の設定で、`legend` とは無関係）。
+
+### Markdownの変換
+記法を辞書側で作り直さず、文法書側の記事と同じ見た目にするため、変換は**本体のレンダラに任せる**。
+`view.php` の `legendMarkdownToHtml()` が本体の `common/markdown.php` を読み込み、
+`Zaslon\Markdown\to_html()` を直接呼ぶ。
+
+- 本体側の呼び出し口は `common/lib.php` の `markdown_to_html()` だが、**`lib.php` は読み込まないこと**。
+  同ファイルは辞書側の `func.php` と同じ `h()` を定義しているため、二重定義で落ちる
+- 本体の `markdown.php` は、保存させたいリンクの判定で本体の `site_config()` を呼ぶ。
+  `lib.php` を読めない代わりに、`view.php` が `function_exists()` で確かめてから
+  辞書側の `dictConfig()` を返す同名の関数を置いている（`site_url` の形式は本体と揃えてある）
+- 辞書はFTPで本体と別に置けるので、本体の `common/markdown.php` か `vendor/autoload.php` が
+  無ければ変換せず、原文をそのまま `<pre>` で出す。変換中の例外も同じ扱いにする。
+  本体側もサイトマップを作るときに辞書の `config.php` を `is_file()` で確かめてから読んでおり
+  （zaslon-site の `index.php` の `sitemap_dict_urls()`）、これと対の関係になっている
+- 辞書データに `legend` が無い場合は、その旨だけを出す
+- 本体は生HTMLをそのまま通す設定なので、辞書データにHTMLを書けばそのまま出る（自分の辞書データなので許容する）
+
+見た目（`dict.css` の `.legend`）も、本体の `css/style.css` の記事本文（見出しの縦棒・表・
+インラインコード・引用）と同じ規則を写してある。表はこのページだけで使うため、
+色変数 `--rule` `--tint` `--code-bg` `--th-bg` `--row-alt` `--quote-border` も本体と同じ名前・同じ値で足した。
+
+本体側の関数名や置き場所が変われば凡例は原文表示に落ちる（ページ自体は出る）ので、
+本体のMarkdown変換に手を入れるときはこのページの表示も確かめること。
 
 ## キャッシュ
 辞書のソートは重いため、結果を `cache/` に保存して使い回している。
@@ -255,6 +278,10 @@ Web経由で叩かれて勝手に追記されないよう、スクリプト側�
 ```
 php tests/run.php
 ```
+
+凡例のMarkdown変換だけは本体（zaslon-site）を必要とするため、
+本体の中の `dict/` に置いた状態で実行したときだけ、そのぶんのテストも一緒に動く。
+辞書のリポジトリ単体で実行した場合は、原文をそのまま出す側の動きだけを確かめる。
 
 ## 参照
 [文法書](https://zaslon.info/idyer/)
