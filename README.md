@@ -13,9 +13,13 @@
 | `example.php` | 例文の一覧ページ |
 | `legend.php` | 凡例のページ。中身は辞書データの `legend`（Markdown）を読む |
 | `chart.php` | 単語数推移のグラフページ |
-| `config.php` | サイト共通設定（サイト名・説明文・サイトURL・カード画像・アクセス解析ID・コピーライト・ページ間メニュー） |
+| `offline.php` | 通信できないときに Service Worker が出すページ |
+| `config.php` | サイト共通設定（サイト名・説明文・サイトURL・カード画像・アプリの表示・アクセス解析ID・コピーライト・ページ間メニュー） |
 | `func.php` | 設定読み込み、文字列処理、HKS順ソート、データ読み込み、キャッシュ |
 | `markdown.php` | 簡易なMarkdown変換。凡例用。本体（zaslon-site）が無い環境でだけ使う |
+| `pwa.php` | ホーム画面に追加したとき（PWA）の設定。マニフェストとService Workerの中身を組み立てる |
+| `manifest.php` | ホーム画面に追加したときの名前・アイコン・開き方（マニフェスト） |
+| `sw.php` | Service Workerを返す。版と対象URLを付けて `sw.js` を出す |
 | `search.php` | 検索と接辞サジェスト |
 | `view.php` | 検索結果のHTML出力 |
 | `header.php` / `footer.php` | 全ページ共通のレイアウト |
@@ -23,6 +27,8 @@
 | `script.js` | 明暗（ライト／ダーク）の切り替え |
 | `dict.js` | イジェール文字表示の切り替え |
 | `pronunciation.js` | 発音記号の自動生成 |
+| `pwa.js` | Service Workerの登録 |
+| `sw.js` | Service Workerの動きの定義。ブラウザは `sw.php` 経由で読む |
 | `vendor/akrantiain.min.js` | akrantiain（第三者製）をブラウザ用にまとめたもの |
 | `vendor/DoulosSIL-Regular.woff2` | 発音記号の書体（第三者製）。配布物をそのまま置く |
 | `vendor/LICENSE-*.txt` | 上記の第三者製ソフトウェア・フォントのライセンス全文 |
@@ -63,8 +69,8 @@
 検索語が複数あるときは、それぞれの語について辿る。
 
 ## 共通設定（config.php）
-サイト名・説明文・zaslon.info本体のURL・カード画像・アクセス解析ID・コピーライト表記・ページ間メニューは
-`config.php` に集約している。値は `func.php` の `dictConfig()` で読み込んで使い回す。
+サイト名・説明文・zaslon.info本体のURL・カード画像・ホーム画面に追加したときの表示（`app_*`）・
+アクセス解析ID・コピーライト表記・ページ間メニューは `config.php` に集約している。値は `func.php` の `dictConfig()` で読み込んで使い回す。
 zaslon-site本体の `common/config.php` / `site_config()` に対応するファイルで、
 本体と揃える必要がある値（`site_url`・`ga_id`・コピーライトの表記形式）は本体側と一致させること。
 
@@ -90,6 +96,38 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 `/icon-512.png`・`/apple-touch-icon.png`）を共用する。同じドメインの `/dict/` に置く前提のため、
 `header.php` からはルートからの絶対パスで指す。
 辞書だけを別の場所（`localhost/webDictionary/` 等）で開くとアイコンは表示されないが、表示内容には影響しない。
+
+## ホーム画面への追加（PWA）
+スマホのホーム画面に追加して、ブラウザの枠なしでアプリのように開ける。
+必要なのは**マニフェスト**（アプリの名前・アイコン・開き方）と**Service Worker**（通信の受け持ち）の2つで、
+`header.php` がマニフェストへのリンクを、`footer.php` が `pwa.js`（Service Workerの登録）をどのページにも出す。
+
+追加したときの表示は `config.php` の `app_name`（アイコンの下に出る短い名前）・`app_theme_color`・
+`app_background_color`・`app_icons` で決まる。アイコンはOGPと同じく本体のサイト直下の物を共用するため、
+辞書だけを別の場所に置いた環境では追加できない（表示には影響しない）。
+
+### 置き場所（manifest.php・sw.php）
+マニフェストもService Workerも、静的なファイルではなくPHPで返している。
+どちらも**辞書の置き場所そのもの**を書く必要があるためで、`pwa.php` の `appBasePath()` が
+今開いているURLから組み立てる。本体の中の `/dict/` でも、リポジトリ単体の `/webDictionary/` でも同じ物が動く。
+
+* `manifest.php` … 開くページ（`start_url`）は検索ページ、受け持ち（`scope`）は辞書のディレクトリ。
+  アイコンの長押しで出るショートカット（凡例・例文一覧・単語数推移）は、メニューと同じく `config.php` の `pages` から作る
+* `sw.php` … 動きの定義は `sw.js` にあり、版（キャッシュ名）と取っておくファイルの一覧だけをPHPで付ける。
+  版には `programUpdatedAt()`（プログラムの更新時刻）を使うため、CSSやJSを更新すればキャッシュも作り直される
+
+辞書の外（本体の文法書など）へのリンクを開くとアプリの受け持ちから出るため、ブラウザ側で開く。
+
+### 通信できないとき（sw.js）
+* ページ（HTML）は**通信を優先**する。辞書は更新され、検索もサーバ側で行うため、
+  キャッシュを返すのは通信できないときだけにする。同じURLで開いたことがあるページはそのまま出て、
+  無ければ `offline.php` を出す
+* CSS・JS・書体は**キャッシュを優先**する。`assetUrl()` の版付きURL（`?v=更新時刻`）で来るため、
+  更新されれば別のURLになり、古い物を返し続けることはない
+* 取っておくページ数には上限（`PAGE_CACHE_LIMIT`）を置き、超えた分は古い物から捨てる
+* 他所のサーバ（アクセス解析・グラフ）と辞書の外のページには手を出さない
+
+なお、単語の検索はサーバ側で行うため、オフラインで新しく引くことはできない。
 
 ## イジェール文字表示
 検索ページと例文一覧ページの「イジェール文字表示」は `dict.js` が担当する。

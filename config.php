@@ -14,6 +14,22 @@ return array(
 	//SNSのカード画像。zaslon.info本体のアイコンを共用するため、site_urlからの絶対URLに直して渡す
 	'og_image' => '/icon-512.png',
 
+	//////ホーム画面に追加したとき（PWA）の表示。manifest.phpに出る//////
+
+	//端末のアイコンの下に出る名前。長いと省略されるため、site_titleより短くする
+	'app_name' => 'イジェール語辞書',
+
+	//アプリの枠と、起動時に一瞬出る背景の色。dict.cssの--page-bg（明るい方）と揃える
+	//暗い表示のときのブラウザ枠の色は、script.jsがtheme-colorのmetaを書き換えて合わせる
+	'app_theme_color' => '#E5E5E0',
+	'app_background_color' => '#E5E5E0',
+
+	//ホーム画面のアイコン。og_imageと同じくzaslon.info本体のサイト直下の物を共用する
+	//Androidでの追加には192px以上の物が要るため、512pxを載せておく
+	'app_icons' => array(
+		array('src' => '/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png'),
+	),
+
 	//本体（zaslon-site）と同じプロパティで計測する。空にすると計測タグを出力しない
 	'ga_id' => 'G-3EQ8FM89JD',
 
