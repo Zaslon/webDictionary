@@ -55,14 +55,19 @@ function appManifest(){
 	$base = appBasePath();
 	$startUrl = $base . 'dict.php';
 
+	//purposeは'any'と'maskable'を両方出す。'any'は画像をそのまま四角く使う従来の見せ方、
+	//'maskable'はAndroid等が丸背景に収める際に使う見せ方で、画像の内接円だけが見えるよう
+	//四隅を切り落として敷き詰める（アイコン画像は元々中央に主要な絵柄を収めてあるため安全）
 	$icons = array();
 	foreach ($config['app_icons'] as $icon){
-		$icons[] = array(
-			'src'     => $icon['src'],
-			'sizes'   => $icon['sizes'],
-			'type'    => $icon['type'],
-			'purpose' => 'any',
-		);
+		foreach (array('any', 'maskable') as $purpose){
+			$icons[] = array(
+				'src'     => $icon['src'],
+				'sizes'   => $icon['sizes'],
+				'type'    => $icon['type'],
+				'purpose' => $purpose,
+			);
+		}
 	}
 
 	//アイコンを長押しすると出るショートカット。メニューと同じくconfig.phpのpagesから作る。
