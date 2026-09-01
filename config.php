@@ -30,6 +30,11 @@ return array(
 		array('src' => '/icon-512.png', 'sizes' => '512x512', 'type' => 'image/png'),
 	),
 
+	//maskable用アイコンの拡大倍率。AndroidなどはOSが安全円の外側を切り落として丸く見せるため、
+	//四角用の画像をそのまま使うと絵柄が中央に小さく寄って見える。中心を軸にこの倍率まで
+	//ズームしてから元の大きさに切り出す（pwa.phpのmaskableIconPng()）。1.0なら加工しない
+	'app_icon_maskable_scale' => 1.0,
+
 	//本体（zaslon-site）と同じプロパティで計測する。空にすると計測タグを出力しない
 	'ga_id' => 'G-3EQ8FM89JD',
 

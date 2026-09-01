@@ -56,13 +56,14 @@ function appManifest(){
 	$startUrl = $base . 'dict.php';
 
 	//purposeは'any'と'maskable'を両方出す。'any'は画像をそのまま四角く使う従来の見せ方、
-	//'maskable'はAndroid等が丸背景に収める際に使う見せ方で、画像の内接円だけが見えるよう
-	//四隅を切り落として敷き詰める（アイコン画像は元々中央に主要な絵柄を収めてあるため安全）
+	//'maskable'はAndroid等が丸背景に収める際に使う見せ方で、OS側が安全円の外側を切り落として
+	//丸く見せる。四角用の画像をそのまま渡すと絵柄が中央に小さく寄って見えるため、
+	//icon-maskable.phpでconfig.phpのapp_icon_maskable_scale倍にズームした版を別途生成して渡す
 	$icons = array();
-	foreach ($config['app_icons'] as $icon){
+	foreach ($config['app_icons'] as $iconIndex => $icon){
 		foreach (array('any', 'maskable') as $purpose){
 			$icons[] = array(
-				'src'     => $icon['src'],
+				'src'     => ($purpose === 'maskable') ? $base . maskableIconUrl($iconIndex, $icon) : $icon['src'],
 				'sizes'   => $icon['sizes'],
 				'type'    => $icon['type'],
 				'purpose' => $purpose,
@@ -100,6 +101,85 @@ function appManifest(){
 		'icons'            => $icons,
 		'shortcuts'        => $shortcuts,
 	);
+}
+
+//maskable用アイコンのURL。絵柄そのものかconfig.phpの倍率設定が変わったときはブラウザが
+//古いキャッシュを使い続けないよう、更新時刻を版として付ける（assetUrl()と同じ考え方）
+function maskableIconUrl($iconIndex, array $icon){
+	$stamp = appVersion();//pwa.php・config.php等の更新はここに含まれる
+	$sourceFile = maskableIconSourceFile($icon);
+	if (is_file($sourceFile)){
+		$stamp = max($stamp, filemtime($sourceFile));//本体側で絵柄だけ差し替えた場合はこちらで拾う
+	}
+	return 'icon-maskable.php?i=' . $iconIndex . '&v=' . $stamp;
+}
+
+//アイコンのsrcはサイト直下からの絶対パス（本体の中でもリポジトリ単体でも解決できるよう
+//appBasePath()と同じ考え方で書いてある）。実ファイルはDOCUMENT_ROOTを基準に読む
+function maskableIconSourceFile(array $icon){
+	$documentRoot = isset($_SERVER['DOCUMENT_ROOT']) ? rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']), '/') : '';
+	return $documentRoot . $icon['src'];
+}
+
+//maskable用に絵柄を拡大したPNGを作る。生成はGDを使うため軽くはなく、絵柄も倍率も
+//滅多に変わらないため、結果をキャッシュして元画像とconfig.phpが変わったときだけ作り直す
+function maskableIconPng(array $icon){
+	$sourceFile = maskableIconSourceFile($icon);
+	if (!is_file($sourceFile)){
+		return null;
+	}
+
+	$sources = array($sourceFile, __DIR__ . '/config.php');
+	$cacheName = 'icon-maskable-' . md5($sourceFile);
+	$cached = readCache($cacheName, $sources);
+	if ($cached !== null){
+		return $cached;
+	}
+
+	$config = dictConfig();
+	$scale = (float)$config['app_icon_maskable_scale'];
+	$png = renderMaskableIcon($sourceFile, $scale);
+	if ($png !== null){
+		writeCache($cacheName, $png, $sources);
+	}
+	return $png;
+}
+
+//画像の中心を軸に$scale倍へズームし、元と同じ大きさに切り出す。$scaleが1.0以下なら加工しない
+function renderMaskableIcon($sourceFile, $scale){
+	$raw = @file_get_contents($sourceFile);
+	if ($raw === false){
+		return null;
+	}
+	$source = @imagecreatefromstring($raw);
+	if ($source === false){
+		return null;
+	}
+
+	$width = imagesx($source);
+	$height = imagesy($source);
+	$dest = imagecreatetruecolor($width, $height);
+	//透過部分を保ったまま切り出すため、コピー前にアルファチャンネルを用意しておく
+	imagealphablending($dest, false);
+	imagesavealpha($dest, true);
+	imagefill($dest, 0, 0, imagecolorallocatealpha($dest, 0, 0, 0, 127));
+
+	if ($scale <= 1.0){
+		imagecopy($dest, $source, 0, 0, 0, 0, $width, $height);
+	}else{
+		//$scale倍に見えるよう、中央から1/$scaleの範囲だけを元の大きさへ引き伸ばして敷き詰める
+		$cropWidth = $width / $scale;
+		$cropHeight = $height / $scale;
+		$srcX = (int)round(($width - $cropWidth) / 2);
+		$srcY = (int)round(($height - $cropHeight) / 2);
+		imagecopyresampled($dest, $source, 0, 0, $srcX, $srcY, $width, $height, (int)round($cropWidth), (int)round($cropHeight));
+	}
+	imagedestroy($source);
+
+	ob_start();
+	imagepng($dest);
+	imagedestroy($dest);
+	return ob_get_clean();
 }
 
 //日本語とスラッシュはそのまま出す。人が読める形にしておく
