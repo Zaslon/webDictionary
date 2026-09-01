@@ -2,6 +2,7 @@
 //テスト実行スクリプト。プロジェクト直下で `php tests/run.php` として実行する。
 require_once __DIR__ . '/../search.php';
 require_once __DIR__ . '/../view.php';
+require_once __DIR__ . '/../pwa.php';
 
 $passed = 0;
 $failed = 0;
@@ -588,6 +589,71 @@ ob_start();
 renderNavigation(20, 1, array('a'), 'both', 'prt');
 $html = ob_get_clean();
 is_same('1ページに収まる場合はページ送りを出さない', '<nav aria-label="ページ送り"><ul class="navigation"></ul></nav>', $html);
+
+//////////////////////////////////////////////////
+//ホーム画面への追加（PWA）
+//////////////////////////////////////////////////
+
+$savedScriptName = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : null;
+
+$_SERVER['SCRIPT_NAME'] = '/dict/manifest.php';
+is_same('appBasePath は辞書を置いた場所を返す', '/dict/', appBasePath());
+$_SERVER['SCRIPT_NAME'] = '/manifest.php';
+is_same('appBasePath はサイト直下でも二重のスラッシュにしない', '/', appBasePath());
+$_SERVER['SCRIPT_NAME'] = '/webDictionary/sw.php';
+is_same('appBasePath は辞書だけを別の場所に置いてもその場所を返す', '/webDictionary/', appBasePath());
+
+$_SERVER['SCRIPT_NAME'] = '/dict/manifest.php';
+$manifest = appManifest();
+$config = dictConfig();
+is_same('マニフェストは検索ページから始める', '/dict/dict.php', $manifest['start_url']);
+is_same('マニフェストの受け持ちは辞書の置き場所', '/dict/', $manifest['scope']);
+is_same('マニフェストのURLが変わってもアプリが別物にならないよう識別子を持つ', '/dict/dict.php', $manifest['id']);
+is_same('マニフェストはアプリとして開く指定を持つ', 'standalone', $manifest['display']);
+is_same('ホーム画面の名前はconfig.phpのapp_nameから取る', $config['app_name'], $manifest['short_name']);
+is_same('アプリの名前はサイト名と揃える', $config['site_title'], $manifest['name']);
+is_same(
+	'ショートカットは検索ページ以外のページを、今いる場所からのURLで出す',
+	array('/dict/legend.php', '/dict/example.php', '/dict/chart.php'),
+	array_map(function ($shortcut){ return $shortcut['url']; }, $manifest['shortcuts'])
+);
+
+//Androidでホーム画面に追加するには192px以上のアイコンが要る
+$largestIcon = 0;
+foreach ($manifest['icons'] as $singleIcon){
+	$sides = explode('x', $singleIcon['sizes']);
+	$largestIcon = max($largestIcon, (int)$sides[0]);
+}
+is_same('ホーム画面用に192px以上のアイコンを載せる', true, $largestIcon >= 192);
+
+is_same('マニフェストはJSONとして出せる', $manifest, json_decode(manifestJson(), true));
+is_same('マニフェストは日本語をそのまま出す', true, strpos(manifestJson(), $config['app_name']) !== false);
+
+$precacheUrls = appPrecacheUrls();
+is_same('通信できないとき用のページを取っておく', true, in_array('/dict/offline.php', $precacheUrls, true));
+is_same(
+	'CSSはページが読むのと同じ版付きのURLで取っておく',
+	true,
+	in_array('/dict/' . assetUrl('dict.css'), $precacheUrls, true)
+);
+is_same('ページが読まないsw.jsは取っておかない', array(), preg_grep('#/sw\.js#', $precacheUrls));
+is_same('端末に入っていることのある書体は取っておかない', array(), preg_grep('/DoulosSIL/', $precacheUrls));
+
+$serviceWorker = serviceWorkerScript();
+is_same(
+	'Service Workerは版を持つ（更新すると古いキャッシュが捨てられる）',
+	true,
+	strpos($serviceWorker, 'const CACHE_VERSION = "' . appVersion() . '"') !== false
+);
+is_same('Service Workerは辞書の置き場所を受け持つ', true, strpos($serviceWorker, 'const SCOPE = "/dict/"') !== false);
+is_same('Service Workerは取っておくファイルの一覧を持つ', true, strpos($serviceWorker, '"/dict/offline.php"') !== false);
+is_same('Service Workerは通信を横取りする', true, strpos($serviceWorker, "addEventListener('fetch'") !== false);
+
+if ($savedScriptName === null){
+	unset($_SERVER['SCRIPT_NAME']);
+}else{
+	$_SERVER['SCRIPT_NAME'] = $savedScriptName;
+}
 
 //////////////////////////////////////////////////
 

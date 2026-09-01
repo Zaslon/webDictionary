@@ -3,6 +3,7 @@
 //  $pageMenu    : メニュー項目 array(ラベル => URL)。buildPageMenu()で組み立てる
 //  $pageScripts : <head>で読み込む追加スクリプトのURL。描画前に効かせたいものだけ置く
 //  $pageDeferredScripts : deferで読み込む追加スクリプトのURL。描画を待たせたくないもの
+//  $pageNoIndex : trueにすると検索避け（noindex）を出す
 //ページ固有の見出し要素を続けて置けるよう、<header>は開いたまま返す。
 //読み込んだ側が</header>を閉じること。
 require_once __DIR__ . '/func.php';
@@ -11,6 +12,7 @@ $config = dictConfig();
 $pageMenu = isset($pageMenu) ? $pageMenu : array();
 $pageScripts = isset($pageScripts) ? $pageScripts : array();
 $pageDeferredScripts = isset($pageDeferredScripts) ? $pageDeferredScripts : array();
+$pageNoIndex = isset($pageNoIndex) ? $pageNoIndex : false;
 ?>
 <!DOCTYPE html>
 <html lang="ja" dir="ltr">
@@ -19,6 +21,9 @@ $pageDeferredScripts = isset($pageDeferredScripts) ? $pageDeferredScripts : arra
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=yes" />
 <meta name="description" content="<?php echo h($config['site_tagline']); ?>" />
 <meta name="keywords" content="人工言語,辞書" />
+<?php if ($pageNoIndex): ?>
+<meta name="robots" content="noindex" />
+<?php endif; ?>
 <?php $canonicalUrl = canonicalUrl(); if ($canonicalUrl !== ''): ?>
 <link rel="canonical" href="<?php echo h($canonicalUrl); ?>" />
 <?php endif; ?>
@@ -71,6 +76,16 @@ $ogImage = absoluteUrl($config['og_image']);
 <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
 <link rel="icon" href="/icon-512.png" type="image/png" sizes="512x512" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<?php
+//ホーム画面に追加したとき（PWA）の設定。中身はmanifest.phpがconfig.phpのapp_*から組み立てる。
+//辞書のページは同じディレクトリに並んでいるため、置き場所に依らないよう相対パスで指す。
+//iOSはマニフェストのdisplayを見ないため、アプリとして開くにはapple-の指定も要る
+?>
+<link rel="manifest" href="manifest.php" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="<?php echo h($config['app_name']); ?>" />
 <title><?php echo h($config['site_title']); ?></title>
 </head>
 <body>
