@@ -28,6 +28,21 @@
 		}
 	}
 
+	// localStorageと同じ内容をCookieにも残す。
+	// ホーム画面に追加したとき（PWA）のiOSの通知バーは
+	// apple-mobile-web-app-status-bar-style でしか変えられず、読み込み時に一度しか見られない。
+	// つまり後からJavaScriptで書き換えても効かないため、ページを返す時点で明暗が分かるよう
+	// サーバへ送られるCookieに残し、header.php（currentTheme）が読んで出し分ける。
+	// OSの設定に従っているときも今出している方を書くので、値は常に実際の表示と一致する。
+	// キー名・値はlocalStorageと同じ。zaslon.info全体で共有するためpathは'/'にする
+	function saveCookie(theme) {
+		try {
+			document.cookie = STORAGE_KEY + '=' + theme + ';path=/;max-age=31536000;samesite=lax';
+		} catch (error) {
+			// 保存できなくても続行する
+		}
+	}
+
 	// 保存済みの選択を、画面を描く前に反映する
 	const saved = loadSetting();
 	if (saved !== null) {
@@ -43,9 +58,11 @@
 		return (query && query.matches) ? 'dark' : 'light';
 	}
 
-	// ボタンの説明とスマホのブラウザ枠の色を、今の表示に合わせる
+	// ボタンの説明とスマホのブラウザ枠の色を、今の表示に合わせる。
+	// 次に開いたときの通知バーの色を決めるCookieも、ここで今の表示に合わせて書き直す
 	function sync() {
 		const now = current();
+		saveCookie(now);
 		const meta = document.getElementById('theme-color-meta');
 		if (meta) {
 			meta.setAttribute('content', BG[now]);
