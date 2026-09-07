@@ -150,6 +150,14 @@ function themeColor($theme = null){
 	return ($theme === 'dark') ? $config['app_theme_color_dark'] : $config['app_theme_color'];
 }
 
+//端末（OS）のダークモード設定。Chromium系はクライアントヒントで送ってくるが、
+//header.phpがAccept-CHで要求するまでは送られてこない。要求前や対応していないブラウザでは
+//分からないため、その場合は明るい方として扱う
+function deviceTheme(){
+	$hint = isset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']) ? (string)$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] : '';
+	return ($hint === 'dark') ? 'dark' : 'light';
+}
+
 //ホーム画面に追加したときのiOSの通知バーの見た目。
 //'default'は白地に黒文字、'black'は黒地に白文字。iOSはこの指定を読み込み時に一度しか見ず、
 //後からJavaScriptで書き換えても効かないため、Cookieに残した表示に合わせてここで出し分ける

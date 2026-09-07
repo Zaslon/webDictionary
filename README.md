@@ -103,7 +103,7 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 `header.php` がマニフェストへのリンクを、`footer.php` が `pwa.js`（Service Workerの登録）をどのページにも出す。
 
 追加したときの表示は `config.php` の `app_name`（アイコンの下に出る短い名前）・`app_theme_color`・
-`app_theme_color_dark`・`app_background_color`・`app_icons` で決まる。アイコンはOGPと同じく本体のサイト直下の物を共用するため、
+`app_theme_color_dark`・`app_icons` で決まる。アイコンはOGPと同じく本体のサイト直下の物を共用するため、
 辞書だけを別の場所に置いた環境では追加できない（表示には影響しない）。
 
 ### 置き場所（manifest.php・sw.php）
@@ -203,6 +203,12 @@ OSの設定ではなく**アプリ内のボタンで選ばれている表示**�
 - 表示ごとに中身が変わるため、`header.php` は `Vary: Cookie` を付ける。
   Service Worker（`sw.js`）が控えのページを探すときは `ignoreVary` を付けて、
   表示を切り替えても控えが見つかるようにしている
+- **起動時**（ホーム画面から開いてページが出るまでの画面）の色はマニフェストの
+  `theme_color` / `background_color` で決まる。ページを開く前なのでアプリ内の設定は使えず、
+  ここだけは**端末のダークモード設定**に合わせる。`header.php` が
+  `Accept-CH: Sec-CH-Prefers-Color-Scheme` を出して端末の設定を送ってもらい、
+  `manifest.php`（`func.php` の `deviceTheme()`）がそれを読んで色を選ぶ。
+  クライアントヒントに対応しないブラウザ（Safari等）では明るい方になる
 
 ## 辞書順
 見出し語の並び順は[辞書順について](https://zaslon.info/idyerin/%E8%BE%9E%E6%9B%B8%E9%A0%86%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/)の規則に従う。

@@ -11,9 +11,12 @@ require_once __DIR__ . '/func.php';
 $config = dictConfig();
 
 //明暗の表示ごとに通知バーの指定（下のtheme-color・apple-mobile-web-app-status-bar-style）が
-//変わるため、Cookieの違う相手に同じ中身を使い回させない
+//変わるため、Cookieの違う相手に同じ中身を使い回させない。
+//Accept-CHは端末のダークモード設定を送ってもらうための要求で、これを出しておくと
+//このあと読まれるmanifest.phpのリクエストに付いてくる（起動時の画面の色に使う）
 if (!headers_sent()){
 	header('Vary: Cookie');
+	header('Accept-CH: Sec-CH-Prefers-Color-Scheme');
 }
 $pageMenu = isset($pageMenu) ? $pageMenu : array();
 $pageScripts = isset($pageScripts) ? $pageScripts : array();

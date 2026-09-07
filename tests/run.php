@@ -610,6 +610,15 @@ is_same('マニフェストは検索ページから始める', '/dict/dict.php',
 is_same('マニフェストの受け持ちは辞書の置き場所', '/dict/', $manifest['scope']);
 is_same('マニフェストのURLが変わってもアプリが別物にならないよう識別子を持つ', '/dict/dict.php', $manifest['id']);
 is_same('マニフェストはアプリとして開く指定を持つ', 'standalone', $manifest['display']);
+
+//起動時の画面はページを開く前に出るため、アプリ内で選んだ表示（Cookie）ではなく端末の設定に合わせる
+$_COOKIE['theme'] = 'light';
+$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = 'dark';
+$darkManifest = appManifest();
+is_same('端末がダークモードなら起動時の枠の色も暗くする', $config['app_theme_color_dark'], $darkManifest['theme_color']);
+is_same('端末がダークモードなら起動時の背景も暗くする', $config['app_theme_color_dark'], $darkManifest['background_color']);
+unset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'], $_COOKIE['theme']);
+is_same('端末の設定が分からなければ起動時の色は明るい方', $config['app_theme_color'], appManifest()['theme_color']);
 is_same('ホーム画面の名前はconfig.phpのapp_nameから取る', $config['app_name'], $manifest['short_name']);
 is_same('アプリの名前はサイト名と揃える', $config['site_title'], $manifest['name']);
 is_same(
@@ -667,10 +676,22 @@ is_same('暗い表示の枠の色はdict.cssの--page-bg（暗い方）', '#1314
 $_COOKIE['theme'] = 'darkish; DROP';
 is_same('知らない値は明るい表示として扱う', 'light', currentTheme());
 
+$savedColorSchemeHint = isset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']) ? $_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] : null;
+
+unset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']);
+is_same('端末の設定が分からなければ明るい方として扱う', 'light', deviceTheme());
+$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = 'dark';
+is_same('端末のダークモード設定はクライアントヒントから読む', 'dark', deviceTheme());
+
 if ($savedThemeCookie === null){
 	unset($_COOKIE['theme']);
 }else{
 	$_COOKIE['theme'] = $savedThemeCookie;
+}
+if ($savedColorSchemeHint === null){
+	unset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']);
+}else{
+	$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = $savedColorSchemeHint;
 }
 
 //////////////////////////////////////////////////
