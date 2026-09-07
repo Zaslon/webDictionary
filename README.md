@@ -103,8 +103,21 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 `header.php` がマニフェストへのリンクを、`footer.php` が `pwa.js`（Service Workerの登録）をどのページにも出す。
 
 追加したときの表示は `config.php` の `app_name`（アイコンの下に出る短い名前）・`app_theme_color`・
-`app_theme_color_dark`・`app_icons` で決まる。アイコンはOGPと同じく本体のサイト直下の物を共用するため、
+`app_icons`・`app_icon_maskable_scale` で決まる。アイコンはOGPと同じく本体のサイト直下の物を共用するため、
 辞書だけを別の場所に置いた環境では追加できない（表示には影響しない）。
+
+### ホーム画面のアイコン
+マニフェストには同じ画像を `purpose` 違いで2つ載せる。
+
+* `any` … 画像をそのまま四角く使う従来の見せ方
+* `maskable` … Androidなどが丸背景に収める見せ方。OS側が安全円の外側を切り落とすため、
+  絵柄はこちらの方が大きく見える。**これが取れないと `any` の見せ方（四角の中に小さく収まる）に戻る**
+
+`config.php` の `app_icon_maskable_scale` を `1.0` より大きくすると、`maskable` 側だけ中心を軸に
+その倍率までズームした版（`icon-maskable.php` がGDで生成、`cache/` に取っておく）に差し替える。
+`1.0` のときや、GDが無い・元画像を読めない環境では元の画像をそのまま渡す。
+これは生成できない状況で404を返すと `maskable` のアイコンごと失われるのを避けるためで、
+倍率を上げるときは `icon-maskable.php` をサーバに置くこと。
 
 ### 置き場所（manifest.php・sw.php）
 マニフェストもService Workerも、静的なファイルではなくPHPで返している。
@@ -175,9 +188,6 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 | 保存する値 | `dark` / `light` |
 | `<html>` に付ける属性 | `data-theme="dark"` / `"light"` |
 
-`script.js` は同じ内容を Cookie `theme`（`path=/`）にも残す。
-サーバ側で明暗を知るためのもので、下の「通知バー・ブラウザ枠の色」で使う。
-
 - ボタンで選んでいなければ、OSの設定（`prefers-color-scheme`）に従う
 - 保存済みの選択は `<head>` で同期読み込みする `script.js` が画面を描く前に付けるので、
   明るい画面が一瞬見えることはない
@@ -189,26 +199,15 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 
 ### 通知バー・ブラウザ枠の色
 スマホのブラウザ枠と、ホーム画面に追加したとき（PWA）の通知バー（ステータスバー）の色は、
-OSの設定ではなく**アプリ内のボタンで選ばれている表示**に合わせる。
-色は `config.php` の `app_theme_color`（明るい方）と `app_theme_color_dark`（暗い方）で、
-`dict.css` の `--page-bg` と揃える。
+**アプリ内の明暗の設定にもOSの設定にも関わらず、常に黒ベースで固定する。**
+色は `config.php` の `app_theme_color`（`dict.css` の `--page-bg` の暗い方と揃える）1つだけ。
 
-- `header.php` は Cookie `theme` を `func.php` の `currentTheme()` で読み、
-  `theme-color` と `apple-mobile-web-app-status-bar-style` を選んで出す
+- `header.php` が `theme-color` に `app_theme_color` を出す。切り替えても変えないため、
+  `script.js` はこの指定に触らない
 - iOSの通知バーは `apple-mobile-web-app-status-bar-style` でしか変えられず、読み込み時に一度しか
-  見られない（明るい表示＝`default` で白地、暗い表示＝`black` で黒地）。
-  後から `script.js` で書き換えても効かないため、Cookieを使ってサーバ側で出し分けている
-- ページを開いたあとの切り替えは `script.js` が `theme-color` を書き換える。
-  iOSの通知バーが変わるのは次に開いたときから
-- 表示ごとに中身が変わるため、`header.php` は `Vary: Cookie` を付ける。
-  Service Worker（`sw.js`）が控えのページを探すときは `ignoreVary` を付けて、
-  表示を切り替えても控えが見つかるようにしている
+  見られない（後から `script.js` で書き換えても効かない）。黒地に白文字の `black` で固定する
 - **起動時**（ホーム画面から開いてページが出るまでの画面）の色はマニフェストの
-  `theme_color` / `background_color` で決まる。ページを開く前なのでアプリ内の設定は使えず、
-  ここだけは**端末のダークモード設定**に合わせる。`header.php` が
-  `Accept-CH: Sec-CH-Prefers-Color-Scheme` を出して端末の設定を送ってもらい、
-  `manifest.php`（`func.php` の `deviceTheme()`）がそれを読んで色を選ぶ。
-  クライアントヒントに対応しないブラウザ（Safari等）では明るい方になる
+  `theme_color` / `background_color` で決まる。こちらも同じ `app_theme_color` を使う
 
 ## 辞書順
 見出し語の並び順は[辞書順について](https://zaslon.info/idyerin/%E8%BE%9E%E6%9B%B8%E9%A0%86%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/)の規則に従う。

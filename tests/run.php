@@ -611,14 +611,9 @@ is_same('マニフェストの受け持ちは辞書の置き場所', '/dict/', $
 is_same('マニフェストのURLが変わってもアプリが別物にならないよう識別子を持つ', '/dict/dict.php', $manifest['id']);
 is_same('マニフェストはアプリとして開く指定を持つ', 'standalone', $manifest['display']);
 
-//起動時の画面はページを開く前に出るため、アプリ内で選んだ表示（Cookie）ではなく端末の設定に合わせる
-$_COOKIE['theme'] = 'light';
-$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = 'dark';
-$darkManifest = appManifest();
-is_same('端末がダークモードなら起動時の枠の色も暗くする', $config['app_theme_color_dark'], $darkManifest['theme_color']);
-is_same('端末がダークモードなら起動時の背景も暗くする', $config['app_theme_color_dark'], $darkManifest['background_color']);
-unset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'], $_COOKIE['theme']);
-is_same('端末の設定が分からなければ起動時の色は明るい方', $config['app_theme_color'], appManifest()['theme_color']);
+is_same('起動時の枠の色はconfig.phpの色で固定する', $config['app_theme_color'], $manifest['theme_color']);
+is_same('起動時の背景も同じ色にする', $config['app_theme_color'], $manifest['background_color']);
+is_same('通知バーの色は暗い方で固定する（dict.cssの--page-bg）', '#131417', $config['app_theme_color']);
 is_same('ホーム画面の名前はconfig.phpのapp_nameから取る', $config['app_name'], $manifest['short_name']);
 is_same('アプリの名前はサイト名と揃える', $config['site_title'], $manifest['name']);
 is_same(
@@ -634,6 +629,17 @@ foreach ($manifest['icons'] as $singleIcon){
 	$largestIcon = max($largestIcon, (int)$sides[0]);
 }
 is_same('ホーム画面用に192px以上のアイコンを載せる', true, $largestIcon >= 192);
+
+//maskableのアイコンが取れないと、ホーム画面のアイコンは四角の中に小さく収まる見せ方に戻る
+$maskableIcons = array_values(array_filter($manifest['icons'], function ($singleIcon){
+	return $singleIcon['purpose'] === 'maskable';
+}));
+is_same('丸背景に収める用（maskable）のアイコンも載せる', true, count($maskableIcons) > 0);
+is_same(
+	'ズームした版を作れない環境では元の画像をそのまま渡す',
+	'/no-such-icon.png',
+	maskableIconSrc('/dict/', 0, array('src' => '/no-such-icon.png', 'sizes' => '512x512', 'type' => 'image/png'))
+);
 
 is_same('マニフェストはJSONとして出せる', $manifest, json_decode(manifestJson(), true));
 is_same('マニフェストは日本語をそのまま出す', true, strpos(manifestJson(), $config['app_name']) !== false);
@@ -657,44 +663,6 @@ is_same(
 is_same('Service Workerは辞書の置き場所を受け持つ', true, strpos($serviceWorker, 'const SCOPE = "/dict/"') !== false);
 is_same('Service Workerは取っておくファイルの一覧を持つ', true, strpos($serviceWorker, '"/dict/offline.php"') !== false);
 is_same('Service Workerは通信を横取りする', true, strpos($serviceWorker, "addEventListener('fetch'") !== false);
-
-//////////////////////////////////////////////////
-//明暗の表示（通知バーの色）
-//////////////////////////////////////////////////
-
-$savedThemeCookie = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : null;
-
-unset($_COOKIE['theme']);
-is_same('選んでいなければ明るい表示として扱う', 'light', currentTheme());
-is_same('明るい表示ではiOSの通知バーを白地にする', 'default', appleStatusBarStyle());
-
-$_COOKIE['theme'] = 'dark';
-is_same('暗い表示を選んでいればCookieから読み取る', 'dark', currentTheme());
-is_same('暗い表示ではiOSの通知バーを黒地にする', 'black', appleStatusBarStyle());
-is_same('暗い表示の枠の色はdict.cssの--page-bg（暗い方）', '#131417', themeColor());
-
-$_COOKIE['theme'] = 'darkish; DROP';
-is_same('知らない値は明るい表示として扱う', 'light', currentTheme());
-
-$savedColorSchemeHint = isset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']) ? $_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] : null;
-
-unset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']);
-is_same('端末の設定が分からなければ明るい方として扱う', 'light', deviceTheme());
-$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = 'dark';
-is_same('端末のダークモード設定はクライアントヒントから読む', 'dark', deviceTheme());
-
-if ($savedThemeCookie === null){
-	unset($_COOKIE['theme']);
-}else{
-	$_COOKIE['theme'] = $savedThemeCookie;
-}
-if ($savedColorSchemeHint === null){
-	unset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']);
-}else{
-	$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = $savedColorSchemeHint;
-}
-
-//////////////////////////////////////////////////
 
 if ($savedScriptName === null){
 	unset($_SERVER['SCRIPT_NAME']);

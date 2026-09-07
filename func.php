@@ -132,41 +132,6 @@ function absoluteUrl($path = null){
 }
 
 //////////////////////////////////////////////////
-//明暗の表示（ライト／ダーク）
-//////////////////////////////////////////////////
-
-//アプリ内のボタンで選んでいる表示。script.jsがCookie 'theme' に残した物を読む。
-//localStorageと違いサーバへ送られるため、ページを返す時点で明暗が分かる。
-//まだ一度も開いていない等でCookieが無ければ、明るい方として扱う
-function currentTheme(){
-	$theme = isset($_COOKIE['theme']) ? (string)$_COOKIE['theme'] : '';
-	return ($theme === 'dark') ? 'dark' : 'light';
-}
-
-//スマホのブラウザ枠・通知バーに出す色。dict.cssの--page-bgと揃える
-function themeColor($theme = null){
-	$config = dictConfig();
-	$theme = ($theme === null) ? currentTheme() : $theme;
-	return ($theme === 'dark') ? $config['app_theme_color_dark'] : $config['app_theme_color'];
-}
-
-//端末（OS）のダークモード設定。Chromium系はクライアントヒントで送ってくるが、
-//header.phpがAccept-CHで要求するまでは送られてこない。要求前や対応していないブラウザでは
-//分からないため、その場合は明るい方として扱う
-function deviceTheme(){
-	$hint = isset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']) ? (string)$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] : '';
-	return ($hint === 'dark') ? 'dark' : 'light';
-}
-
-//ホーム画面に追加したときのiOSの通知バーの見た目。
-//'default'は白地に黒文字、'black'は黒地に白文字。iOSはこの指定を読み込み時に一度しか見ず、
-//後からJavaScriptで書き換えても効かないため、Cookieに残した表示に合わせてここで出し分ける
-function appleStatusBarStyle($theme = null){
-	$theme = ($theme === null) ? currentTheme() : $theme;
-	return ($theme === 'dark') ? 'black' : 'default';
-}
-
-//////////////////////////////////////////////////
 //リクエストパラメータ
 //////////////////////////////////////////////////
 

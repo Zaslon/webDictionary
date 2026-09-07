@@ -10,14 +10,6 @@ require_once __DIR__ . '/func.php';
 
 $config = dictConfig();
 
-//明暗の表示ごとに通知バーの指定（下のtheme-color・apple-mobile-web-app-status-bar-style）が
-//変わるため、Cookieの違う相手に同じ中身を使い回させない。
-//Accept-CHは端末のダークモード設定を送ってもらうための要求で、これを出しておくと
-//このあと読まれるmanifest.phpのリクエストに付いてくる（起動時の画面の色に使う）
-if (!headers_sent()){
-	header('Vary: Cookie');
-	header('Accept-CH: Sec-CH-Prefers-Color-Scheme');
-}
 $pageMenu = isset($pageMenu) ? $pageMenu : array();
 $pageScripts = isset($pageScripts) ? $pageScripts : array();
 $pageDeferredScripts = isset($pageDeferredScripts) ? $pageDeferredScripts : array();
@@ -62,11 +54,9 @@ $ogImage = absoluteUrl($config['og_image']);
 <meta name="twitter:site" content="@Zaslon" />
 <?php
 //スマホのブラウザ枠と、ホーム画面に追加したとき（PWA）の通知バーの色。
-//アプリ内のボタンで選ばれている表示に合わせる。選んだ内容はscript.jsがCookieに残しており、
-//初めからその色で出せるようここで読む。ページを開いたあとの切り替えはscript.jsが書き換える
-$appTheme = currentTheme();
+//アプリ内の明暗の設定や端末のダークモード設定に関わらず、config.phpの色で固定する
 ?>
-<meta name="theme-color" id="theme-color-meta" content="<?php echo h(themeColor($appTheme)); ?>" />
+<meta name="theme-color" content="<?php echo h($config['app_theme_color']); ?>" />
 <?php $gaId = gaMeasurementId(); if ($gaId !== ''): ?>
 <!-- Google tag (gtag.js)。設定はconfig.phpのga_id / ga_exclude_hosts参照。zaslon-site本体と同じプロパティ -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo h($gaId); ?>"></script>
@@ -100,10 +90,10 @@ $appTheme = currentTheme();
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <?php
 //iOSの通知バーはこの指定でしか変えられず、読み込み時に一度しか見られない（JavaScriptで
-//後から書き換えても効かない）ため、明るい表示なら白地、暗い表示なら黒地を選んで出す。
-//通信できないときはService Workerが控えのページを返すので、その間は最後に開いたときの色になる
+//後から書き換えても効かない）。'black'は黒地に白文字、'default'は白地に黒文字で、
+//上のtheme-colorと揃えて常に黒地にする
 ?>
-<meta name="apple-mobile-web-app-status-bar-style" content="<?php echo h(appleStatusBarStyle($appTheme)); ?>" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <meta name="apple-mobile-web-app-title" content="<?php echo h($config['app_name']); ?>" />
 <title><?php echo h($config['site_title']); ?></title>
 </head>

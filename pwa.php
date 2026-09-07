@@ -57,13 +57,13 @@ function appManifest(){
 
 	//purposeは'any'と'maskable'を両方出す。'any'は画像をそのまま四角く使う従来の見せ方、
 	//'maskable'はAndroid等が丸背景に収める際に使う見せ方で、OS側が安全円の外側を切り落として
-	//丸く見せる。四角用の画像をそのまま渡すと絵柄が中央に小さく寄って見えるため、
-	//icon-maskable.phpでconfig.phpのapp_icon_maskable_scale倍にズームした版を別途生成して渡す
+	//丸く見せる（絵柄が大きく見えるのはこちら）。config.phpのapp_icon_maskable_scaleで
+	//さらにズームする場合だけ、icon-maskable.phpが作る版に差し替える
 	$icons = array();
 	foreach ($config['app_icons'] as $iconIndex => $icon){
 		foreach (array('any', 'maskable') as $purpose){
 			$icons[] = array(
-				'src'     => ($purpose === 'maskable') ? $base . maskableIconUrl($iconIndex, $icon) : $icon['src'],
+				'src'     => ($purpose === 'maskable') ? maskableIconSrc($base, $iconIndex, $icon) : $icon['src'],
 				'sizes'   => $icon['sizes'],
 				'type'    => $icon['type'],
 				'purpose' => $purpose,
@@ -85,11 +85,6 @@ function appManifest(){
 		);
 	}
 
-	//アプリの枠と、起動時に一瞬出る画面の色。ここはページを開く前に使われるため、
-	//アプリ内のボタンで選んだ表示（Cookie）ではなく端末のダークモード設定に合わせる。
-	//ページを開いたあとの色はheader.phpのtheme-colorが受け持つ
-	$themeColor = themeColor(deviceTheme());
-
 	return array(
 		//マニフェストのURLが変わってもアプリが別物にならないよう、識別子を明示する
 		'id'               => $startUrl,
@@ -101,11 +96,27 @@ function appManifest(){
 		'start_url'        => $startUrl,
 		'scope'            => $base,
 		'display'          => 'standalone',
-		'theme_color'      => $themeColor,
-		'background_color' => $themeColor,
+		//アプリの枠と、起動時に一瞬出る画面の色。header.phpのtheme-colorと同じく固定の色を使う
+		'theme_color'      => $config['app_theme_color'],
+		'background_color' => $config['app_theme_color'],
 		'icons'            => $icons,
 		'shortcuts'        => $shortcuts,
 	);
+}
+
+//maskable用に渡すアイコンのURL。ズームしないなら元画像をそのまま渡す。
+//icon-maskable.phpが読めない環境（設置し忘れ・GD無し・元画像が無い）で404を返すと、
+//maskableのアイコンごと使われずに'any'（四角の中に小さく収まる見せ方）へ戻ってしまうため、
+//生成できると分かっているときだけ差し替える
+function maskableIconSrc($base, $iconIndex, array $icon){
+	$config = dictConfig();
+	if ((float)$config['app_icon_maskable_scale'] <= 1.0){
+		return $icon['src'];
+	}
+	if (!function_exists('imagecreatefromstring') || !is_file(maskableIconSourceFile($icon))){
+		return $icon['src'];
+	}
+	return $base . maskableIconUrl($iconIndex, $icon);
 }
 
 //maskable用アイコンのURL。絵柄そのものかconfig.phpの倍率設定が変わったときはブラウザが
