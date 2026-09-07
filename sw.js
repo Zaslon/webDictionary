@@ -66,8 +66,10 @@ async function handlePage(request) {
 		}
 		return response;
 	} catch (error) {
-		// 検索語ごとに別のページなので、同じURLで開いたことがある場合だけ控えを返す
-		const cached = await cache.match(request);
+		// 検索語ごとに別のページなので、同じURLで開いたことがある場合だけ控えを返す。
+		// ページはVary: Cookieを持つ（明暗の表示で通知バーの指定が変わる）ため、
+		// ignoreVaryを付けないと表示を切り替えたあと控えが見つからなくなる
+		const cached = await cache.match(request, {ignoreVary: true});
 		if (cached) {
 			return cached;
 		}

@@ -649,6 +649,32 @@ is_same('Service Workerは辞書の置き場所を受け持つ', true, strpos($s
 is_same('Service Workerは取っておくファイルの一覧を持つ', true, strpos($serviceWorker, '"/dict/offline.php"') !== false);
 is_same('Service Workerは通信を横取りする', true, strpos($serviceWorker, "addEventListener('fetch'") !== false);
 
+//////////////////////////////////////////////////
+//明暗の表示（通知バーの色）
+//////////////////////////////////////////////////
+
+$savedThemeCookie = isset($_COOKIE['theme']) ? $_COOKIE['theme'] : null;
+
+unset($_COOKIE['theme']);
+is_same('選んでいなければ明るい表示として扱う', 'light', currentTheme());
+is_same('明るい表示ではiOSの通知バーを白地にする', 'default', appleStatusBarStyle());
+
+$_COOKIE['theme'] = 'dark';
+is_same('暗い表示を選んでいればCookieから読み取る', 'dark', currentTheme());
+is_same('暗い表示ではiOSの通知バーを黒地にする', 'black', appleStatusBarStyle());
+is_same('暗い表示の枠の色はdict.cssの--page-bg（暗い方）', '#131417', themeColor());
+
+$_COOKIE['theme'] = 'darkish; DROP';
+is_same('知らない値は明るい表示として扱う', 'light', currentTheme());
+
+if ($savedThemeCookie === null){
+	unset($_COOKIE['theme']);
+}else{
+	$_COOKIE['theme'] = $savedThemeCookie;
+}
+
+//////////////////////////////////////////////////
+
 if ($savedScriptName === null){
 	unset($_SERVER['SCRIPT_NAME']);
 }else{
