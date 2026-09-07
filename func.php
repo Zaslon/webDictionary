@@ -132,6 +132,29 @@ function absoluteUrl($path = null){
 }
 
 //////////////////////////////////////////////////
+//明暗の表示（ライト／ダーク）
+//////////////////////////////////////////////////
+
+//スマホのブラウザ枠・通知バーと、起動時に一瞬出る画面の色。dict.cssの--page-bgと揃える
+function themeColor($theme){
+	$config = dictConfig();
+	return ($theme === 'dark') ? $config['app_theme_color_dark'] : $config['app_theme_color'];
+}
+
+//マニフェスト（起動時の画面の色）を出すときの明暗。マニフェストはページの外から読まれるため
+//CSSのメディアクエリが効かず、端末の設定をこの2通りで受け取る。
+//  ・Sec-CH-Prefers-Color-Scheme … Chromium系がheader.phpのAccept-CHに応えて送ってくる
+//  ・?theme=dark … script.jsがマニフェストへのリンクに付ける（クライアントヒントを送らないiOS向け）
+//どちらも無ければ端末の設定が分からないため、明るい方として扱う
+function manifestTheme(){
+	$hint = isset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']) ? (string)$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] : '';
+	if ($hint === 'dark' || $hint === 'light'){
+		return $hint;//リンクに付いた値より、読みに来た時点の設定であるこちらを優先する
+	}
+	return (getParam('theme') === 'dark') ? 'dark' : 'light';
+}
+
+//////////////////////////////////////////////////
 //リクエストパラメータ
 //////////////////////////////////////////////////
 

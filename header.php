@@ -10,6 +10,12 @@ require_once __DIR__ . '/func.php';
 
 $config = dictConfig();
 
+//Accept-CHは端末のダークモード設定を送ってもらうための要求。これを出しておくと、このあと
+//読まれるmanifest.phpのリクエストに付いてくる（起動時の画面の色に使う。iOSは送ってこない）
+if (!headers_sent()){
+	header('Accept-CH: Sec-CH-Prefers-Color-Scheme');
+}
+
 $pageMenu = isset($pageMenu) ? $pageMenu : array();
 $pageScripts = isset($pageScripts) ? $pageScripts : array();
 $pageDeferredScripts = isset($pageDeferredScripts) ? $pageDeferredScripts : array();
@@ -54,9 +60,12 @@ $ogImage = absoluteUrl($config['og_image']);
 <meta name="twitter:site" content="@Zaslon" />
 <?php
 //スマホのブラウザ枠と、ホーム画面に追加したとき（PWA）の通知バーの色。
-//アプリ内の明暗の設定や端末のダークモード設定に関わらず、config.phpの色で固定する
+//端末のダークモード設定に合わせるため、mediaで出し分けた2つを出す。アプリ内のボタンで
+//選んだ表示ではなく端末の設定に従うため、切り替えてもこの色は変わらない（script.jsも触らない）。
+//mediaを見ない古いブラウザは最初の1つだけを使うため、明るい方を先に置く
 ?>
-<meta name="theme-color" content="<?php echo h($config['app_theme_color']); ?>" />
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="<?php echo h(themeColor('light')); ?>" />
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="<?php echo h(themeColor('dark')); ?>" />
 <?php $gaId = gaMeasurementId(); if ($gaId !== ''): ?>
 <!-- Google tag (gtag.js)。設定はconfig.phpのga_id / ga_exclude_hosts参照。zaslon-site本体と同じプロパティ -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo h($gaId); ?>"></script>
@@ -89,11 +98,12 @@ $ogImage = absoluteUrl($config['og_image']);
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <?php
-//iOSの通知バーはこの指定でしか変えられず、読み込み時に一度しか見られない（JavaScriptで
-//後から書き換えても効かない）。'black'は黒地に白文字、'default'は白地に黒文字で、
-//上のtheme-colorと揃えて常に黒地にする
+//iOSの通知バーは値を3つ（'default'＝白地に黒文字、'black'＝黒地に白文字、'black-translucent'）
+//しか選べず、読み込み時に一度しか見られない（JavaScriptで後から書き換えても効かない）ため、
+//端末の設定に合わせて出し分けることはできない。iOS15以降は'default'のとき上のtheme-colorが
+//使われて端末の設定どおりになるため、それ以前でも文字が読める'default'を選ぶ
 ?>
-<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="<?php echo h($config['app_name']); ?>" />
 <title><?php echo h($config['site_title']); ?></title>
 </head>
