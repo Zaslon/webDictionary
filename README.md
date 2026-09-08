@@ -103,7 +103,7 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 `header.php` がマニフェストへのリンクを、`footer.php` が `pwa.js`（Service Workerの登録）をどのページにも出す。
 
 追加したときの表示は `config.php` の `app_name`（アイコンの下に出る短い名前）・`app_theme_color`・
-`app_icons`・`app_icon_maskable_scale` で決まる。アイコンはOGPと同じく本体のサイト直下の物を共用するため、
+`app_theme_color_dark`・`app_icons`・`app_icon_maskable_scale` で決まる。アイコンはOGPと同じく本体のサイト直下の物を共用するため、
 辞書だけを別の場所に置いた環境では追加できない（表示には影響しない）。
 
 ### ホーム画面のアイコン
@@ -197,17 +197,31 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 - グラフ（`wordchart.js`）の色はCSSではなく描画時に決まるため、
   `dict.css` の変数を読んで描き、`data-theme` の変化を見張って描き直している
 
-### 通知バー・ブラウザ枠の色
-スマホのブラウザ枠と、ホーム画面に追加したとき（PWA）の通知バー（ステータスバー）の色は、
-**アプリ内の明暗の設定にもOSの設定にも関わらず、常に黒ベースで固定する。**
-色は `config.php` の `app_theme_color`（`dict.css` の `--page-bg` の暗い方と揃える）1つだけ。
+### 通知バー・ブラウザ枠・起動時の画面の色
+スマホのブラウザ枠と、ホーム画面に追加したとき（PWA）の通知バー（ステータスバー）・起動時の画面は、
+**アプリ内のボタンで選んだ表示ではなく、端末のダークモード設定に合わせる。**
+色は `config.php` の `app_theme_color`（明るい方）と `app_theme_color_dark`（暗い方）で、
+`dict.css` の `--page-bg` と揃える。
 
-- `header.php` が `theme-color` に `app_theme_color` を出す。切り替えても変えないため、
-  `script.js` はこの指定に触らない
-- iOSの通知バーは `apple-mobile-web-app-status-bar-style` でしか変えられず、読み込み時に一度しか
-  見られない（後から `script.js` で書き換えても効かない）。黒地に白文字の `black` で固定する
+- `header.php` は `theme-color` を `media="(prefers-color-scheme: light)"` と `dark` の2つ出し、
+  どちらを使うかはブラウザが端末の設定を見て決める。`media` を見ない古いブラウザは最初の1つ
+  （明るい方）を使うため、並び順を入れ替えないこと。切り替えはブラウザ任せなので `script.js` は触らない
+- iOSの通知バーは `apple-mobile-web-app-status-bar-style` の3つの値からしか選べず、読み込み時に
+  一度しか見られない（後から `script.js` で書き換えても効かない）ため、端末の設定では出し分けられない。
+  iOS 15以降は `default` のとき上の `theme-color` が使われて端末の設定どおりになるため、
+  それ以前でも文字が読める `default`（白地に黒文字）を出す
 - **起動時**（ホーム画面から開いてページが出るまでの画面）の色はマニフェストの
-  `theme_color` / `background_color` で決まる。こちらも同じ `app_theme_color` を使う
+  `theme_color` / `background_color` で決まる。マニフェストはページの外から読まれてCSSの
+  メディアクエリが効かないため、端末の設定を次の2通りで受け取る（`func.php` の `manifestTheme()`）。
+  どちらも無ければ明るい方になる
+
+  | 経路 | 誰が使うか |
+  | --- | --- |
+  | `Sec-CH-Prefers-Color-Scheme` ヘッダ | Chromium系。`header.php` が `Accept-CH` で要求すると送ってくる |
+  | マニフェストのURLの `?theme=dark` | クライアントヒントを送らないiOS向け。`script.js` がリンクに付ける |
+
+  ブラウザがマニフェストを読むのは追加するときと、その後の更新確認のときなので、
+  追加後に端末の設定を変えても起動時の画面の色が変わるのは次に読み直されてから
 
 ## 辞書順
 見出し語の並び順は[辞書順について](https://zaslon.info/idyerin/%E8%BE%9E%E6%9B%B8%E9%A0%86%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/)の規則に従う。

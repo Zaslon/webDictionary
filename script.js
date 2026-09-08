@@ -43,7 +43,8 @@
 	}
 
 	// ボタンの説明を今の表示に合わせる。
-	// ブラウザ枠・通知バーの色（header.php の theme-color）は明暗に関わらず固定のため触らない
+	// ブラウザ枠・通知バーの色（header.php の theme-color）は端末の設定に合わせてブラウザが
+	// 選ぶため（media 付きで2つ出してある）、ボタンで切り替えても触らない
 	function sync() {
 		const now = current();
 		const button = document.getElementById('theme-toggle');
@@ -54,8 +55,25 @@
 		}
 	}
 
+	// 起動時の画面（マニフェストの theme_color・background_color）の色を端末の設定に合わせる。
+	// マニフェストはページの外から読まれるため media クエリが効かず、端末の設定を URL に付けて
+	// サーバへ渡す。ブラウザがマニフェストを読むのはホーム画面に追加する時点なので、
+	// 読み込みが終わってから書き換えても間に合う（Chromium系は Sec-CH-Prefers-Color-Scheme
+	// でも同じことを伝えており、こちらはそれを送らない iOS 向け）。
+	// アプリ内のボタンで選んだ表示ではなく、端末の設定そのものを見る
+	function syncManifest() {
+		const link = document.querySelector('link[rel="manifest"]');
+		if (!link) {
+			return;
+		}
+		// 置き場所に依らないよう、書かれている相対パスのまま組み立て直す
+		const base = link.getAttribute('href').split('?')[0];
+		link.setAttribute('href', (query && query.matches) ? base + '?theme=dark' : base);
+	}
+
 	// ボタンはbody側にあるため、読み込み終わってから結びつける
 	document.addEventListener('DOMContentLoaded', function () {
+		syncManifest();
 		const button = document.getElementById('theme-toggle');
 		if (button) {
 			button.hidden = false;
@@ -72,6 +90,7 @@
 	// まだボタンで選んでいなければ、OS側の設定変更にそのまま追従する
 	if (query && query.addEventListener) {
 		query.addEventListener('change', function () {
+			syncManifest();// 起動時の画面の色は、ボタンで選んでいても端末の設定に合わせる
 			if (!root.hasAttribute('data-theme')) {
 				sync();
 			}

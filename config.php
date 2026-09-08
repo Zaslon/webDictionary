@@ -19,9 +19,10 @@ return array(
 	//端末のアイコンの下に出る名前。長いと省略されるため、site_titleより短くする
 	'app_name' => 'イジェール語辞書',
 
-	//ブラウザ枠・通知バーと、起動時に一瞬出る背景の色。dict.cssの--page-bg（暗い方）と揃える。
-	//アプリ内で明るい表示を選んでいても、端末がダークモードでなくても、常にこの色で固定する
-	'app_theme_color' => '#131417',
+	//ブラウザ枠・通知バーと、起動時に一瞬出る背景の色。dict.cssの--page-bgと揃える。
+	//どちらを出すかは端末のダークモード設定で決まる（header.phpのtheme-color・manifest.php）
+	'app_theme_color' => '#E5E5E0',
+	'app_theme_color_dark' => '#131417',
 
 	//ホーム画面のアイコン。og_imageと同じくzaslon.info本体のサイト直下の物を共用する
 	//Androidでの追加には192px以上の物が要るため、512pxを載せておく

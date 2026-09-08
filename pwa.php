@@ -85,6 +85,10 @@ function appManifest(){
 		);
 	}
 
+	//アプリの枠と、起動時に一瞬出る画面の色。ここはページを開く前に使われてCSSのメディアクエリが
+	//効かないため、端末のダークモード設定をmanifestTheme()で受け取って選ぶ
+	$themeColor = themeColor(manifestTheme());
+
 	return array(
 		//マニフェストのURLが変わってもアプリが別物にならないよう、識別子を明示する
 		'id'               => $startUrl,
@@ -96,9 +100,8 @@ function appManifest(){
 		'start_url'        => $startUrl,
 		'scope'            => $base,
 		'display'          => 'standalone',
-		//アプリの枠と、起動時に一瞬出る画面の色。header.phpのtheme-colorと同じく固定の色を使う
-		'theme_color'      => $config['app_theme_color'],
-		'background_color' => $config['app_theme_color'],
+		'theme_color'      => $themeColor,
+		'background_color' => $themeColor,
 		'icons'            => $icons,
 		'shortcuts'        => $shortcuts,
 	);

@@ -611,9 +611,40 @@ is_same('マニフェストの受け持ちは辞書の置き場所', '/dict/', $
 is_same('マニフェストのURLが変わってもアプリが別物にならないよう識別子を持つ', '/dict/dict.php', $manifest['id']);
 is_same('マニフェストはアプリとして開く指定を持つ', 'standalone', $manifest['display']);
 
-is_same('起動時の枠の色はconfig.phpの色で固定する', $config['app_theme_color'], $manifest['theme_color']);
-is_same('起動時の背景も同じ色にする', $config['app_theme_color'], $manifest['background_color']);
-is_same('通知バーの色は暗い方で固定する（dict.cssの--page-bg）', '#131417', $config['app_theme_color']);
+//起動時の画面はページを開く前に出てCSSのメディアクエリが効かないため、端末の設定を
+//クライアントヒント（Chromium系）かマニフェストのURL（iOS向け・script.jsが付ける）で受け取る
+$savedColorSchemeHint = isset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']) ? $_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] : null;
+$savedThemeParam = isset($_GET['theme']) ? $_GET['theme'] : null;
+unset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'], $_GET['theme']);
+
+is_same('端末の設定が分からなければ起動時の色は明るい方', $config['app_theme_color'], appManifest()['theme_color']);
+is_same('起動時の背景も枠と同じ色にする', $config['app_theme_color'], appManifest()['background_color']);
+
+$_GET['theme'] = 'dark';
+is_same('マニフェストのURLで暗い方を求められたらその色を出す', $config['app_theme_color_dark'], appManifest()['theme_color']);
+$_GET['theme'] = 'darkish; DROP';
+is_same('知らない値は明るい方として扱う', $config['app_theme_color'], appManifest()['theme_color']);
+unset($_GET['theme']);
+
+$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = 'dark';
+is_same('端末がダークモードなら起動時の色も暗くする', $config['app_theme_color_dark'], appManifest()['theme_color']);
+is_same('起動時の背景も暗くする', $config['app_theme_color_dark'], appManifest()['background_color']);
+$_GET['theme'] = 'dark';
+$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = 'light';
+is_same('読みに来た時点の端末の設定は、URLに付いた値より優先する', $config['app_theme_color'], appManifest()['theme_color']);
+unset($_GET['theme']);
+
+if ($savedColorSchemeHint === null){
+	unset($_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME']);
+}else{
+	$_SERVER['HTTP_SEC_CH_PREFERS_COLOR_SCHEME'] = $savedColorSchemeHint;
+}
+if ($savedThemeParam !== null){
+	$_GET['theme'] = $savedThemeParam;
+}
+
+is_same('明るい方の色はdict.cssの--page-bg（明るい方）', '#E5E5E0', themeColor('light'));
+is_same('暗い方の色はdict.cssの--page-bg（暗い方）', '#131417', themeColor('dark'));
 is_same('ホーム画面の名前はconfig.phpのapp_nameから取る', $config['app_name'], $manifest['short_name']);
 is_same('アプリの名前はサイト名と揃える', $config['site_title'], $manifest['name']);
 is_same(
