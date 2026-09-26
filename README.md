@@ -37,7 +37,7 @@
 | `wordchart.js` | 単語数推移のグラフの描画 |
 | `idyer.json` | 辞書データ（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)で管理） |
 | `affixTable.csv` | 接辞テーブル。[0]対象品詞、[1]形態、[2]説明、[3]特殊処理、[4]派生後の品詞 |
-| `logger/dictLog.csv` | 単語数の記録。グラフの元データ |
+| `logger/dictLog.csv` | 単語数の記録。グラフの元データ。正はサーバ側で、リポジトリの物は表示確認用の控え |
 | `logger/idyer_logger.php` | 単語数を記録するスクリプト。cronから定期実行する |
 | `tests/run.php` | テスト |
 | `../favicon.ico` `../icon-512.png` `../apple-touch-icon.png` | サイトアイコン（親サイトに設置） |
@@ -448,6 +448,47 @@ php logger/idyer_logger.php
 
 `logger/` は `dictLog.csv` をブラウザから読むため公開ディレクトリに置いてあるので、
 Web経由で叩かれて勝手に追記されないよう、スクリプト側でCLI以外の実行を403で弾いている。
+
+## デプロイ
+GitHub Actions の「デプロイ」（`.github/workflows/deploy.yml`）を手動で起動すると、
+前回デプロイしたコミットからの差分だけを lftp（SFTP か FTPS）でサーバに送る。
+最後にデプロイしたコミットはサーバの辞書フォルダの `.deploy-state` に記録しており、
+外から読めないよう本体の `.htaccess` で塞いでいる。
+
+中身の比較はしないため、サーバ側を手で変えた分は検出・修正されない。
+初回や手動でサーバを最新にした直後は `mode=init` で一度実行し、現在のコミットを記録させること。
+
+サーバからは何も消さない。リポジトリから消したファイルもサーバには残る。
+代わりに、実行のたびにサーバのファイル一覧を取り、サーバにあってリポジトリ（のデプロイ対象）に
+無いファイルをログに一覧で出し、1件以上あれば警告を出す。不要な物は手で消すこと。
+
+次のものは送らない。
+
+| 対象 | 理由 | サーバにあるときの報告 |
+| --- | --- | --- |
+| `idyer.json` | 別リポジトリで管理しており、別途上げる | しない |
+| `logger/` | サーバの `dictLog.csv` は cron が追記する実データで、リポジトリの物は控え。`idyer_logger.php` を直したときは手で上げる | しない |
+| `Endrata-bold.woff` `Endrata-bold.ttf` | リポジトリに含めていないため、手で上げる | しない |
+| `cache/` | サーバ側で生成される | しない |
+| `tests/` `docs/` `README.md` `.github/` `.gitignore` | 辞書の表示には使わない。`tests/` は公開ディレクトリに置くと Web から実行できてしまう | する |
+
+リポジトリの外で管理するファイルをサーバに増やしたときは、`deploy.yml` の `server_managed` に足せば報告から外れる。
+
+リポジトリの Settings で `production` 環境を作り（master ブランチ限定）、次を設定する。
+
+| 種類 | 名前 | 内容 |
+| --- | --- | --- |
+| Secret | `DEPLOY_HOST` | 接続先ホスト |
+| Secret | `DEPLOY_USER` | ユーザー名 |
+| Secret | `DEPLOY_PASSWORD` | パスワード（SFTP を鍵で認証するなら不要） |
+| Secret | `DEPLOY_SSH_KEY` | SFTP の秘密鍵（パスワード認証なら不要） |
+| Secret | `DEPLOY_KNOWN_HOSTS` | SFTP のときのサーバの公開鍵（`ssh-keyscan` の出力） |
+| Variable | `DEPLOY_PATH` | サーバ上の辞書フォルダ（本体の `dict/` に当たる場所） |
+| Variable | `DEPLOY_PROTOCOL` | `sftp` か `ftps`。未設定なら `sftp` |
+| Variable | `DEPLOY_PORT` | 既定以外のポートを使うときだけ |
+
+`DEPLOY_PATH` は Secret にしないこと。Secret の値と同じ文字列はログ中ですべて伏せられるため、
+`/` などを入れるとログが読めなくなる。
 
 ## テスト
 ```

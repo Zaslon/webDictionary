@@ -1,0 +1,262 @@
+name: デプロイ
+
+# 送るのは、サーバに置いた記録ファイル（最後にデプロイしたコミット）と HEAD の git 差分だけ。
+# FTP は海外のランナーから1往復ごとに時間がかかり、中身を全ファイル比較すると時間がかかりすぎるため。
+# したがってサーバ上のファイルを手で変更した場合、その食い違いはこのワークフローでは
+# 検出・修正されない。
+#
+# サーバからは何も消さない。辞書フォルダにはリポジトリの外で管理するファイルが多く、
+# 誤って消すと戻せないため。代わりに、サーバにあってリポジトリに無いファイルを毎回報告する
+# （ファイル名の一覧を取るだけなので、フォルダ数ぶんの往復で済む）。
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "diff: 前回のデプロイからの差分を送る / init: 何も送らず、今のコミットをデプロイ済みとして記録する（手動でサーバを最新にした直後に使う）"
+        type: choice
+        options:
+          - diff
+          - init
+        default: diff
+      dry_run:
+        description: "ドライラン（転送・記録をせず、送るファイルとサーバにだけあるファイルの一覧だけ表示する）"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    # workflow_dispatch はブランチを選んで起動できてしまうため、master 以外は弾く
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-24.04
+    # Secrets は production 環境に置き、環境側でも master ブランチ限定にしておくこと
+    environment: production
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # 前回デプロイしたコミットとの差分を取るのに全履歴が要る
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: ツールのインストール
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq lftp
+
+      - name: 同期
+        env:
+          MODE: ${{ inputs.mode }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          PROTOCOL: ${{ vars.DEPLOY_PROTOCOL || 'sftp' }}
+          PORT: ${{ vars.DEPLOY_PORT }}
+          # パスは Secret にしないこと。GitHub はシークレット値と同じ文字列をログ中で
+          # すべて伏せるため、"/" などを入れるとログ全体が読めなくなる
+          REMOTE_ROOT: ${{ vars.DEPLOY_PATH }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER_NAME: ${{ secrets.DEPLOY_USER }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          # lftp の --env-password はこの名前の環境変数を読む。
+          # コマンドラインに載せるとログやプロセス一覧に出るため、この経路で渡す。
+          LFTP_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          echo "接続方式: $PROTOCOL（Variables の DEPLOY_PROTOCOL。未設定なら sftp）"
+
+          if [ -z "$HOST" ];        then echo "::error::Secret が未設定: DEPLOY_HOST"; exit 1; fi
+          if [ -z "$USER_NAME" ];   then echo "::error::Secret が未設定: DEPLOY_USER"; exit 1; fi
+          if [ -z "$REMOTE_ROOT" ]; then echo "::error::Variable が未設定: DEPLOY_PATH"; exit 1; fi
+          REMOTE_ROOT="${REMOTE_ROOT%/}"
+          REMOTE_ROOT="${REMOTE_ROOT:-/}"
+
+          # 以下の正規表現はいずれもリポジトリ直下（＝ DEPLOY_PATH）からの相対パスに対するもの。
+
+          # リポジトリの外で管理していて、サーバにあるのが正しいもの。送らず、
+          # 「サーバにだけあるファイル」としても報告しない
+          server_managed=(
+            # dictLog.csv はサーバの cron が追記していく実データで、リポジトリにあるのは
+            # 表示確認用の控え。送ると本番の記録を巻き戻してしまうため、フォルダごと触らない。
+            # idyer_logger.php を直したときは手で上げること
+            '^logger/'
+            # 辞書データは別リポジトリで管理し、別途サーバに上げる。今は .gitignore で
+            # 除外されているが、誤って追跡されても上書きしないようここでも外す
+            '^idyer\.json$'
+            '^Endrata-bold\.(woff|ttf)$'  # 意図的にリポジトリに含めていない
+            '^cache/'                     # サーバ側で生成される
+            '^\.deploy-state$'
+          )
+          # リポジトリ用で辞書には不要なもの
+          excludes=(
+            '^\.github/'
+            '^\.gitignore$'
+            '^README\.md$'
+            '^tests/'                     # 公開ディレクトリに置くと Web から実行できてしまう
+            '^docs/'
+            "${server_managed[@]}"
+          )
+          matches_any() {
+            local path="$1" re
+            shift
+            for re in "$@"; do
+              if [[ "$path" =~ $re ]]; then return 0; fi
+            done
+            return 1
+          }
+          if [ "$MODE" != "diff" ] && [ "$MODE" != "init" ]; then
+            echo "::error::mode が不正: $MODE"; exit 1
+          fi
+
+          # 辞書フォルダは公開されるので、本体の .htaccess 側で外部から読めないようにしてある
+          state_name=".deploy-state"
+          head_sha="$(git rev-parse HEAD)"
+
+          # ---- lftp の接続部分（毎回の lftp 実行で共通）----
+          port_opt=""
+          if [ -n "$PORT" ]; then port_opt=":$PORT"; fi
+          header="$RUNNER_TEMP/lftp-header"
+          {
+            if [ "$PROTOCOL" = "sftp" ]; then
+              if [ -z "$KNOWN_HOSTS" ]; then echo "::error::Secret が未設定: DEPLOY_KNOWN_HOSTS" >&2; exit 1; fi
+              mkdir -p ~/.ssh && chmod 700 ~/.ssh
+              printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+              ssh_cmd="ssh -a -x -o StrictHostKeyChecking=yes"
+              if [ -n "$SSH_KEY" ]; then
+                printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+                chmod 600 ~/.ssh/deploy_key
+                ssh_cmd="$ssh_cmd -o IdentitiesOnly=yes -i $HOME/.ssh/deploy_key"
+              fi
+              echo "set sftp:connect-program \"$ssh_cmd\""
+              echo "set sftp:auto-confirm no"
+              url="sftp://$HOST$port_opt"
+            elif [ "$PROTOCOL" = "ftps" ]; then
+              echo "set ftp:ssl-force true"
+              echo "set ftp:ssl-protect-data true"
+              echo "set ssl:verify-certificate true"
+              # 付けないと多くの FTP サーバが . で始まるファイルを一覧に出さず、報告から漏れる
+              echo "set ftp:list-options -a"
+              url="ftp://$HOST$port_opt"
+            else
+              echo "::error::DEPLOY_PROTOCOL は sftp か ftps: $PROTOCOL" >&2; exit 1
+            fi
+            echo "set net:max-retries 3"
+            echo "set net:timeout 30"
+            if [ "$PROTOCOL" = "sftp" ] && [ -n "$SSH_KEY" ]; then
+              # 末尾のカンマは「パスワード空」の指定。無いと鍵認証でもパスワードを聞きに行く
+              echo "open -u \"$USER_NAME,\" \"$url\""
+            else
+              echo "open --env-password -u \"$USER_NAME\" \"$url\""
+            fi
+            echo "cd \"$REMOTE_ROOT\" || exit 1"
+          } > "$header"
+
+          # lftp のスクリプトにはパスを "..." で囲んで書く。" と \ があると囲みを抜けられ、
+          # mput はワイルドカードを展開するので * ? [ ] があると別のファイルを巻き込む。
+          # そういう名前が来たら何もせず止める。
+          check_name() {
+            case "$1" in
+              *'"'* | *'\'* | *'*'* | *'?'* | *'['* | *']'* | *$'\n'*)
+                echo "::error::lftp で安全に扱えない文字を含むファイル名: $1"; exit 1 ;;
+            esac
+          }
+
+          # ---- サーバにあって、リポジトリ（のデプロイ対象）に無いファイルを報告する ----
+          # 読むだけなので、どのモード・ドライランでも行う。接続の確認も兼ねる
+          { cat "$header"; echo "find . > \"$RUNNER_TEMP/server-files\" || exit 1"; } > "$RUNNER_TEMP/run.lftp"
+          if ! lftp -f "$RUNNER_TEMP/run.lftp"; then
+            echo "::error::サーバに接続できない、または DEPLOY_PATH の場所へ移動できない"
+            exit 1
+          fi
+          declare -A deployable=()
+          while IFS= read -r -d '' path; do
+            if ! matches_any "$path" "${excludes[@]}"; then deployable["$path"]=1; fi
+          done < <(git -c core.quotepath=off ls-files -z)
+          server_only=()
+          while IFS= read -r path; do
+            path="${path#./}"
+            # フォルダは末尾が / で出る。中身のファイルの側で報告されるので飛ばす
+            case "$path" in '' | */) continue ;; esac
+            if matches_any "$path" "${server_managed[@]}"; then continue; fi
+            if [ -n "${deployable[$path]:-}" ]; then continue; fi
+            server_only+=("$path")
+          done < "$RUNNER_TEMP/server-files"
+          echo "== サーバにあって、リポジトリ（のデプロイ対象）に無いファイル（${#server_only[@]}件）=="
+          if [ "${#server_only[@]}" -gt 0 ]; then
+            printf '  %s\n' "${server_only[@]}"
+            echo "::warning::サーバにあって、リポジトリ（のデプロイ対象）に無いファイルが ${#server_only[@]} 件ある。このワークフローは消さないので、不要なら手で消すこと（一覧はログ参照）"
+          fi
+
+          # ---- init: 何も送らず、現在のコミットを記録する ----
+          if [ "$MODE" = "init" ]; then
+            echo "記録するコミット: $head_sha"
+            if [ "$DRY_RUN" = "true" ]; then echo "ドライランのため記録しない"; exit 0; fi
+            printf '%s\n' "$head_sha" > "$RUNNER_TEMP/state-new"
+            { cat "$header"; echo "put \"$RUNNER_TEMP/state-new\" -o \"$state_name\" || exit 1"; } > "$RUNNER_TEMP/run.lftp"
+            lftp -f "$RUNNER_TEMP/run.lftp"
+            echo "記録した"
+            exit 0
+          fi
+
+          # ---- diff: 前回デプロイしたコミットを読む ----
+          {
+            cat "$header"
+            echo "get \"$state_name\" -o \"$RUNNER_TEMP/state-old\" || exit 3"
+          } > "$RUNNER_TEMP/run.lftp"
+          set +e
+          lftp -f "$RUNNER_TEMP/run.lftp"
+          rc=$?
+          set -e
+          if [ "$rc" = 3 ]; then
+            echo "::error::サーバに $state_name が無い。サーバを手動で最新にしてから mode=init で一度実行すること"
+            exit 1
+          elif [ "$rc" != 0 ]; then
+            echo "::error::サーバに接続できない、または DEPLOY_PATH の場所へ移動できない"
+            exit 1
+          fi
+          old_sha="$(tr -d '[:space:]' < "$RUNNER_TEMP/state-old")"
+          if ! git cat-file -e "$old_sha^{commit}" 2>/dev/null; then
+            echo "::error::記録されたコミット $old_sha が履歴に無い（履歴の書き換え等）。サーバを手動で最新にしてから mode=init で実行すること"
+            exit 1
+          fi
+          echo "前回デプロイ: $old_sha"
+          echo "今回:         $head_sha"
+          if [ "$old_sha" = "$head_sha" ]; then echo "変更なし"; exit 0; fi
+
+          # ---- 差分から送るものを選ぶ ----
+          uploads=()
+          # 消えたファイル（改名の旧名を含む）はサーバに残り、上の報告に出る
+          while IFS= read -r -d '' path; do
+            if matches_any "$path" "${excludes[@]}"; then continue; fi
+            check_name "$path"
+            uploads+=("$path")
+          done < <(git -c core.quotepath=off diff --no-renames --diff-filter=d --name-only -z "$old_sha" "$head_sha")
+
+          echo "== 送るファイル（${#uploads[@]}件）=="
+          if [ "${#uploads[@]}" -gt 0 ]; then printf '  %s\n' "${uploads[@]}"; fi
+
+          if [ "$DRY_RUN" = "true" ]; then echo "ドライランのため転送しない"; exit 0; fi
+
+          # ---- 転送 ----
+          printf '%s\n' "$head_sha" > "$RUNNER_TEMP/state-new"
+          {
+            cat "$header"
+            # 1行が長くなりすぎないよう50件ずつに分ける
+            for ((i = 0; i < ${#uploads[@]}; i += 50)); do
+              printf 'mput -d -P 4'
+              for f in "${uploads[@]:i:50}"; do printf ' "%s"' "$f"; done
+              echo ' || exit 1'
+            done
+            # 記録の更新は最後。途中で失敗したら記録は前回のまま残り、次回また同じ差分から送り直す
+            echo "put \"$RUNNER_TEMP/state-new\" -o \"$state_name\" || exit 1"
+          } > "$RUNNER_TEMP/run.lftp"
+          lftp -f "$RUNNER_TEMP/run.lftp"
+          echo "完了"
+
+      - name: 後始末
+        if: always()
+        run: rm -f ~/.ssh/deploy_key "$RUNNER_TEMP"/lftp-header "$RUNNER_TEMP"/run.lftp "$RUNNER_TEMP"/state-* "$RUNNER_TEMP"/server-files
