@@ -358,3 +358,62 @@ function findDerivationSuggestions(array $words, array $affixTable, array $keyWo
 	}
 	return array_values($suggestions);
 }
+
+//$_GET から検索条件を読む。URLから来る値は既知の値・数字以外を落とす
+//返り値：array(
+//  'keyBox'         => 検索語そのもの（未指定・空文字は null）,
+//  'type'           => normalizeType() を通した検索対象,
+//  'mode'           => normalizeMode() を通した一致の仕方,
+//  'includeVoicing' => 連濁派生語を含めるか,
+//  'id'             => 単語ID（数字でなければ null）,
+//  'page'           => 1以上のページ番号。最終ページへの寄せは runSearch() が行う,
+//)
+function readSearchRequest(){
+	$id = getParam("id");
+	$page = getParam("page");
+	return array(
+		'keyBox'         => getParam("keyBox"),
+		'type'           => normalizeType(getParam("type")),
+		'mode'           => normalizeMode(getParam("mode")),
+		'includeVoicing' => isVoicingRequested(),
+		'id'             => ($id !== null && preg_match("/^[0-9]+$/", $id)) ? (int)$id : null,
+		'page'           => ($page !== null && preg_match("/^[0-9]+$/", $page)) ? max(1, (int)$page) : 1,
+	);
+}
+
+//$request は readSearchRequest() の返り値
+//返り値：array(
+//  'keyWords'    => parseKeywords() の返り値,
+//  'suggestions' => findDerivationSuggestions() の返り値,
+//  'hitKeys'     => $words の添字の配列,
+//  'hitAmount'   => ヒット数,
+//  'page'        => 存在しないページを最終ページに寄せたページ番号（0件なら1）,
+//  'firstIndex'  => そのページの先頭が $hitKeys の何番目か,
+//)
+function runSearch(array $words, array $affixTable, array $exampleIndex, array $request){
+	$type = $request['type'];
+	$mode = $request['mode'];
+	$keyWords = parseKeywords($request['keyBox'], $type, $mode);
+	$suggestions = array();
+	$hitKeys = array();
+	if ($keyWords){
+		if ($request['id'] !== null){
+			//id指定は関連語や例文からの1語リンクなので、検索条件より優先する
+			$entryKey = findEntryKeyById($words, $request['id']);
+			$hitKeys = ($entryKey === null) ? array() : array($entryKey);
+		}else{
+			$suggestions = findDerivationSuggestions($words, $affixTable, $keyWords);
+			$hitKeys = searchEntries($words, $keyWords, $type, $mode, $request['includeVoicing'], $exampleIndex);
+		}
+	}
+	$hitAmount = count($hitKeys);
+	$page = min($request['page'], max(1, (int)ceil($hitAmount / WORDS_PER_PAGE)));//存在しないページを指定された場合は最終ページに寄せる
+	return array(
+		'keyWords'    => $keyWords,
+		'suggestions' => $suggestions,
+		'hitKeys'     => $hitKeys,
+		'hitAmount'   => $hitAmount,
+		'page'        => $page,
+		'firstIndex'  => WORDS_PER_PAGE * ($page - 1),
+	);
+}

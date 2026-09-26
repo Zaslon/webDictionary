@@ -331,6 +331,33 @@ ul.navigation li a:hover{
 	background-color: var(--chip-hover);
 	}
 
+/* 省略記号は押せないので、番号と同じ行・高さに置いたままチップの見た目だけを外す。
+   枠は透明で残し、高さを番号と揃える */
+ul.navigation li.navigationGap {
+	background-color: transparent;
+	border-color: transparent;
+	color: var(--muted);
+	min-width: 1.5em;
+	}
+
+/* インクリメンタルサーチ（livesearch.js）の問い合わせ中。
+   すぐ返る問い合わせで明滅しないよう、薄くするときだけ遅らせる（戻すときはすぐ） */
+#results {
+	transition: opacity 0.1s ease;
+	}
+
+#results[aria-busy="true"] {
+	opacity: 0.5;
+	transition: opacity 0.2s ease 0.25s;
+	}
+
+/* 通信できずに結果を更新できなかったときの注意書き。結果は残っているので控えめにする */
+#main p.searchStatus {
+	color: var(--muted);
+	font-size: 0.9em;
+	margin-top: 10px;
+	}
+
 /* サイト名は本体の .site-title と同じ明朝系にする。
    ただし大きさは本体（60px）に揃えず200%のまま。本体のサイト名と違って和文で長く、
    60pxだと折り返してしまうため。 */

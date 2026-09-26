@@ -9,7 +9,8 @@
 
 | ファイル | 役割 |
 | --- | --- |
-| `dict.php` | 検索ページ。パラメータの解釈と組み立てのみを行う |
+| `dict.php` | 検索ページ（初回表示と直リンク）。パラメータの解釈と組み立てのみを行う |
+| `results.php` | 検索結果の断片（`dict.php` の `#results` の中身）だけを返す。`livesearch.js` が使う |
 | `example.php` | 例文の一覧ページ |
 | `legend.php` | 凡例のページ。中身は辞書データの `legend`（Markdown）を読む |
 | `chart.php` | 単語数推移のグラフページ |
@@ -27,6 +28,7 @@
 | `script.js` | 明暗（ライト／ダーク）の切り替え |
 | `dict.js` | イジェール文字表示の切り替え |
 | `pronunciation.js` | 発音記号の自動生成 |
+| `livesearch.js` | インクリメンタルサーチ（ページ内で検索結果を差し替える） |
 | `pwa.js` | Service Workerの登録 |
 | `sw.js` | Service Workerの動きの定義。ブラウザは `sw.php` 経由で読む |
 | `vendor/akrantiain.min.js` | akrantiain（第三者製）をブラウザ用にまとめたもの |
@@ -67,6 +69,65 @@
 
 同じ見出し語について複数の解釈が見つかった場合は、最も浅い解釈だけを出す。
 検索語が複数あるときは、それぞれの語について辿る。
+
+## インクリメンタルサーチ（livesearch.js・results.php）
+検索ページでは、入力や条件の変更に応じてページを遷移させずに検索結果だけを差し替える。
+
+* 検索語は最後の入力から300ms待ってから問い合わせる。IMEで変換している間は問い合わせず、確定したときに問い合わせる。
+  「検索」ボタンとEnterは待たずにすぐ問い合わせる
+* 検索対象・一致の仕方・連濁のチェックを変えたときはすぐ問い合わせる。
+  「イジェール文字表示」は書体を変えるだけ（`dict.js`）なので問い合わせず、URLの `Idf` だけを合わせる
+* 結果の中の、検索ページへのリンク（関連語・もしかして・語源・使用単語・ページ送り）もページ内で差し替える。
+  Ctrl・Shift・中クリックなどで開いたときと、例文一覧など他のページへのリンクは普段どおり遷移する
+* 同じ条件になる操作（Enterの連打など）では問い合わせない。速く打っても、古い応答が新しい結果を上書きすることはない
+
+### URLと履歴
+差し替えるたびに、URLを今の条件のクエリにする。並びは `func.php` の `makeLink()` と同じ
+（`keyBox, type, mode, page, [Idf], [voicing], [id]`）で、検索語が空ならクエリを付けない。
+このURLも、リンクの `href`（`dict.php?...`、`&id=...` を含む）も、そのまま開けば `dict.php` がサーバ側で同じ結果を出すので、
+共有・再読み込み・新しいタブで開くといった操作は今までどおり使える。
+
+* 入力している間は1件の履歴にまとめる（最初の結果で1件積み、続きはその1件を書き換える）。
+  「検索」ボタンかEnter、またはリンクで区切られる
+* 結果の中のリンクは、押すたびに1件積む
+* リンクや戻る/進むでは、そのURLの結果を取り直し、フォームもURLの条件に戻す。
+  フォームに無い条件の読み替え（`fwd` → 部分一致、`trans` → 見出し語・訳語検索）は `dict.php` と同じ。
+  「イジェール文字表示」のチェックだけは `dict.js` の保存済みの設定に従うため、URLからは戻さない
+* リンクで開いた後にフォームを触ると、条件はフォームから作り直す。`id` はこのとき外れる（フォーム送信と同じ）
+
+GA4 の拡張計測（ブラウザの履歴イベントによるページ変更）が有効だと、URLを書き換えるたびに page_view が数えられる。
+コードでは手当てしていないので、要らなければGAの管理画面で切ること。
+
+### 結果の断片（results.php）
+`results.php` は `dict.php` と同じクエリを受け、`#results` の中身だけ（`<html>` などは付けない）を返す。
+どちらも `search.php` の `readSearchRequest()` / `runSearch()` と `view.php` の `renderSearchResults()` を通すため、
+ページ内で差し替えた結果と直リンクで開いた結果は同じHTMLになる（`tests/run.php` で突き合わせている）。
+断片のURLが検索結果に載らないよう `X-Robots-Tag: noindex` を付け、辞書の更新をすぐ拾えるよう `Cache-Control: no-cache` にしている。
+辞書の読み込みに失敗したときは、内部の情報（辞書のパスなど）を出さずに500を返す。
+
+### 通信できないとき・JavaScriptが無いとき
+* 入力や条件の変更で問い合わせられなかったときは、表示中の結果を残して「通信できないため検索結果を更新できませんでした。」を出す。URLは変えない
+* リンクで問い合わせられなかったときは通常の遷移に切り替え、Service Worker の控えか `offline.php` に任せる
+* JavaScriptが無効なときや、必要な機能（`fetch`・`AbortController`・`history.pushState`）が無いブラウザでは何もせず、
+  今までどおりフォームのGET送信で動く
+
+### 作り
+フォーム（`#searchForm`）・結果（`#results`）・状態表示（`#searchStatus`）の3つのビューは、
+ブラウザのイベントを `dict:input` / `dict:optionchange` / `dict:fontchange` / `dict:submit` / `dict:navigate` に翻訳して
+泡立てるだけで判断をしない。ルート（`div.all`）で受ける Mediator が待ち時間・問い合わせ・履歴を受け持つ。
+結果を差し替え終えると `#results` から `dict:resultsupdated` を出す（`pronunciation.js` が受ける）。
+
+## ページ送り
+検索結果のページ送りは、総ページ数が10以上のとき間を省略記号（…）にする。JavaScriptの有無に関わらず同じ表示で、
+番号の並びは `view.php` の `navigationPages()` だけが決める。
+
+* 先頭の3ページ・今のページとその前後1ページ・最後の3ページを出し、間が空く所に省略記号を1つ置く
+* 重なる所や隣り合う所には省略記号を出さない。1ページだけ抜ける所（`3, …, 5`）は省略記号にする
+* 例：総ページ数20で10ページ目なら `1 2 3 … 9 10 11 … 18 19 20`
+* 数は `view.php` の定数 `PAGE_NAVIGATION_COLLAPSE_FROM`（省略し始める総ページ数）・
+  `PAGE_NAVIGATION_EDGE`（先頭・末尾に出す数）・`PAGE_NAVIGATION_AROUND`（今のページの前後に出す数）で決まる
+
+例文一覧（`example.php`）のページ送りは省略しない。
 
 ## 共通設定（config.php）
 サイト名・説明文・zaslon.info本体のURL・カード画像・ホーム画面に追加したときの表示（`app_*`）・
@@ -138,6 +199,10 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 * CSS・JS・書体は**キャッシュを優先**する。`assetUrl()` の版付きURL（`?v=更新時刻`）で来るため、
   更新されれば別のURLになり、古い物を返し続けることはない
 * 取っておくページ数には上限（`PAGE_CACHE_LIMIT`）を置き、超えた分は古い物から捨てる
+* ページ遷移以外で読まれたページ（開発者ツールがソースを表示し直すときなど）や `manifest.php` のような、
+  ページでも静的ファイルでもない物には手を出さず、Service Worker が無いときと同じくブラウザに任せる
+* 検索結果の断片（`results.php`）には手を出さず、毎回サーバに問い合わせる。控えも取らない
+  （通信できないときの動きは「インクリメンタルサーチ」の節）
 * 他所のサーバ（アクセス解析・グラフ）と辞書の外のページには手を出さない
 
 なお、単語の検索はサーバ側で行うため、オフラインで新しく引くことはできない。
@@ -239,9 +304,13 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 それ以外は綴りから作る。発音記号欄が空文字列の単語も「無し」として扱う。
 
 akrantiainの実装はTypeScript版しか無く、規則も辞書データの中にあるため、変換はブラウザ側で行う。
-`vendor/akrantiain.min.js` が処理系、`pronunciation.js` が組み込み側で、`dict.php` がこの2つを
-`defer` で読み込む。規則は `view.php` の `renderPronunciationRules()` が
+`vendor/akrantiain.min.js` が処理系、`pronunciation.js` が組み込み側で、`dict.php` がこの2つと `livesearch.js` を
+この順に `defer` で読み込む。規則は `view.php` の `renderPronunciationRules()` が
 `<script type="application/json" id="snojRules">` としてページに埋め込む。
+
+インクリメンタルサーチで結果を差し替えたときは、`livesearch.js` が出す `dict:resultsupdated` を受けて、
+差し替えた範囲の発音記号を埋め直す。規則は差し替えのたびに入れ替わるが、
+中身が同じ間は読み込んだ結果を使い回す（打つたびに規則を読み直さない）。
 
 `view.php` は、辞書データに発音記号を持つ単語には値をそのまま出し、持たない単語には
 `<span class="wordPronunciation" data-form="見出し語"></span>` を置く。

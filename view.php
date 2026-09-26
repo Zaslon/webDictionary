@@ -3,6 +3,37 @@
 require_once __DIR__ . '/func.php';
 require_once __DIR__ . '/markdown.php';//凡例用。本体（zaslon-site）が無い環境での変換に使う
 
+//検索結果の領域。dict.php の #results の中身と、results.php の応答本体を同じ物にするため1か所で出す
+//$snojRules は辞書データの snoj（無ければ null）。$request は readSearchRequest()、$result は runSearch() の返り値
+function renderSearchResults(array $words, array $exampleIndex, $snojRules, array $request, array $result){
+	$type = $request['type'];
+	$mode = $request['mode'];
+	if (!$result['keyWords']){
+		echo '<p>検索ワードを入力してください。</p>';
+	}else{
+		renderSuggestions($result['suggestions'], $type, $mode);
+
+		$hitAmount = $result['hitAmount'];
+		$firstIndex = $result['firstIndex'];
+		echo '<p class="result">';
+		if ($hitAmount === 0){
+			echo_h($request['keyBox'] . ' での検索結果：0件');
+		}else{
+			echo_h($request['keyBox'] . ' での検索結果：' . $hitAmount . '件(' . ($firstIndex + 1) . 'から' . min($firstIndex + WORDS_PER_PAGE, $hitAmount) . '件目)');
+		}
+		echo '</p>';
+
+		foreach (array_slice($result['hitKeys'], $firstIndex, WORDS_PER_PAGE) as $entryKey){
+			renderEntry($words[$entryKey], $type, $mode, $exampleIndex);
+		}
+		if ($result['hitKeys']){
+			renderPronunciationRules($snojRules);
+		}
+	}
+
+	renderNavigation($result['hitAmount'], $result['page'], $result['keyWords'], $type, $mode);
+}
+
 function renderSuggestions(array $suggestions, $type, $mode){
 	foreach ($suggestions as $singleSuggestion){
 		echo '<p class="suggest">もしかして、';
@@ -319,16 +350,55 @@ function renderLegend($legend, $rendererPath = null){
 	echo '<div class="legend">', legendMarkdownToHtml($legend, $rendererPath), '</div>';
 }
 
+//短い検索語では数十ページになり、番号を全部並べると結果の前に何行も折り返すため、
+//この総ページ数から間を省略記号にする
+const PAGE_NAVIGATION_COLLAPSE_FROM = 10;
+const PAGE_NAVIGATION_EDGE = 3;  //先頭・末尾に必ず出すページ数
+const PAGE_NAVIGATION_AROUND = 1;//今のページの前後に出すページ数
+
+//総ページ数が PAGE_NAVIGATION_COLLAPSE_FROM 以上のとき省略記号つきの番号列にする
+//1ページだけ抜ける所（3, …, 5）も、並びの規則を揃えるため省略記号にする
+//$currentPage は 1〜$totalPages に収まっている前提（runSearch() が寄せる）
+//返り値：ページ番号(int)と省略記号(null)を並べた配列。例 array(1, 2, 3, null, 9, 10, 11, null, 18, 19, 20)
+function navigationPages($totalPages, $currentPage){
+	if ($totalPages < PAGE_NAVIGATION_COLLAPSE_FROM){
+		return ($totalPages < 1) ? array() : range(1, $totalPages);
+	}
+
+	$shown = array_merge(
+		range(1, PAGE_NAVIGATION_EDGE),
+		range($currentPage - PAGE_NAVIGATION_AROUND, $currentPage + PAGE_NAVIGATION_AROUND),
+		range($totalPages - PAGE_NAVIGATION_EDGE + 1, $totalPages)
+	);
+	$shown = array_filter(array_unique($shown), function ($singlePage) use ($totalPages){
+		return $singlePage >= 1 && $singlePage <= $totalPages;
+	});
+	sort($shown);
+
+	$pages = array();
+	$previousPage = null;
+	foreach ($shown as $singlePage){
+		if ($previousPage !== null && $singlePage - $previousPage >= 2){
+			$pages[] = null;
+		}
+		$pages[] = $singlePage;
+		$previousPage = $singlePage;
+	}
+	return $pages;
+}
+
 function renderNavigation($hitAmount, $page, array $keyWords, $type, $mode){
 	echo '<nav aria-label="ページ送り"><ul class="navigation">';
 	if ($hitAmount > WORDS_PER_PAGE){
 		$totalPages = (int)ceil($hitAmount / WORDS_PER_PAGE);
 		$keyWord = implode(' ', $keyWords);
-		for ($i = 1; $i <= $totalPages; $i++){
-			if ($page === $i){
-				echo '<li class="currentPage" aria-current="page">', h($i), '</li>';
+		foreach (navigationPages($totalPages, $page) as $singlePage){
+			if ($singlePage === null){
+				echo '<li class="navigationGap">…</li>';
+			}elseif ($page === $singlePage){
+				echo '<li class="currentPage" aria-current="page">', h($singlePage), '</li>';
 			}else{
-				echo '<li>', makeLink($keyWord, $type, $mode, $i), h($i), '</a></li>';
+				echo '<li>', makeLink($keyWord, $type, $mode, $singlePage), h($singlePage), '</a></li>';
 			}
 		}
 	}

@@ -7,6 +7,10 @@ require_once __DIR__ . '/../pwa.php';
 $passed = 0;
 $failed = 0;
 
+//dict.php と results.php を読み込むテストは header() を呼ぶ。先に何か出力していると
+//CLIでも「headers already sent」の警告になるため、結果の表示は最後までまとめて貯めておく
+ob_start();
+
 function is_same($label, $expected, $actual){
 	global $passed, $failed;
 	if ($expected === $actual){
@@ -591,6 +595,225 @@ $html = ob_get_clean();
 is_same('1ページに収まる場合はページ送りを出さない', '<nav aria-label="ページ送り"><ul class="navigation"></ul></nav>', $html);
 
 //////////////////////////////////////////////////
+//ページ送りの省略表示
+//////////////////////////////////////////////////
+
+//番号が昇順で重複せず、省略記号が続けて出ないこと
+function isWellFormedNavigation(array $pages){
+	$previousPage = 0;
+	$previousWasGap = false;
+	foreach ($pages as $singlePage){
+		if ($singlePage === null){
+			if ($previousWasGap){
+				return false;
+			}
+			$previousWasGap = true;
+			continue;
+		}
+		if ($singlePage <= $previousPage){
+			return false;
+		}
+		$previousPage = $singlePage;
+		$previousWasGap = false;
+	}
+	return true;
+}
+
+$navigationCases = array(
+	array('総ページ数が省略の手前なら全て並べる', 9, 5, range(1, 9)),
+	array('1ページだけでも番号を返す', 1, 1, array(1)),
+	array('省略の境目の総ページ数では先頭と末尾だけ残す', 10, 1, array(1, 2, 3, null, 8, 9, 10)),
+	array('先頭と隣り合う所には省略記号を挟まず、1ページ抜ける所には挟む', 10, 5, array(1, 2, 3, 4, 5, 6, null, 8, 9, 10)),
+	array('中央のページは前後1ページと先頭・末尾を出す', 20, 10, array(1, 2, 3, null, 9, 10, 11, null, 18, 19, 20)),
+	array('先頭のページでは先頭と重なる', 20, 1, array(1, 2, 3, null, 18, 19, 20)),
+	array('先頭の3ページ目では次のページが続く', 20, 3, array(1, 2, 3, 4, null, 18, 19, 20)),
+	array('先頭の4ページ目では前のページが先頭と隣り合う', 20, 4, array(1, 2, 3, 4, 5, null, 18, 19, 20)),
+	array('最後のページでは末尾と重なる', 20, 20, array(1, 2, 3, null, 18, 19, 20)),
+	array('末尾の手前では次のページが末尾と隣り合う', 20, 17, array(1, 2, 3, null, 16, 17, 18, 19, 20)),
+	array('末尾の3ページ目では前のページが続く', 20, 18, array(1, 2, 3, null, 17, 18, 19, 20)),
+);
+foreach ($navigationCases as $singleCase){
+	list($label, $totalPages, $currentPage, $expected) = $singleCase;
+	$pages = navigationPages($totalPages, $currentPage);
+	is_same('navigationPages: ' . $label, $expected, $pages);
+	is_same('navigationPages: ' . $label . '（昇順・重複なし・省略記号が続かない）', true, isWellFormedNavigation($pages));
+}
+
+ob_start();
+renderNavigation(20 * 20, 10, array('a'), 'both', 'prt');
+$html = ob_get_clean();
+is_same('総ページ数が多ければ省略記号を2つ出す', 2, substr_count($html, '<li class="navigationGap">…</li>'));
+is_same('省略したページ送りは番号と省略記号を合わせて11個', 11, substr_count($html, '<li'));
+is_same('省略したページ送りでも現在のページはリンクにしない', true,
+	strpos($html, '<li class="currentPage" aria-current="page">10</li>') !== false);
+is_same('省略記号はリンクにしない', 0, preg_match('#<li class="navigationGap">[^<]*<a#u', $html));
+is_same('省略したページ送りも検索語を引き継ぐ', true,
+	strpos($html, '<li><a href="dict.php?keyBox=a&amp;type=both&amp;mode=prt&amp;page=20">20</a></li>') !== false);
+
+ob_start();
+renderNavigation(20 * 9, 1, array('a'), 'both', 'prt');
+$html = ob_get_clean();
+is_same('総ページ数が省略の手前なら省略記号を出さない', false, strpos($html, 'navigationGap'));
+is_same('総ページ数が省略の手前なら全ページを並べる', 9, substr_count($html, '<li'));
+
+//////////////////////////////////////////////////
+//検索条件の読み取りと検索の実行
+//////////////////////////////////////////////////
+
+$savedGet = $_GET;
+
+$_GET = array('keyBox' => 'zere', 'type' => 'all', 'mode' => 'perf', 'voicing' => 'true', 'id' => '12', 'page' => '3');
+is_same('readSearchRequest はURLの検索条件を読む', array(
+	'keyBox' => 'zere', 'type' => 'all', 'mode' => 'perf', 'includeVoicing' => true, 'id' => 12, 'page' => 3,
+), readSearchRequest());
+
+$_GET = array();
+is_same('readSearchRequest は未指定なら既定値にする', array(
+	'keyBox' => null, 'type' => 'both', 'mode' => 'prt', 'includeVoicing' => false, 'id' => null, 'page' => 1,
+), readSearchRequest());
+
+$_GET = array('keyBox' => '', 'type' => 'word; DROP', 'mode' => '../../x', 'id' => 'abc', 'page' => 'x');
+$request = readSearchRequest();
+is_same('readSearchRequest は空の検索語をnullにする', null, $request['keyBox']);
+is_same('readSearchRequest は未知のtypeをbothにする', 'both', $request['type']);
+is_same('readSearchRequest は未知のmodeをprtにする', 'prt', $request['mode']);
+is_same('readSearchRequest は数字でないidをnullにする', null, $request['id']);
+is_same('readSearchRequest は数字でないページを1にする', 1, $request['page']);
+
+$_GET = array('id' => '-1', 'page' => '0');
+$request = readSearchRequest();
+is_same('readSearchRequest は負のidをnullにする', null, $request['id']);
+is_same('readSearchRequest は0ページを1にする', 1, $request['page']);
+
+$_GET = array('page' => '1');
+is_same('readSearchRequest は1ページ目をそのまま読む', 1, readSearchRequest()['page']);
+$_GET = array('page' => '999');
+is_same('readSearchRequest は大きなページも寄せずに読む', 999, readSearchRequest()['page']);
+
+$_GET = $savedGet;
+
+function searchRequest(array $overrides){
+	return array_merge(array(
+		'keyBox' => null, 'type' => 'both', 'mode' => 'prt', 'includeVoicing' => false, 'id' => null, 'page' => 1,
+	), $overrides);
+}
+
+//3ページになる件数の辞書
+$manyWords = array();
+for ($i = 1; $i <= 45; $i++){
+	$manyWords['w' . $i] = makeEntry('mira', '名詞', array('水'), array(), 100 + $i);
+}
+$manyWords['other'] = makeEntry('zere', '動詞', array('食べる'), array(), 12);
+$manyExampleIndex = makeExampleIndex(array('words' => $manyWords));
+
+$result = runSearch($manyWords, $affixTable, $manyExampleIndex, searchRequest(array()));
+is_same('runSearch は検索語が無ければ0件にする', 0, $result['hitAmount']);
+is_same('runSearch は検索語が無ければ検索語を空にする', array(), $result['keyWords']);
+is_same('runSearch は検索語が無ければ1ページ目にする', 1, $result['page']);
+
+$result = runSearch($manyWords, $affixTable, $manyExampleIndex, searchRequest(array('keyBox' => 'mira')));
+is_same('runSearch は一致した件数を返す', 45, $result['hitAmount']);
+is_same('runSearch は一致した見出し語のキーを返す', 45, count($result['hitKeys']));
+is_same('runSearch は1ページ目の先頭を0番目にする', 0, $result['firstIndex']);
+
+$result = runSearch($manyWords, $affixTable, $manyExampleIndex, searchRequest(array('keyBox' => 'mira', 'page' => 2)));
+is_same('runSearch は指定したページを返す', 2, $result['page']);
+is_same('runSearch はページの先頭の位置を返す', WORDS_PER_PAGE, $result['firstIndex']);
+
+$result = runSearch($manyWords, $affixTable, $manyExampleIndex, searchRequest(array('keyBox' => 'mira', 'page' => 999)));
+is_same('runSearch は存在しないページを最終ページに寄せる', 3, $result['page']);
+is_same('runSearch は寄せたページの先頭の位置を返す', WORDS_PER_PAGE * 2, $result['firstIndex']);
+
+$result = runSearch($manyWords, $affixTable, $manyExampleIndex, searchRequest(array('keyBox' => 'zzzzz', 'page' => 5)));
+is_same('runSearch は0件なら1ページ目にする', 1, $result['page']);
+
+$result = runSearch($manyWords, $affixTable, $manyExampleIndex, searchRequest(array('keyBox' => 'mira', 'id' => 12)));
+is_same('runSearch はid指定を検索条件より優先する', array('other'), $result['hitKeys']);
+is_same('runSearch はid指定では派生の提案を出さない', array(), $result['suggestions']);
+
+$result = runSearch($manyWords, $affixTable, $manyExampleIndex, searchRequest(array('keyBox' => 'mira', 'id' => 999)));
+is_same('runSearch は存在しないidでは0件にする', 0, $result['hitAmount']);
+
+$result = runSearch($manyWords, $affixTable, $manyExampleIndex, searchRequest(array('id' => 12)));
+is_same('runSearch は検索語が無ければidを見ない', 0, $result['hitAmount']);
+
+//////////////////////////////////////////////////
+//検索結果の領域
+//////////////////////////////////////////////////
+
+function searchResultsHtml(array $words, array $exampleIndex, $snojRules, array $request){
+	global $affixTable;
+	ob_start();
+	renderSearchResults($words, $exampleIndex, $snojRules, $request, runSearch($words, $affixTable, $exampleIndex, $request));
+	return ob_get_clean();
+}
+
+is_same('検索語が無ければ案内文とページ送りの枠だけを出す',
+	'<p>検索ワードを入力してください。</p><nav aria-label="ページ送り"><ul class="navigation"></ul></nav>',
+	searchResultsHtml($manyWords, $manyExampleIndex, '"a" -> /a/;', searchRequest(array())));
+
+$html = searchResultsHtml($manyWords, $manyExampleIndex, '"a" -> /a/;', searchRequest(array('keyBox' => 'zzzzz')));
+is_same('0件の件数を出す', true, strpos($html, '<p class="result">zzzzz での検索結果：0件</p>') !== false);
+is_same('0件なら発音規則を出さない', false, strpos($html, 'snojRules'));
+
+$html = searchResultsHtml($manyWords, $manyExampleIndex, '"a" -> /a/;', searchRequest(array('keyBox' => 'mira', 'page' => 2)));
+is_same('一致した件数と表示中の範囲を出す', true, strpos($html, '<p class="result">mira での検索結果：45件(21から40件目)</p>') !== false);
+is_same('1ページ分の単語欄を出す', WORDS_PER_PAGE, substr_count($html, '<ul class="wordEntry">'));
+is_same('一致すれば発音規則を出す', true, strpos($html, '<script type="application/json" id="snojRules">') !== false);
+is_same('検索結果の領域にページ送りを出す', true, strpos($html, '<li class="currentPage" aria-current="page">2</li>') !== false);
+
+$html = searchResultsHtml($manyWords, $manyExampleIndex, null, searchRequest(array('keyBox' => 'mira')));
+is_same('辞書データに発音規則が無ければ出さない', false, strpos($html, 'snojRules'));
+
+$html = searchResultsHtml($manyWords, $manyExampleIndex, null, searchRequest(array('keyBox' => '<script>alert(1)</script>')));
+is_same('件数表示の検索語をエスケープする', false, strpos($html, '<script>'));
+is_same('件数表示に検索語をエスケープして出す', true, strpos($html, '&lt;script&gt;alert(1)&lt;/script&gt; での検索結果') !== false);
+
+//////////////////////////////////////////////////
+//検索ページと結果の断片（dict.php / results.php）
+//////////////////////////////////////////////////
+
+//ページの変数を他のテストに漏らさないよう、関数の中で読み込む
+function renderScript($script, array $query){
+	$savedGet = $_GET;
+	$_GET = $query;
+	ob_start();
+	include __DIR__ . '/../' . $script;
+	$html = ob_get_clean();
+	$_GET = $savedGet;
+	return $html;
+}
+
+$pageCases = array(
+	'検索語なし'             => array(),
+	'複数ページになる検索語' => array('keyBox' => 'mir', 'type' => 'both', 'mode' => 'prt', 'page' => '1'),
+	'同じ検索語の2ページ目'  => array('keyBox' => 'mir', 'type' => 'both', 'mode' => 'prt', 'page' => '2'),
+	'id指定'                 => array('keyBox' => 'zere', 'type' => 'both', 'mode' => 'prt', 'page' => '1', 'id' => '10'),
+	'省略記号が出る検索語'   => array('keyBox' => 'a', 'type' => 'both', 'mode' => 'prt', 'page' => '10', 'Idf' => 'true', 'voicing' => 'true'),
+);
+foreach ($pageCases as $label => $query){
+	$fragment = renderScript('results.php', $query);
+	$page = renderScript('dict.php', $query);
+	is_same('results.php は dict.php の #results の中身と同じ（' . $label . '）', true,
+		strpos($page, '<div id="results">' . $fragment . '</div>') !== false);
+	is_same('results.php は断片だけを返す（' . $label . '）', false, strpos($fragment, '<html'));
+}
+//上の一致が、複数ページ・省略記号の場合を本当に含んでいるかを確かめる
+is_same('実データで複数ページになる検索語を使っている', true,
+	strpos(renderScript('results.php', $pageCases['同じ検索語の2ページ目']), '<li class="currentPage" aria-current="page">2</li>') !== false);
+is_same('実データで省略記号が出る検索語を使っている', 2,
+	substr_count(renderScript('results.php', $pageCases['省略記号が出る検索語']), '<li class="navigationGap">…</li>'));
+
+$page = renderScript('dict.php', array('keyBox' => 'zere'));
+is_same('検索ページはフォームにidを付ける', true, strpos($page, '<form id="searchForm" action="" method="GET">') !== false);
+is_same('検索ページは入力の補助を切り、Enterの表示を検索にする', true,
+	strpos($page, 'autocomplete="off" enterkeyhint="search"') !== false);
+is_same('検索ページは通信失敗の注意書きの場所を置く', true,
+	strpos($page, '<p id="searchStatus" class="searchStatus" role="status" hidden></p>') !== false);
+is_same('検索ページはインクリメンタルサーチを発音記号の後に読む', true,
+	strpos($page, 'pronunciation.js') < strpos($page, 'livesearch.js'));
+
+//////////////////////////////////////////////////
 //ホーム画面への追加（PWA）
 //////////////////////////////////////////////////
 
@@ -694,6 +917,10 @@ is_same(
 is_same('Service Workerは辞書の置き場所を受け持つ', true, strpos($serviceWorker, 'const SCOPE = "/dict/"') !== false);
 is_same('Service Workerは取っておくファイルの一覧を持つ', true, strpos($serviceWorker, '"/dict/offline.php"') !== false);
 is_same('Service Workerは通信を横取りする', true, strpos($serviceWorker, "addEventListener('fetch'") !== false);
+is_same('Service Workerは検索結果の断片に手を出さない', true, strpos($serviceWorker, "SCOPE + 'results.php'") !== false);
+is_same('Service Workerはページ遷移以外で読まれたページをキャッシュ優先にしない', true,
+	strpos($serviceWorker, '!STATIC_PATTERN.test(url.pathname)') !== false);
+is_same('インクリメンタルサーチのスクリプトも取っておく', true, in_array('/dict/' . assetUrl('livesearch.js'), $precacheUrls, true));
 
 if ($savedScriptName === null){
 	unset($_SERVER['SCRIPT_NAME']);
@@ -703,5 +930,6 @@ if ($savedScriptName === null){
 
 //////////////////////////////////////////////////
 
+ob_end_flush();
 echo "\n", $failed === 0 ? "OK" : "NG", ": {$passed} passed, {$failed} failed\n";
 exit($failed === 0 ? 0 : 1);

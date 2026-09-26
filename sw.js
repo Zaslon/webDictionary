@@ -7,7 +7,10 @@
 //   キャッシュを返すのは通信できないときだけにする
 // - CSS・JS・書体はキャッシュを優先する。版付きのURL（`?v=更新時刻`）で来るため、
 //   更新されれば別のURLになり、古い物を返し続けることはない
+// - それ以外（ページ遷移以外で読まれたページ、manifest.php など）には手を出さない
 // - 辞書の外（本体のページ）と他所のサーバ（アクセス解析・グラフ）には手を出さない
+// - 検索結果の断片（results.php）は毎回サーバに問い合わせ、控えも取らない。
+//   通信できないときは livesearch.js が表示中の結果を残して注意書きを出す
 
 // 版が変わると別の名前になるため、古いキャッシュはactivateでまとめて消える
 const STATIC_CACHE = 'idyer-dict-static-' + CACHE_VERSION;
@@ -48,8 +51,16 @@ self.addEventListener('fetch', (event) => {
 	if (url.origin !== self.location.origin || !url.pathname.startsWith(SCOPE)) {
 		return;// 辞書の外は普段どおりブラウザに任せる
 	}
+	if (url.pathname === SCOPE + 'results.php') {
+		return;// 直接開いたとき（navigate）も、下の handlePage で控えを取らせない
+	}
 	if (request.mode === 'navigate') {
 		event.respondWith(handlePage(request));
+		return;
+	}
+	// ページ遷移以外で読まれたページ（開発者ツールがソースを表示し直すときなど）は、
+	// キャッシュを優先する handleAsset に入れず、SW が無いときと同じくブラウザに任せる
+	if (!STATIC_PATTERN.test(url.pathname)) {
 		return;
 	}
 	event.respondWith(handleAsset(request));
@@ -86,7 +97,7 @@ async function handleAsset(request) {
 		return cached;
 	}
 	const response = await fetch(request);
-	if (response.ok && response.type === 'basic' && STATIC_PATTERN.test(new URL(request.url).pathname)) {
+	if (response.ok && response.type === 'basic') {
 		const cache = await caches.open(STATIC_CACHE);
 		await cache.put(request, response.clone());
 	}
