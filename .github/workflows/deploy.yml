@@ -72,6 +72,10 @@ jobs:
           if [ -z "$HOST" ];        then echo "::error::Secret が未設定: DEPLOY_HOST"; exit 1; fi
           if [ -z "$USER_NAME" ];   then echo "::error::Secret が未設定: DEPLOY_USER"; exit 1; fi
           if [ -z "$REMOTE_ROOT" ]; then echo "::error::Variable が未設定: DEPLOY_PATH"; exit 1; fi
+          # 空のままでも lftp は空パスワードでログインしに行き、530 としか出ないため先に弾く
+          if [ -z "$LFTP_PASSWORD" ] && { [ "$PROTOCOL" != "sftp" ] || [ -z "$SSH_KEY" ]; }; then
+            echo "::error::Secret が未設定: DEPLOY_PASSWORD（production 環境か、リポジトリの Secrets に置くこと）"; exit 1
+          fi
           REMOTE_ROOT="${REMOTE_ROOT%/}"
           REMOTE_ROOT="${REMOTE_ROOT:-/}"
 
@@ -169,7 +173,7 @@ jobs:
           # 読むだけなので、どのモード・ドライランでも行う。接続の確認も兼ねる
           { cat "$header"; echo "find . > \"$RUNNER_TEMP/server-files\" || exit 1"; } > "$RUNNER_TEMP/run.lftp"
           if ! lftp -f "$RUNNER_TEMP/run.lftp"; then
-            echo "::error::サーバに接続できない、または DEPLOY_PATH の場所へ移動できない"
+            echo "::error::サーバに接続・ログインできない、DEPLOY_PATH の場所へ移動できない、またはファイル一覧を取れない（理由はログの直前の lftp のメッセージ）"
             exit 1
           fi
           declare -A deployable=()
