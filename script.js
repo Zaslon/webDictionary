@@ -9,6 +9,10 @@
 	const root = document.documentElement;
 	const query = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
+	// JavaScriptが無いときだけ要る部品（検索ボタン）をCSSで隠すための目印。
+	// deferの livesearch.js で隠すと、描画されたボタンが一瞬見えてから消えるため、ここで付ける
+	root.classList.add('js-enabled');
+
 	// プライベートモードなどでlocalStorageを使えなくても、そのページ内の切り替えは動かす
 	function loadSetting() {
 		try {

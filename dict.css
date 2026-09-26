@@ -208,12 +208,14 @@ body{
 	height: 300px;
 }
 
-.textAndSubmit{
+.buttonAndLabel{
 	display: inline-block;
 }
 
-.buttonAndLabel{
-	display: inline-block;
+/* ラジオ・チェックボックスを装飾色を持たない --text の色で塗る */
+input[type="checkbox"],
+input[type="radio"]{
+	accent-color: var(--text);
 }
 
 input[type="text"]{
@@ -228,6 +230,143 @@ button{
 	border: 1px solid var(--border);
 	border-radius: 3px;
 	color: inherit;
+}
+
+/* ---- 検索フォーム（dict.php） ---- */
+
+.searchBar {
+	position: relative;   /* 虫眼鏡の位置の基準 */
+	display: flex;
+	gap: 6px;
+	max-width: 32em;
+}
+
+#keyBox {
+	flex: 1 1 auto;
+	min-width: 0;
+	margin: 0;
+	padding: 0.3em 0.6em 0.3em 2em;
+}
+
+/* 検索ボタンを隠すと検索欄であることの手掛かりが消えるため、入力欄の左に虫眼鏡を置く。
+   色を --muted に追従させるため、絵はmaskで抜いて地色で塗る */
+.searchBar::before {
+	content: "";
+	position: absolute;
+	left: 0.6em;
+	top: 50%;
+	width: 1em;
+	height: 1em;
+	transform: translateY(-50%);
+	background-color: var(--muted);
+	pointer-events: none;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 21 21'/%3E%3C/svg%3E") center / contain no-repeat;
+	        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 21 21'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+#btn {
+	flex: 0 0 auto;
+	margin: 0;
+	padding: 0.3em 1.2em;
+	cursor: pointer;
+}
+
+/* JavaScriptが動けば入力と条件の変更だけで結果が変わる（livesearch.js）ので、ボタンは要らない。
+   Enterでの送信（submitイベント）は、ボタンを隠してもブラウザが行う */
+.js-enabled #btn {
+	display: none;
+}
+
+/* 条件はまとまり（対象・方式・チェックボックス）ごとに折り返さない塊にし、塊単位で折り返す */
+.searchOptions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5em 1.6em;
+	margin-top: 0.6em;
+	font-size: 90%;
+	line-height: 1.6;
+}
+
+.optionGroup {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+	white-space: nowrap;
+}
+
+.optionLabel {
+	color: var(--muted);
+	font-size: 90%;
+}
+
+.optionChecks {
+	gap: 0.2em 1.2em;
+}
+
+.optionChecks input {
+	width: 1.05em;
+	height: 1.05em;
+	margin: 0 0.35em 0 0;
+	vertical-align: -0.15em;
+}
+
+/* 同じ name のラジオを1本のつながったボタンに見せる。
+   ラジオ自体は透明にして残し、Tab・矢印キーでの操作と読み上げはそのまま効かせる */
+.segmented {
+	position: relative;
+	display: inline-grid;
+	grid-auto-flow: column;
+	background-color: var(--chip);
+	border: 1px solid var(--border);
+	border-radius: 3px;
+}
+
+.segmented input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	pointer-events: none;
+}
+
+.segmented label {
+	padding: 0.15em 0.9em;
+	text-align: center;
+	cursor: pointer;
+}
+
+.segmented label ~ label {
+	border-left: 1px solid var(--border);
+}
+
+.segmented label:first-of-type { border-radius: 2px 0 0 2px; }
+.segmented label:last-of-type  { border-radius: 0 2px 2px 0; }
+
+.segmented label:hover {
+	background-color: var(--chip-hover);
+}
+
+/* 選択中は紙面と文字の色を入れ替える。新しい色を足さずに、明暗どちらでも一目で分かる */
+.segmented input:checked + label {
+	background-color: var(--text);
+	color: var(--paper);
+}
+
+.segmented input:focus-visible + label {
+	position: relative;
+	outline: 2px solid var(--focus);
+	outline-offset: 2px;
+}
+
+/* ハイコントラスト表示では背景色が捨てられ、選択中が見分けられなくなるため、システムの色で塗る */
+@media (forced-colors: active) {
+	.segmented input:checked + label {
+		forced-color-adjust: none;
+		background-color: Highlight;
+		color: HighlightText;
+	}
 }
 
 input[type="submit"]:hover,
@@ -285,7 +424,7 @@ form {
 	text-align: left;
 	padding: 10px;
 	padding-top: 0;
-	padding-bottom: 0.2em;
+	padding-bottom: 0.4em;
 	}
 
 form p{
@@ -742,20 +881,39 @@ span.exampleTag {
 	border-left:none;
 	}
 
-	.textAndSubmit{
-	width:100%;
+	.searchBar {
+	max-width: none;
 	}
 
-	input[type="text"]{
-	float:left;
-	width:48%;
-	margin-right:0;
+	/* 狭い画面では条件のまとまりを1行ずつ積み、見出し（対象・方式）の幅を揃えて縦に並べる。
+	   2択のボタンは行の残りを等分する */
+	.searchOptions {
+	flex-direction: column;
+	align-items: stretch;
+	gap: 0.45em;
 	}
 
-	input[type="submit"]{
-	float:right;
-	width:48%;
-	margin-right:0;
+	.optionLabel {
+	flex: 0 0 2.6em;
+	}
+
+	.segmented {
+	flex: 1 1 auto;
+	grid-auto-columns: 1fr;
+	}
+
+	.segmented label {
+	padding-left: 0.4em;
+	padding-right: 0.4em;
+	}
+
+	.optionChecks {
+	flex-wrap: wrap;
+	white-space: normal;
+	}
+
+	.optionChecks .buttonAndLabel {
+	white-space: nowrap;
 	}
 
 	/* 明暗の切り替えボタンもタップ領域を44pxにする。

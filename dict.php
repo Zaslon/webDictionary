@@ -36,16 +36,30 @@ require __DIR__ . '/header.php';
 		</div>
 
 		<form id="searchForm" action="" method="GET">
-			<div class="textAndSubmit"><input type="text" name="keyBox" id="keyBox" aria-label="検索語" value="<?php echo h($request['keyBox']); ?>" autocomplete="off" enterkeyhint="search"><input type="submit" name="submit" id="btn" value="検索"></div>
-<!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c1" value="word"<?php echo checkedAttr($checkedType === "word"); ?>><label for="c1">見出し語検索</label></div> -->
-<!--		<div class='buttonAndLabel'><input type="radio" name="type" id="c2" value="trans"<?php echo checkedAttr($checkedType === "trans"); ?>><label for="c2">訳語検索</label></div> -->
-			<div class="buttonAndLabel"><input type="radio" name="type" id="c3" value="both"<?php echo checkedAttr($checkedType === "both"); ?>><label for="c3">見出し語・訳語検索</label></div>
-			<div class="buttonAndLabel"><input type="radio" name="type" id="c4" value="all"<?php echo checkedAttr($checkedType === "all"); ?>><label for="c4">全文検索</label></div>
-			<div class="buttonAndLabel"><input type="checkbox" name="Idf" id="c5" value="true"<?php echo checkedAttr(isIdfRequested()); ?>><label for="c5">イジェール文字表示</label></div>
-			<div class="buttonAndLabel"><input type="radio" name="mode" id="c6" value="prt"<?php echo checkedAttr($checkedMode === "prt"); ?>><label for="c6">部分一致</label></div>
-<!--		<div class='buttonAndLabel'><input type="radio" name="mode" id="c7" value="fwd"<?php echo checkedAttr($checkedMode === "fwd"); ?>><label for="c7">前方一致</label></div> -->
-			<div class="buttonAndLabel"><input type="radio" name="mode" id="c8" value="perf"<?php echo checkedAttr($checkedMode === "perf"); ?>><label for="c8">完全一致</label></div>
-			<div class="buttonAndLabel"><input type="checkbox" name="voicing" id="c9" value="true"<?php echo checkedAttr($request['includeVoicing']); ?>><label for="c9">検索対象に連濁派生語を含む</label></div>
+			<div class="searchBar"><input type="text" name="keyBox" id="keyBox" aria-label="検索語" placeholder="検索語を入力" value="<?php echo h($request['keyBox']); ?>" autocomplete="off" enterkeyhint="search"><input type="submit" name="submit" id="btn" value="検索"></div>
+			<div class="searchOptions">
+				<div class="optionGroup" role="radiogroup" aria-labelledby="typeLabel">
+					<span class="optionLabel" id="typeLabel">対象</span>
+					<span class="segmented">
+<!--					<input type="radio" name="type" id="c1" value="word"<?php echo checkedAttr($checkedType === "word"); ?>><label for="c1">見出し語</label> -->
+<!--					<input type="radio" name="type" id="c2" value="trans"<?php echo checkedAttr($checkedType === "trans"); ?>><label for="c2">訳語</label> -->
+						<input type="radio" name="type" id="c3" value="both"<?php echo checkedAttr($checkedType === "both"); ?>><label for="c3">見出し語・訳語</label>
+						<input type="radio" name="type" id="c4" value="all"<?php echo checkedAttr($checkedType === "all"); ?>><label for="c4">全文</label>
+					</span>
+				</div>
+				<div class="optionGroup" role="radiogroup" aria-labelledby="modeLabel">
+					<span class="optionLabel" id="modeLabel">方式</span>
+					<span class="segmented">
+						<input type="radio" name="mode" id="c6" value="prt"<?php echo checkedAttr($checkedMode === "prt"); ?>><label for="c6">部分一致</label>
+<!--					<input type="radio" name="mode" id="c7" value="fwd"<?php echo checkedAttr($checkedMode === "fwd"); ?>><label for="c7">前方一致</label> -->
+						<input type="radio" name="mode" id="c8" value="perf"<?php echo checkedAttr($checkedMode === "perf"); ?>><label for="c8">完全一致</label>
+					</span>
+				</div>
+				<div class="optionGroup optionChecks">
+					<span class="buttonAndLabel"><input type="checkbox" name="voicing" id="c9" value="true"<?php echo checkedAttr($request['includeVoicing']); ?>><label for="c9">連濁派生語を含む</label></span>
+					<span class="buttonAndLabel"><input type="checkbox" name="Idf" id="c5" value="true"<?php echo checkedAttr(isIdfRequested()); ?>><label for="c5">イジェール文字表示</label></span>
+				</div>
+			</div>
 			<input type="hidden" name="page" value="1">
 		</form>
 	</header>
