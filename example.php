@@ -17,6 +17,8 @@ $page = ($page !== null && preg_match("/^[0-9]+$/", $page)) ? max(1, (int)$page)
 $page = min($page, max(1, (int)ceil($exampleAmount / EXAMPLES_PER_PAGE)));//存在しないページを指定された場合は最終ページに寄せる
 $firstIndex = EXAMPLES_PER_PAGE * ($page - 1);
 
+//検索エンジンには1ページ目（クエリの無い example.php）だけを載せる。理由は dict.php と同じ
+$pageNoIndex = ($_GET !== array());
 $pageMenu = buildPageMenu('example');
 $pageScripts = array('dict.js');//表示前にフォントを確定させるため、head内で読み込む
 require __DIR__ . '/header.php';

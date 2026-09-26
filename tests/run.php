@@ -813,6 +813,21 @@ is_same('検索ページは通信失敗の注意書きの場所を置く', true,
 is_same('検索ページはインクリメンタルサーチを発音記号の後に読む', true,
 	strpos($page, 'pronunciation.js') < strpos($page, 'livesearch.js'));
 
+//検索エンジンには条件の無いページだけを載せる
+$noIndexTag = '<meta name="robots" content="noindex" />';
+is_same('検索条件の付いた検索ページは検索エンジンに載せない', true, strpos($page, $noIndexTag) !== false);
+is_same('検索エンジンに載せないページには canonical を出さない', false, strpos($page, 'rel="canonical"'));
+foreach (array('id指定' => $pageCases['id指定'], 'イジェール文字表示だけ' => array('Idf' => 'true')) as $label => $query){
+	is_same('検索条件の付いた検索ページは検索エンジンに載せない（' . $label . '）', true,
+		strpos(renderScript('dict.php', $query), $noIndexTag) !== false);
+}
+$page = renderScript('dict.php', array());
+is_same('条件の無い検索ページは検索エンジンに載せる', false, strpos($page, 'noindex'));
+is_same('条件の無い検索ページは canonical を出す', true, strpos($page, 'rel="canonical"') !== false);
+is_same('例文一覧の2ページ目以降は検索エンジンに載せない', true,
+	strpos(renderScript('example.php', array('page' => '2')), $noIndexTag) !== false);
+is_same('例文一覧の1ページ目は検索エンジンに載せる', false, strpos(renderScript('example.php', array()), 'noindex'));
+
 //////////////////////////////////////////////////
 //ホーム画面への追加（PWA）
 //////////////////////////////////////////////////

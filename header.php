@@ -3,7 +3,7 @@
 //  $pageMenu    : メニュー項目 array(ラベル => URL)。buildPageMenu()で組み立てる
 //  $pageScripts : <head>で読み込む追加スクリプトのURL。描画前に効かせたいものだけ置く
 //  $pageDeferredScripts : deferで読み込む追加スクリプトのURL。描画を待たせたくないもの
-//  $pageNoIndex : trueにすると検索避け（noindex）を出す
+//  $pageNoIndex : trueにすると検索避け（noindex）を出し、canonicalは出さない
 //ページ固有の見出し要素を続けて置けるよう、<header>は開いたまま返す。
 //読み込んだ側が</header>を閉じること。
 require_once __DIR__ . '/func.php';
@@ -31,7 +31,10 @@ $pageNoIndex = isset($pageNoIndex) ? $pageNoIndex : false;
 <?php if ($pageNoIndex): ?>
 <meta name="robots" content="noindex" />
 <?php endif; ?>
-<?php $canonicalUrl = canonicalUrl(); if ($canonicalUrl !== ''): ?>
+<?php
+//noindex のページに別のURLを指す canonical を並べると、検索エンジンに食い違った指示を出すことになるため出さない
+$canonicalUrl = $pageNoIndex ? '' : canonicalUrl();
+if ($canonicalUrl !== ''): ?>
 <link rel="canonical" href="<?php echo h($canonicalUrl); ?>" />
 <?php endif; ?>
 <?php

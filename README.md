@@ -152,6 +152,17 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 カードは正方形の小さいカード（`summary`）で、画像は `config.php` の `og_image`。
 説明文は `site_tagline` で、`meta name="description"` と `og:description` の両方に出る。
 
+## 検索エンジンに載せるページ
+検索エンジンに載せるのはクエリの無いページ（`dict.php`・`example.php`・`legend.php`・`chart.php`）だけにする。
+サイトマップにもこれらだけが載る（zaslon-site の `index.php` の `sitemap_dict_urls()`）。
+
+* クエリの付いた `dict.php`（検索結果）と `example.php`（2ページ目以降など）は `<meta name="robots" content="noindex" />` を出す。
+  検索条件の付いたURLは語ごとに際限なく増え、`canonical` だけでは中身の違うページとして個別に載せられることがあるため
+* `noindex` のページには `canonical` を出さない（別のURLを指す `canonical` と並べると食い違った指示になる）。
+  `header.php` の `$pageNoIndex` で切り替える
+* 検索結果の断片 `results.php` は `X-Robots-Tag: noindex` を返す
+* `robots.txt` では巡回を止めない。止めると検索エンジンが `noindex` を読めず、URLだけが載ることがある
+
 ## アイコン
 ファビコン・アイコン・カード画像は、辞書側に持たず zaslon.info 本体のサイト直下（`/favicon.ico`・
 `/icon-512.png`・`/apple-touch-icon.png`）を共用する。同じドメインの `/dict/` に置く前提のため、

@@ -20,6 +20,9 @@ $searchResult = runSearch($words, $affixTable, $exampleIndex, $request);
 $checkedType = ($request['type'] === "trans") ? "both" : $request['type'];
 $checkedMode = ($request['mode'] === "fwd") ? "prt" : $request['mode'];
 
+//検索条件の付いたURLは語ごとに際限なく増えるため、検索エンジンには条件の無い dict.php だけを載せる。
+//canonical だけでは、中身の違うページとして個別に載せられることがある
+$pageNoIndex = ($_GET !== array());
 $pageMenu = buildPageMenu('dict');
 $pageScripts = array('dict.js');//表示前にフォントを確定させるため、head内で読み込む
 //発音記号の生成とインクリメンタルサーチ。検索結果より後で構わないため、描画を止めずに読み込む
