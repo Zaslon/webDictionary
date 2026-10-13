@@ -159,8 +159,9 @@ function manifestTheme(){
 //////////////////////////////////////////////////
 
 //未指定と空文字列を区別せずnullにまとめる
+//keyBox[]=a のような配列は、後続の文字列関数がTypeErrorで落ちるため未指定として扱う
 function getParam($name){
-	return (isset($_GET[$name]) && $_GET[$name] !== '') ? $_GET[$name] : null;
+	return (isset($_GET[$name]) && is_string($_GET[$name]) && $_GET[$name] !== '') ? $_GET[$name] : null;
 }
 
 //URLから渡る値をそのまま使わないよう、既知の値以外は既定値に落とす
