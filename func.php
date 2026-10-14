@@ -159,8 +159,9 @@ function manifestTheme(){
 //////////////////////////////////////////////////
 
 //未指定と空文字列を区別せずnullにまとめる
+//keyBox[]=a のような配列は、後続の文字列関数がTypeErrorで落ちるため未指定として扱う
 function getParam($name){
-	return (isset($_GET[$name]) && $_GET[$name] !== '') ? $_GET[$name] : null;
+	return (isset($_GET[$name]) && is_string($_GET[$name]) && $_GET[$name] !== '') ? $_GET[$name] : null;
 }
 
 //URLから渡る値をそのまま使わないよう、既知の値以外は既定値に落とす
@@ -402,7 +403,7 @@ function readCache($name, array $sources){
 	if ($raw === false){
 		return null;
 	}
-	$data = @unserialize($raw);
+	$data = @unserialize($raw, array('allowed_classes' => false));
 	if (!is_array($data) || !array_key_exists('stamp', $data) || !array_key_exists('value', $data)){
 		return null;
 	}
@@ -412,7 +413,7 @@ function readCache($name, array $sources){
 //書けなくてもソートし直せば動くため、失敗は握りつぶす
 function writeCache($name, $value, array $sources){
 	$dir = cacheDir();
-	if (!is_dir($dir) && !@mkdir($dir, 0777, true)){
+	if (!is_dir($dir) && !@mkdir($dir, 0755, true)){
 		return;
 	}
 	$file = $dir . '/' . $name . '.cache';
