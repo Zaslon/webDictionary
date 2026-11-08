@@ -7386,6 +7386,13 @@ html {
   box-shadow: var(--sw-elevation-overlay);
 }
 
+/* DADS は高さを 100dvh とするが、Android の Chrome の PWA では dvh が起動直後の画面の高さのまま更新されず、
+ * 下端が画面外に出ることがある（implementation/web.md「画面の端（PWA）」）。モーダルのドロワーは
+ * ビューポートを包含ブロックとする固定配置なので、100% で画面の高さになる。 */
+.dads-drawer {
+  height: 100%;
+}
+
 .dads-drawer[data-placement="left"] {
   border-right-color: var(--color-neutral-black);
 }
