@@ -31,42 +31,55 @@ require __DIR__ . '/header.php';
 ?>
 		<div class="dictVer">
 			<p>プログラム更新日：<?php echo h(date("Y/m/d", programUpdatedAt())); ?></p>
-			<p>辞書更新日：<?php echo h(date("Y/m/d", filemtime($dictionaryFile))); ?><br />
-			単語数：<?php echo h(count($words)); ?></p>
+			<p>辞書更新日：<?php echo h(date("Y/m/d", filemtime($dictionaryFile))); ?></p>
+			<p>単語数：<?php echo h(count($words)); ?></p>
 		</div>
 
-		<form id="searchForm" action="" method="GET">
-			<div class="searchBar"><input type="text" name="keyBox" id="keyBox" aria-label="検索語" placeholder="検索語を入力" value="<?php echo h($request['keyBox']); ?>" autocomplete="off" enterkeyhint="search"><input type="submit" name="submit" id="btn" value="検索"></div>
+		<?php //部品は ZasDesignSystem の検索ボックス・ラジオグループ・チェックボックス。id と name は livesearch.js・dict.js が使う ?>
+		<form id="searchForm" class="searchForm" action="" method="GET" role="search">
+			<div class="sw-search-box" data-size="md">
+				<div class="sw-search-box__fields">
+					<label class="sw-search-box__input">
+						<svg class="sw-search-box__input-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 20.5-6-6a7.4 7.4 0 0 0 1.9-5A7.4 7.4 0 0 0 9.5 2 7.5 7.5 0 1 0 14 15.5l6 6 1-1ZM3.5 9.5a6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6 6 6 0 0 1-6-6Z" fill="currentcolor"/></svg>
+						<span class="dads-u-visually-hidden">検索語</span>
+						<input class="sw-search-box__input-control" type="search" name="keyBox" id="keyBox" placeholder="検索語を入力" value="<?php echo h($request['keyBox']); ?>" autocomplete="off" enterkeyhint="search">
+					</label>
+				</div>
+				<button class="dads-button sw-search-box__submit" type="submit" name="submit" value="検索" id="btn" data-type="solid-fill" data-size="md">検索</button>
+			</div>
 			<div class="searchOptions">
-				<div class="optionGroup" role="radiogroup" aria-labelledby="typeLabel">
-					<span class="optionLabel" id="typeLabel">対象</span>
-					<span class="segmented">
-<!--					<input type="radio" name="type" id="c1" value="word"<?php echo checkedAttr($checkedType === "word"); ?>><label for="c1">見出し語</label> -->
-<!--					<input type="radio" name="type" id="c2" value="trans"<?php echo checkedAttr($checkedType === "trans"); ?>><label for="c2">訳語</label> -->
-						<input type="radio" name="type" id="c3" value="both"<?php echo checkedAttr($checkedType === "both"); ?>><label for="c3">見出し語・訳語</label>
-						<input type="radio" name="type" id="c4" value="all"<?php echo checkedAttr($checkedType === "all"); ?>><label for="c4">全文</label>
+				<div class="sw-radio-group" role="radiogroup" aria-labelledby="typeLabel">
+					<span class="sw-radio-group__legend" id="typeLabel">対象</span>
+					<span class="sw-radio-group__options">
+<!--						<label class="sw-radio-group__option"><input class="sw-radio-group__input" type="radio" name="type" id="c1" value="word"<?php echo checkedAttr($checkedType === "word"); ?>><span class="sw-radio-group__label">見出し語</span></label> -->
+<!--						<label class="sw-radio-group__option"><input class="sw-radio-group__input" type="radio" name="type" id="c2" value="trans"<?php echo checkedAttr($checkedType === "trans"); ?>><span class="sw-radio-group__label">訳語</span></label> -->
+						<label class="sw-radio-group__option"><input class="sw-radio-group__input" type="radio" name="type" id="c3" value="both"<?php echo checkedAttr($checkedType === "both"); ?>><span class="sw-radio-group__label">見出し語・訳語</span></label>
+						<label class="sw-radio-group__option"><input class="sw-radio-group__input" type="radio" name="type" id="c4" value="all"<?php echo checkedAttr($checkedType === "all"); ?>><span class="sw-radio-group__label">全文</span></label>
 					</span>
 				</div>
-				<div class="optionGroup" role="radiogroup" aria-labelledby="modeLabel">
-					<span class="optionLabel" id="modeLabel">方式</span>
-					<span class="segmented">
-						<input type="radio" name="mode" id="c6" value="prt"<?php echo checkedAttr($checkedMode === "prt"); ?>><label for="c6">部分一致</label>
-<!--					<input type="radio" name="mode" id="c7" value="fwd"<?php echo checkedAttr($checkedMode === "fwd"); ?>><label for="c7">前方一致</label> -->
-						<input type="radio" name="mode" id="c8" value="perf"<?php echo checkedAttr($checkedMode === "perf"); ?>><label for="c8">完全一致</label>
+				<div class="sw-radio-group" role="radiogroup" aria-labelledby="modeLabel">
+					<span class="sw-radio-group__legend" id="modeLabel">方式</span>
+					<span class="sw-radio-group__options">
+						<label class="sw-radio-group__option"><input class="sw-radio-group__input" type="radio" name="mode" id="c6" value="prt"<?php echo checkedAttr($checkedMode === "prt"); ?>><span class="sw-radio-group__label">部分一致</span></label>
+<!--						<label class="sw-radio-group__option"><input class="sw-radio-group__input" type="radio" name="mode" id="c7" value="fwd"<?php echo checkedAttr($checkedMode === "fwd"); ?>><span class="sw-radio-group__label">前方一致</span></label> -->
+						<label class="sw-radio-group__option"><input class="sw-radio-group__input" type="radio" name="mode" id="c8" value="perf"<?php echo checkedAttr($checkedMode === "perf"); ?>><span class="sw-radio-group__label">完全一致</span></label>
 					</span>
 				</div>
-				<div class="optionGroup optionChecks">
-					<span class="buttonAndLabel"><input type="checkbox" name="voicing" id="c9" value="true"<?php echo checkedAttr($request['includeVoicing']); ?>><label for="c9">連濁派生語を含む</label></span>
-					<span class="buttonAndLabel"><input type="checkbox" name="Idf" id="c5" value="true"<?php echo checkedAttr(isIdfRequested()); ?>><label for="c5">イジェール文字表示</label></span>
+				<div class="optionChecks">
+					<label class="dads-checkbox" data-size="sm">
+						<span class="dads-checkbox__checkbox"><input class="dads-checkbox__input" type="checkbox" name="voicing" id="c9" value="true"<?php echo checkedAttr($request['includeVoicing']); ?>></span>
+						<span class="dads-checkbox__label">連濁派生語を含む</span>
+					</label>
+					<label class="dads-checkbox" data-size="sm">
+						<span class="dads-checkbox__checkbox"><input class="dads-checkbox__input" type="checkbox" name="Idf" id="c5" value="true"<?php echo checkedAttr(isIdfRequested()); ?>></span>
+						<span class="dads-checkbox__label">イジェール文字表示</span>
+					</label>
 				</div>
 			</div>
 			<input type="hidden" name="page" value="1">
 		</form>
-	</header>
 
-	<main id="main">
 		<p id="searchStatus" class="searchStatus" role="status" hidden></p>
 		<?php //results.php の応答と突き合わせるテストがあるため、#results の開閉タグと中身の間に空白を入れない ?>
 		<div id="results"><?php renderSearchResults($words, $exampleIndex, isset($json['snoj']) ? $json['snoj'] : null, $request, $searchResult); ?></div>
-	</main>
 <?php require __DIR__ . '/footer.php'; ?>

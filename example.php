@@ -21,21 +21,23 @@ $firstIndex = EXAMPLES_PER_PAGE * ($page - 1);
 $pageNoIndex = ($_GET !== array());
 $pageMenu = buildPageMenu('example');
 $pageScripts = array('dict.js');//表示前にフォントを確定させるため、head内で読み込む
+$pageHeading = '例文一覧';
 require __DIR__ . '/header.php';
 ?>
 		<div class="dictVer">
 			<p>プログラム更新日：<?php echo h(date("Y/m/d", programUpdatedAt())); ?></p>
-			<p>辞書更新日：<?php echo h(date("Y/m/d", filemtime($dictionaryFile))); ?><br />
-			例文数：<?php echo h($exampleAmount); ?></p>
+			<p>辞書更新日：<?php echo h(date("Y/m/d", filemtime($dictionaryFile))); ?></p>
+			<p>例文数：<?php echo h($exampleAmount); ?></p>
 		</div>
 
 		<!-- 検索ページと状態を共有するため、送信はせずdict.jsに任せる -->
 		<div class="fontSwitch">
-			<div class="buttonAndLabel"><input type="checkbox" id="c5"<?php echo checkedAttr(isIdfRequested()); ?>><label for="c5">イジェール文字表示</label></div>
+			<label class="dads-checkbox" data-size="sm">
+				<span class="dads-checkbox__checkbox"><input class="dads-checkbox__input" type="checkbox" id="c5"<?php echo checkedAttr(isIdfRequested()); ?>></span>
+				<span class="dads-checkbox__label">イジェール文字表示</span>
+			</label>
 		</div>
-	</header>
 
-	<main id="main">
 	<?php
 	if ($exampleAmount === 0){
 		echo '<p>例文はまだ登録されていません。</p>';
@@ -54,5 +56,4 @@ require __DIR__ . '/header.php';
 
 	renderExampleNavigation($exampleAmount, $page);
 	?>
-	</main>
 <?php require __DIR__ . '/footer.php'; ?>

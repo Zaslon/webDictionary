@@ -23,9 +23,11 @@
 | `sw.php` | Service Workerを返す。版と対象URLを付けて `sw.js` を出す |
 | `search.php` | 検索と接辞サジェスト |
 | `view.php` | 検索結果のHTML出力 |
-| `header.php` / `footer.php` | 全ページ共通のレイアウト |
-| `dict.css` | 全ページ共通のスタイル。色は zaslon.info 本体と同じ変数名で持つ |
-| `script.js` | 明暗（ライト／ダーク）の切り替え |
+| `header.php` / `footer.php` | 全ページ共通のレイアウト（ヘッダ・メニュー・フッタ） |
+| `design-system.css` | ZasDesignSystem の部品とトークン。`_css/build.mjs` の生成物で、手で編集しない |
+| `dict.css` | 辞書のスタイル。配置と、部品の無い要素（単語欄・例文・ページ送り・凡例）だけを書く |
+| `_css/build.mjs` / `_css/design-system.full.css` | `design-system.css` の生成スクリプトと生成元（ZasDesignSystem の書き出し）。サーバには送らない |
+| `script.js` | 明暗（ライト／ダーク）の切り替え、メニューのドロワー、起動時の画面の色 |
 | `dict.js` | イジェール文字表示の切り替え |
 | `pronunciation.js` | 発音記号の自動生成 |
 | `livesearch.js` | インクリメンタルサーチ（ページ内で検索結果を差し替える） |
@@ -33,13 +35,14 @@
 | `sw.js` | Service Workerの動きの定義。ブラウザは `sw.php` 経由で読む |
 | `vendor/akrantiain.min.js` | akrantiain（第三者製）をブラウザ用にまとめたもの |
 | `vendor/DoulosSIL-Regular.woff2` | 発音記号の書体（第三者製）。配布物をそのまま置く |
-| `vendor/LICENSE-*.txt` | 上記の第三者製ソフトウェア・フォントのライセンス全文 |
+| `vendor/LICENSE-*.txt` | 上記の第三者製ソフトウェア・フォントと、`design-system.css`（デジタル庁デザインシステム）・明暗ボタンの絵（Material Symbols）のライセンス全文 |
 | `wordchart.js` | 単語数推移のグラフの描画 |
 | `idyer.json` | 辞書データ（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)で管理） |
 | `affixTable.csv` | 接辞テーブル。[0]対象品詞、[1]形態、[2]説明、[3]特殊処理、[4]派生後の品詞 |
 | `logger/dictLog.csv` | 単語数の記録。グラフの元データ。正はサーバ側で、リポジトリの物は表示確認用の控え |
 | `logger/idyer_logger.php` | 単語数を記録するスクリプト。cronから定期実行する |
 | `tests/run.php` | テスト |
+| `辞書チェック.bat` / `_local/router.php` | 手元での表示確認（下記「手元での確認」）。サーバには送らない |
 | `../favicon.ico` `../icon-512.png` `../apple-touch-icon.png` | サイトアイコン（親サイトに設置） |
 
 `Endrata` フォント（`*.woff` / `*.ttf`）は意図的にリポジトリに含めていないため、
@@ -135,9 +138,11 @@ GA4 の拡張計測（ブラウザの履歴イベントによるページ変更�
 zaslon-site本体の `common/config.php` / `site_config()` に対応するファイルで、
 本体と揃える必要がある値（`site_url`・`ga_id`・コピーライトの表記形式）は本体側と一致させること。
 
-ページ間メニュー（検索仕様・凡例・検索ページ・例文一覧・単語数推移・ホームへ戻る）は
-`func.php` の `buildPageMenu($currentPageKey)` が `config.php` の `pages` から自分自身の項目を除いて組み立てる。
+ページ間メニュー（検索仕様・検索・例文一覧・凡例・単語数推移・ホームへ戻る）は
+`func.php` の `buildPageMenu($currentPageKey)` が `config.php` の `pages` から組み立てる。
+本体と同じく今いるページの項目も残し、`aria-current="page"` で示す。
 辞書の中のページは `pages` に、文法書側の記事など辞書の外へのリンクは `menu_before` / `menu_after` に書く。
+`pages` の `dict` はヘッダのサイト名のリンク先にも使う。
 
 ## アクセス解析
 `header.php` が `config.php` の `ga_id` を使って zaslon.info 本体と同じGA4プロパティに計測タグを出す
@@ -233,63 +238,91 @@ URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `s
 なお、CSSやJSを更新してもブラウザが古いものを使い続けないよう、
 `func.php` の `assetUrl()` で `dict.css?v=更新時刻` の形にしている。
 
-## 見た目（配色・書体・ダークモード）
-配色も書体も zaslon.info 本体（[zaslon-site](https://zaslon.info/) の `css/style.css`）に合わせてある。
+## 手元での確認
+`辞書チェック.bat` を開くと PHP の組み込みサーバが立ち上がり、ブラウザで `http://127.0.0.1:8081/dict/dict.php` が開く。
+止めるときはそのウィンドウで Ctrl+C。
 
-### 配色
-`dict.css` の先頭で本体と**同じ変数名・同じ値**の色を定義しているので、
-どちらかの色を変えたときは、もう一方の同じ名前の値も合わせること。
+- 辞書データ `idyer.json` をこのフォルダに置いておくこと（リポジトリには無い）
+- PHP は PATH → `C:\php` → `C:\xampp\php` の順に探す。環境変数 `PHP_EXE` で指定もできる。
+  `mbstring` が読まれていなければ、PHP の `ext` フォルダから足して起動する
+- 本番と同じ `/dict/` のURLで開けるよう、`_local/router.php` が `/dict/` 以下をこのフォルダのファイルに対応させる
+- 隣に `zaslon-site` があればそれをドキュメントルートにし、サイト直下のアイコンも本番と同じく表示される。
+  ただし凡例は本体のレンダラではなく辞書側の簡易な変換で出る（本体のフォルダの中に辞書が無いため）
+- 待ち受けは `127.0.0.1` だけ（LAN からは見えない）。ポートは 8081 で、本体の `ブログチェック.bat`（8080）と同時に動かせる
+
+## 見た目（デザインシステム・明暗）
+見た目は zaslon.info 本体（[zaslon-site](https://zaslon.info/)）と同じく、ZasDesignSystem（デジタル庁デザインシステムが基）に従う。
+ヘッダ（サイト名・明暗ボタン・水平メニュー／ドロワー）・フッタ・ページ見出しは本体の `common/header.php` / `css/style.css` と同じマークアップと規則で、
+検索欄（検索ボックス）・検索条件（ラジオグループ・チェックボックス）は ZasDesignSystem の部品をそのまま使う。
+
+### CSS の構成
+| ファイル | 中身 | 編集 |
+| --- | --- | --- |
+| `design-system.css` | 部品の見た目と、色・文字・寸法のトークン（ライト／ダーク） | しない（生成物） |
+| `dict.css` | 配置（余白・並び・幅）と、部品の無い要素（単語欄・例文・ページ送り・凡例の地の文） | する |
+
+`design-system.css` はカスケードレイヤーに入っており、レイヤーに入れていない `dict.css` が常に優先される。
+`dict.css` では部品（`.dads-*` / `.sw-*`）の見た目を上書きせず、色は役割のトークン（`--sw-color-*`）だけを使う。
+トークンがライト／ダークで値を切り替えるので、`dict.css` にダーク用の指定は無い。
+
+### design-system.css の作り直し
+`_css/design-system.full.css`（ZasDesignSystem の `local-design-system/web/design-system.css` の写し）から、
+辞書で使う部品だけを残して作る。デプロイはビルドしないので、生成物もコミットする。
+
+```
+node _css/build.mjs
+```
+
+- 使っている部品は、辞書直下の `*.php` / `*.js` / `*.css` に書かれた `dads-*` / `sw-*` のクラス名で判定する。
+  クラス名を文字列の連結で組み立てると見つけられず、その部品の CSS が消える
+- 凡例は本体の `common/markdown.php` が HTML にするため、そこで付くクラスは `build.mjs` の `RENDERER_CLASSES` に並べてある。本体の側を変えたら合わせること
+- キーカラーを灰色に、リンクを青に置き換える表（`KEY_TO_GRAY`・`LINK`）は本体の `_css/build.mjs` と同じ値にすること。食い違うと辞書と本体で色が変わる
+- ZasDesignSystem を更新したら `_css/design-system.full.css` を差し替えて実行し直す。`_css/` はサーバには送らない（`deploy.yml` の除外）
 
 ### 書体
-本文の書体・字の大きさ・行間・狭い画面での切り替え（768px）は本体と同じ値にしてある。
-
-| | 値 | 備考 |
-| --- | --- | --- |
-| 本文 | `"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif` | |
-| 字の大きさ | `100%`（768px以下は `108%`） | |
-| 行間 | `1.85`（768px以下は `1.8`） | 一覧（`wordEntry` / `menu` / `navigation`）は本体の `.post-list` と同じ `1.6` に戻す |
-| サイト名（`h1`） | `Georgia,"Times New Roman",serif` | 大きさは本体（60px）に揃えず200%のまま。和文で長く、60pxだと折り返すため |
-
+本文はトークンの `--font-family-sans`、サイト名は本体と同じ `"Noto Serif Display", "Noto Serif JP"` 系の明朝。
+サイト名は和文で長いため、狭い画面では本体（28px）より小さい 24px にし、空白の位置で折り返させる。
 イジェール文字の `Endrata` と発音記号の `Doulos SIL` だけは辞書固有なので、上の指定より優先される。
 
 ### ダークモード
 切り替えは `script.js` が担当し、ヘッダ右上のボタン（`header.php`）で選ぶ。
 **辞書と本体は同じドメインに置いてあり、明暗はサイト全体で1つの設定として共有する。**
-そのため、次の3つは本体（`common/header.php` と `css/style.css`）と必ず同じにすること。
+そのため、次の3つは本体（`common/header.php` と `js/site.js`）と必ず同じにすること。
 片方だけ変えると、辞書と本体で設定が分かれてしまう。
 
 | 何 | 値 |
 | --- | --- |
-| `localStorage` のキー | `theme` |
+| `localStorage` のキー | `sw-theme`（旧版のキー `theme` も読む。ボタンで選び直すと消す） |
 | 保存する値 | `dark` / `light` |
 | `<html>` に付ける属性 | `data-theme="dark"` / `"light"` |
 
 - ボタンで選んでいなければ、OSの設定（`prefers-color-scheme`）に従う
-- 保存済みの選択は `<head>` で同期読み込みする `script.js` が画面を描く前に付けるので、
-  明るい画面が一瞬見えることはない
-- 暗い色は `dict.css` の `@media (prefers-color-scheme: dark)` と `:root[data-theme="dark"]` の
-  2か所に同じ並びで書いてある。JavaScriptが動かない環境でもOSの設定だけで暗くなるようにするためで、
-  片方だけ直さないこと
+- 保存済みの選択は `header.php` の `<head>` 内のインラインスクリプトが画面を描く前に付けるので、
+  明るい画面が一瞬見えることはない。外部ファイルにすると、読み込みを待つ間に一度 OS の設定の色で描かれる
 - グラフ（`wordchart.js`）の色はCSSではなく描画時に決まるため、
-  `dict.css` の変数を読んで描き、`data-theme` の変化を見張って描き直している
+  トークン（`--sw-color-*`）を読んで描き、`data-theme` の変化を見張って描き直している
+
+### メニュー（水平メニュー／ドロワー）
+幅が 768px 未満のとき、または項目が1行に収まらないときは、ハンバーガーメニューボタンからドロワーで開く。
+描画前の判定は `header.php` のインラインスクリプト、以後の切り替えは `script.js` が行う。
+JavaScript が動かない環境（と `showModal` の無いブラウザ）では水平メニューだけを出し、はみ出す分は横にスクロールさせる。
 
 ### 通知バー・ブラウザ枠・起動時の画面の色
-スマホのブラウザ枠と、ホーム画面に追加したとき（PWA）の通知バー（ステータスバー）・起動時の画面は、
-**アプリ内のボタンで選んだ表示ではなく、端末のダークモード設定に合わせる。**
 色は `config.php` の `app_theme_color`（明るい方）と `app_theme_color_dark`（暗い方）で、
-`dict.css` の `--page-bg` と揃える。
+トークンの `color-background`（`--sw-color-background`）と揃える（本体の `theme-color` と同じ値）。
 
-- `header.php` は `theme-color` を `media="(prefers-color-scheme: light)"` と `dark` の2つ出し、
-  どちらを使うかはブラウザが端末の設定を見て決める。`media` を見ない古いブラウザは最初の1つ
-  （明るい方）を使うため、並び順を入れ替えないこと。切り替えはブラウザ任せなので `script.js` は触らない
+- `header.php` は `theme-color` を `media="(prefers-color-scheme: light)"` と `dark` の2つ出す。
+  `media` を見ない古いブラウザは最初の1つ（明るい方）を使うため、並び順を入れ替えないこと
+- スクリプトが動けば、ページを開いた時点と明暗を切り替えたときに、両方の `theme-color` を今の表示の
+  `--sw-color-background` で上書きする（ZasDesignSystem の `implementation/web.md`「Android のナビゲーションバー」）。
+  アプリ内のボタンで選んだ表示と OS の設定が食い違っても、画面下端が白く浮かない
 - iOSの通知バーは `apple-mobile-web-app-status-bar-style` の3つの値からしか選べず、読み込み時に
-  一度しか見られない（後から `script.js` で書き換えても効かない）ため、端末の設定では出し分けられない。
-  iOS 15以降は `default` のとき上の `theme-color` が使われて端末の設定どおりになるため、
-  それ以前でも文字が読める `default`（白地に黒文字）を出す
+  一度しか見られない（後から書き換えても効かない）ため、出し分けられない。
+  iOS 15以降は `default` のとき上の `theme-color` が使われるため、それ以前でも文字が読める `default`（白地に黒文字）を出す
 - **起動時**（ホーム画面から開いてページが出るまでの画面）の色はマニフェストの
-  `theme_color` / `background_color` で決まる。マニフェストはページの外から読まれてCSSの
-  メディアクエリが効かないため、端末の設定を次の2通りで受け取る（`func.php` の `manifestTheme()`）。
-  どちらも無ければ明るい方になる
+  `theme_color` / `background_color` で決まり、**端末のダークモード設定に合わせる**。
+  マニフェストはページの外から読まれてCSSのメディアクエリが効かないため、端末の設定を次の2通りで受け取る
+  （`func.php` の `manifestTheme()`）。どちらも無ければ明るい方になる
 
   | 経路 | 誰が使うか |
   | --- | --- |

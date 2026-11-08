@@ -1,65 +1,75 @@
-// 明暗の表示（dict.css のダークモード）
-// zaslon.info 本体（zaslon-site の common/header.php）と同じ仕組みで、
-// localStorage のキー 'theme' と <html> の data-theme 属性を共有する。
-// 同じドメインに置いているので、これでサイト全体が1つの設定で動く。
-// キー名（'theme'）・値（'dark' / 'light'）・属性名（data-theme）は本体と揃えてあり、変えると設定が分かれる。
-// 保存済みの選択を表示前に確定させる必要があるため、head内で同期的に読み込むこと
+// 全ページ共通の操作（明暗の切り替え、ドロワー、起動時の画面の色）。
+// zaslon.info 本体（zaslon-site の js/site.js）と同じ動きにしてある。
+// 描画前に済ませる必要のあるもの（保存済みの明暗の反映・js-enabled）は header.php のインラインスクリプトが行う。
+// header.php で defer 読み込みするので、ここが動く時点で DOM はできている。
 (function () {
-	const STORAGE_KEY = 'theme';
 	const root = document.documentElement;
-	const query = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+	// 768 は ZasDesignSystem の tokens.md の breakpoint-split。header.php と dict.css の値もそろえること。
+	const narrowQuery = window.matchMedia('(max-width: 767.98px)');
+	const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-	// JavaScriptが無いときだけ要る部品（検索ボタン）をCSSで隠すための目印。
-	// deferの livesearch.js で隠すと、描画されたボタンが一瞬見えてから消えるため、ここで付ける
-	root.classList.add('js-enabled');
+	/* ---------- 明暗 ---------- */
 
-	// プライベートモードなどでlocalStorageを使えなくても、そのページ内の切り替えは動かす
-	function loadSetting() {
-		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			return (stored === 'dark' || stored === 'light') ? stored : null;
-		} catch (error) {
-			return null;
+	// 本体と同じキー。同じドメインに置いているので、サイト全体で1つの設定になる。
+	// 'theme' は旧版のキーで、選び直したら消す（header.php は残っていれば読む）
+	const STORAGE_KEY = 'sw-theme';
+
+	function currentTheme() {
+		const set = root.getAttribute('data-theme');
+		return (set === 'dark' || set === 'light') ? set : (darkQuery.matches ? 'dark' : 'light');
+	}
+
+	function syncThemeColor() {
+		const color = getComputedStyle(root).getPropertyValue('--sw-color-background').trim();
+		document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
+			meta.setAttribute('content', color);
+		});
+	}
+
+	const themeButton = document.querySelector('[data-js-theme-toggle]');
+
+	// ボタンには押した結果（今と逆の明暗）を出す。
+	// 絵は <svg> で、SVGElement には hidden プロパティが無いため、属性を直接付け外しする。
+	function syncThemeButton() {
+		if (!themeButton) {
+			return;
 		}
+		const next = (currentTheme() === 'dark') ? 'light' : 'dark';
+		themeButton.querySelectorAll('[data-js-theme-next]').forEach(function (element) {
+			element.toggleAttribute('hidden', element.getAttribute('data-js-theme-next') !== next);
+		});
 	}
 
-	function saveSetting(theme) {
-		try {
-			localStorage.setItem(STORAGE_KEY, theme);
-		} catch (error) {
-			// 保存できなくても続行する
-		}
+	if (themeButton) {
+		themeButton.hidden = false;
+		themeButton.addEventListener('click', function () {
+			const next = (currentTheme() === 'dark') ? 'light' : 'dark';
+			root.setAttribute('data-theme', next);
+			try {
+				localStorage.setItem(STORAGE_KEY, next);
+				localStorage.removeItem('theme');
+			} catch (error) {
+				// プライベートモードなどで保存できなくても、そのページ内の切り替えは効かせる
+			}
+		});
 	}
 
-	// 保存済みの選択を、画面を描く前に反映する
-	const saved = loadSetting();
-	if (saved !== null) {
-		root.setAttribute('data-theme', saved);
-	}
+	// data-theme をどこから書き換えても、ボタンとブラウザ枠の色を追従させる
+	new MutationObserver(function () {
+		syncThemeColor();
+		syncThemeButton();
+	}).observe(root, {attributes: true, attributeFilter: ['data-theme', 'data-contrast']});
+	// theme-color は両方のメタタグを同じ値にしているため、OS の設定の変化は media では反映されない
+	darkQuery.addEventListener('change', function () {
+		syncThemeColor();
+		syncThemeButton();
+		syncManifest();
+	});
+	syncThemeColor();
+	syncThemeButton();
 
-	// 今どちらで表示しているか。属性が無ければOSの設定に従っている状態
-	function current() {
-		const attribute = root.getAttribute('data-theme');
-		if (attribute === 'dark' || attribute === 'light') {
-			return attribute;
-		}
-		return (query && query.matches) ? 'dark' : 'light';
-	}
+	/* ---------- 起動時の画面の色（マニフェスト） ---------- */
 
-	// ボタンの説明を今の表示に合わせる。
-	// ブラウザ枠・通知バーの色（header.php の theme-color）は端末の設定に合わせてブラウザが
-	// 選ぶため（media 付きで2つ出してある）、ボタンで切り替えても触らない
-	function sync() {
-		const now = current();
-		const button = document.getElementById('theme-toggle');
-		if (button) {
-			const next = (now === 'dark') ? 'ライトモード' : 'ダークモード';
-			button.setAttribute('aria-label', next + 'に切り替え');
-			button.setAttribute('title', next + 'に切り替え');
-		}
-	}
-
-	// 起動時の画面（マニフェストの theme_color・background_color）の色を端末の設定に合わせる。
 	// マニフェストはページの外から読まれるため media クエリが効かず、端末の設定を URL に付けて
 	// サーバへ渡す。ブラウザがマニフェストを読むのはホーム画面に追加する時点なので、
 	// 読み込みが終わってから書き換えても間に合う（Chromium系は Sec-CH-Prefers-Color-Scheme
@@ -72,32 +82,71 @@
 		}
 		// 置き場所に依らないよう、書かれている相対パスのまま組み立て直す
 		const base = link.getAttribute('href').split('?')[0];
-		link.setAttribute('href', (query && query.matches) ? base + '?theme=dark' : base);
+		link.setAttribute('href', darkQuery.matches ? base + '?theme=dark' : base);
+	}
+	syncManifest();
+
+	/* ---------- メニュー（水平メニュー／ドロワー） ---------- */
+
+	const header = document.getElementById('site-header');
+	const drawer = document.getElementById('site-drawer');
+	const menuButton = document.querySelector('[data-js-drawer-open]');
+
+	// 幅が足りない、または項目が 1 行に収まらないときはドロワーに切り替える。
+	// 収まるかを測るには水平メニューを出しておく必要があるため、一度 bar にしてから測る。
+	// showModal の無い古いブラウザではドロワーを開けないので、JavaScript が無いときと同じく
+	// data-nav を外して水平メニュー（はみ出す分は横スクロール）だけにする
+	const canUseDrawer = !!(drawer && menuButton && typeof drawer.showModal === 'function');
+
+	function updateNavMode() {
+		if (!header) {
+			return;
+		}
+		if (!canUseDrawer) {
+			header.removeAttribute('data-nav');
+			return;
+		}
+		const list = header.querySelector('.dads-horizontal-menu');
+		let mode = 'drawer';
+		if (!narrowQuery.matches && list) {
+			header.setAttribute('data-nav', 'bar');
+			mode = (list.scrollWidth > list.clientWidth) ? 'drawer' : 'bar';
+		}
+		header.setAttribute('data-nav', mode);
+		if (mode === 'bar' && drawer && drawer.open) {
+			drawer.close();
+		}
 	}
 
-	// ボタンはbody側にあるため、読み込み終わってから結びつける
-	document.addEventListener('DOMContentLoaded', function () {
-		syncManifest();
-		const button = document.getElementById('theme-toggle');
-		if (button) {
-			button.hidden = false;
-			button.addEventListener('click', function () {
-				const next = (current() === 'dark') ? 'light' : 'dark';
-				root.setAttribute('data-theme', next);
-				saveSetting(next);
-				sync();
+	if (canUseDrawer) {
+		menuButton.hidden = false;
+		menuButton.addEventListener('click', function () {
+			drawer.showModal();
+		});
+		const closeButton = drawer.querySelector('[data-js-drawer-close]');
+		if (closeButton) {
+			closeButton.addEventListener('click', function () {
+				drawer.close();
 			});
 		}
-		sync();
-	});
-
-	// まだボタンで選んでいなければ、OS側の設定変更にそのまま追従する
-	if (query && query.addEventListener) {
-		query.addEventListener('change', function () {
-			syncManifest();// 起動時の画面の色は、ボタンで選んでいても端末の設定に合わせる
-			if (!root.hasAttribute('data-theme')) {
-				sync();
+		// ドロワーの外（背面の幕）を押したら閉じる。幕への押下は dialog 自身に届く。
+		drawer.addEventListener('click', function (event) {
+			if (event.target === drawer) {
+				drawer.close();
+			}
+		});
+		drawer.addEventListener('close', function () {
+			if (header && header.getAttribute('data-nav') === 'drawer') {
+				menuButton.focus();
 			}
 		});
 	}
+
+	// ResizeObserver は使わない。測るために data-nav を書き換えると自身の大きさが変わり、通知が循環する。
+	narrowQuery.addEventListener('change', updateNavMode);
+	window.addEventListener('resize', updateNavMode);
+	if (document.fonts && document.fonts.ready) {
+		document.fonts.ready.then(updateNavMode);
+	}
+	updateNavMode();
 })();

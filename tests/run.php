@@ -805,7 +805,7 @@ is_same('実データで省略記号が出る検索語を使っている', 2,
 	substr_count(renderScript('results.php', $pageCases['省略記号が出る検索語']), '<li class="navigationGap">…</li>'));
 
 $page = renderScript('dict.php', array('keyBox' => 'zere'));
-is_same('検索ページはフォームにidを付ける', true, strpos($page, '<form id="searchForm" action="" method="GET">') !== false);
+is_same('検索ページはフォームにidを付ける', true, strpos($page, '<form id="searchForm" class="searchForm" action="" method="GET" role="search">') !== false);
 is_same('検索ページは入力の補助を切り、Enterの表示を検索にする', true,
 	strpos($page, 'autocomplete="off" enterkeyhint="search"') !== false);
 is_same('検索ページは通信失敗の注意書きの場所を置く', true,
@@ -881,13 +881,13 @@ if ($savedThemeParam !== null){
 	$_GET['theme'] = $savedThemeParam;
 }
 
-is_same('明るい方の色はdict.cssの--page-bg（明るい方）', '#E5E5E0', themeColor('light'));
-is_same('暗い方の色はdict.cssの--page-bg（暗い方）', '#131417', themeColor('dark'));
+is_same('明るい方の色はdesign-system.cssの--sw-color-background（明るい方）', '#ffffff', themeColor('light'));
+is_same('暗い方の色はdesign-system.cssの--sw-color-background（暗い方）', '#181818', themeColor('dark'));
 is_same('ホーム画面の名前はconfig.phpのapp_nameから取る', $config['app_name'], $manifest['short_name']);
 is_same('アプリの名前はサイト名と揃える', $config['site_title'], $manifest['name']);
 is_same(
 	'ショートカットは検索ページ以外のページを、今いる場所からのURLで出す',
-	array('/dict/legend.php', '/dict/example.php', '/dict/chart.php'),
+	array('/dict/example.php', '/dict/legend.php', '/dict/chart.php'),
 	array_map(function ($shortcut){ return $shortcut['url']; }, $manifest['shortcuts'])
 );
 
@@ -920,6 +920,16 @@ is_same(
 	true,
 	in_array('/dict/' . assetUrl('dict.css'), $precacheUrls, true)
 );
+is_same('デザインシステムのCSSも取っておく', true, in_array('/dict/' . assetUrl('design-system.css'), $precacheUrls, true));
+is_same('生成元の全部品入りのCSSは取っておかない', array(), preg_grep('#design-system\.full#', $precacheUrls));
+
+$menu = buildPageMenu('example');
+is_same('メニューは今のページも残し、そこにだけ印を付ける', array('例文一覧'),
+	array_values(array_map(function ($item){ return $item['label']; }, array_filter($menu, function ($item){ return $item['current']; }))));
+is_same('メニューはconfig.phpの前後の項目を挟む', count($config['menu_before']) + count($config['pages']) + count($config['menu_after']), count($menu));
+$page = renderScript('example.php', array());
+is_same('今のページのメニュー項目にaria-currentを付ける（水平メニューとドロワー）', 2,
+	substr_count($page, 'href="/dict/example.php" aria-current="page"') + substr_count($page, 'href="/dict/example.php" data-current aria-current="page"'));
 is_same('ページが読まないsw.jsは取っておかない', array(), preg_grep('#/sw\.js#', $precacheUrls));
 is_same('端末に入っていることのある書体は取っておかない', array(), preg_grep('/DoulosSIL/', $precacheUrls));
 

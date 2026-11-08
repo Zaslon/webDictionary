@@ -19,10 +19,11 @@ return array(
 	//端末のアイコンの下に出る名前。長いと省略されるため、site_titleより短くする
 	'app_name' => 'イジェール語辞書',
 
-	//ブラウザ枠・通知バーと、起動時に一瞬出る背景の色。dict.cssの--page-bgと揃える。
-	//どちらを出すかは端末のダークモード設定で決まる（header.phpのtheme-color・manifest.php）
-	'app_theme_color' => '#E5E5E0',
-	'app_theme_color_dark' => '#131417',
+	//ブラウザ枠・通知バーと、起動時に一瞬出る背景の色。design-system.cssの--sw-color-background
+	//（ZasDesignSystemのcolor-background）と揃える。本体のcommon/header.phpのtheme-colorとも同じ値。
+	//ページを開いた後はheader.phpのスクリプトが今の表示の色で上書きする。マニフェストは端末の設定で決まる
+	'app_theme_color' => '#ffffff',
+	'app_theme_color_dark' => '#181818',
 
 	//ホーム画面のアイコン。og_imageと同じくzaslon.info本体のサイト直下の物を共用する
 	//Androidでの追加には192px以上の物が要るため、512pxを載せておく
@@ -48,11 +49,12 @@ return array(
 
 	//並び順がそのままメニューの並び順になる。キーはbuildPageMenu()に渡すページの識別子
 	//pathはそのままhrefに出るため、サイト内の絶対パスで書く
+	//'dict'はサイト名のリンク先にも使う（header.php）
 	'pages' => array(
-		'legend'  => array('label' => '凡例',             'path' => '/dict/legend.php'),
-		'dict'    => array('label' => '検索ページへ戻る', 'path' => '/dict/dict.php'),
-		'example' => array('label' => '例文一覧',         'path' => '/dict/example.php'),
-		'chart'   => array('label' => '単語数推移',       'path' => '/dict/chart.php'),
+		'dict'    => array('label' => '検索',       'path' => '/dict/dict.php'),
+		'example' => array('label' => '例文一覧',   'path' => '/dict/example.php'),
+		'legend'  => array('label' => '凡例',       'path' => '/dict/legend.php'),
+		'chart'   => array('label' => '単語数推移', 'path' => '/dict/chart.php'),
 	),
 
 	//どのページでも出す項目。'pages'の前後に挟まれる

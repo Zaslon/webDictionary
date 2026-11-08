@@ -56,7 +56,7 @@
 	function idyer_logger($logFile, $wordCount){
 		$arr = array(date("Y-m-d"), $wordCount);
 		$fp = fopen($logFile, "a");
-		fputcsv($fp, $arr);
+		fputcsv($fp, $arr, ',', '"', '');//$escape を省略するとPHP 8.4以降で非推奨警告が出る
 		fclose($fp);
 		return $arr;
 	}

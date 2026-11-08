@@ -102,6 +102,9 @@ jobs:
             '^README\.md$'
             '^tests/'                     # 公開ディレクトリに置くと Web から実行できてしまう
             '^docs/'
+            '^_css/'                      # design-system.css の生成元と生成スクリプト。生成物は直下に置く
+            '^_local/'                    # 手元の確認用（辞書チェック.bat のルータ）
+            '\.bat$'
             "${server_managed[@]}"
           )
           matches_any() {

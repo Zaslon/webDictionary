@@ -69,7 +69,8 @@ function parseKeywords($keyBox, $type, $mode){
 	}
 
 	//ダブルコーテーションで囲めば空白を含む語をひとつとして扱えるよう、CSVとして分解する
-	$keyWords = str_getcsv($keyWord, ' ', "\"");
+	//$escape は省略するとPHP 8.4以降で非推奨警告が出る。検索語のバックスラッシュを特別扱いしないよう空にしている
+	$keyWords = str_getcsv($keyWord, ' ', "\"", "");
 	if ($mode === 'perf'){
 		$keyWords = array(implode(" ", $keyWords));//完全一致では空白ごと一致させる
 	}

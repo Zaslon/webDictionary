@@ -9,9 +9,5 @@ $pageMenu = buildPageMenu(null);
 $pageNoIndex = true;//検索結果に出す物ではない
 require __DIR__ . '/header.php';
 ?>
-	</header>
-
-	<main id="main">
 		<p>オフラインのため、このページを表示できません。</p>
-	</main>
 <?php require __DIR__ . '/footer.php'; ?>

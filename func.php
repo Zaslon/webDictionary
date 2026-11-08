@@ -48,24 +48,22 @@ function dictConfig(){
 	return $config;
 }
 
-//$currentPageKey : 今開いているページのキー（config.phpの'pages'参照）。該当項目は自分自身への
-//リンクになるため取り除く。どの項目にも該当しないページはnullでよい
+//$currentPageKey : 今開いているページのキー（config.phpの'pages'参照）。該当項目は current を立て、
+//header.php が aria-current を付ける（本体と同じく、今いる項目もメニューに残して示す）。どの項目にも該当しないページはnullでよい
+//返り値：array('label' => 表示名, 'url' => リンク先, 'current' => 今のページか) の並び
 //リンクはsite_urlを付けずサイト内の絶対パスのまま出す。手元のXAMPPでの表示確認中に
 //メニューから公開サイトへ飛ばされないようにするため（zaslon-site本体のメニューと同じ）
 function buildPageMenu($currentPageKey){
 	$config = dictConfig();
 	$menu = array();
 	foreach ($config['menu_before'] as $label => $path){
-		$menu[$label] = $path;
+		$menu[] = array('label' => $label, 'url' => $path, 'current' => false);
 	}
 	foreach ($config['pages'] as $pageKey => $page){
-		if ($pageKey === $currentPageKey){
-			continue;
-		}
-		$menu[$page['label']] = $page['path'];
+		$menu[] = array('label' => $page['label'], 'url' => $page['path'], 'current' => ($pageKey === $currentPageKey));
 	}
 	foreach ($config['menu_after'] as $label => $path){
-		$menu[$label] = $path;
+		$menu[] = array('label' => $label, 'url' => $path, 'current' => false);
 	}
 	return $menu;
 }
@@ -135,7 +133,7 @@ function absoluteUrl($path = null){
 //明暗の表示（ライト／ダーク）
 //////////////////////////////////////////////////
 
-//スマホのブラウザ枠・通知バーと、起動時に一瞬出る画面の色。dict.cssの--page-bgと揃える
+//スマホのブラウザ枠・通知バーと、起動時に一瞬出る画面の色。design-system.cssの--sw-color-backgroundと揃える
 function themeColor($theme){
 	$config = dictConfig();
 	return ($theme === 'dark') ? $config['app_theme_color_dark'] : $config['app_theme_color'];

@@ -60,29 +60,28 @@ async function getCsv(url) {
 	return rows;
 }
 
-// dict.cssの色をそのまま使う。CSSの色を変えればグラフも一緒に変わる
+// design-system.css の役割のトークンをそのまま使う。トークンの値が変わればグラフも一緒に変わる。
+// 変数名は引用符付きの文字列で書くこと。_css/build.mjs はこの形の参照を数えて、使っている変数を残す
 function themeColor(name, fallback) {
 	const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 	return (value === '') ? fallback : value;
 }
 
+// 見出しはページの h1（chart.php）にあるので、グラフの中には題を出さない
 function chartOptions() {
-	const paper = themeColor('--paper', '#F6F6F8');
-	const text = themeColor('--text', '#111');
-	const muted = themeColor('--muted', '#777');
-	const rule = themeColor('--rule-light', '#ddd');
-	const link = themeColor('--link', '#1a5fb4');
+	const background = themeColor('--sw-color-background', '#ffffff');
+	const secondary = themeColor('--sw-color-text-secondary', '#666666');
+	const divider = themeColor('--sw-color-divider', '#e6e6e6');
+	const link = themeColor('--sw-color-link', '#1A5FB4');
 	const axis = {
-		titleTextStyle: {color: muted},
-		textStyle: {color: muted},
-		gridlines: {color: rule},
-		baselineColor: rule
+		titleTextStyle: {color: secondary},
+		textStyle: {color: secondary},
+		gridlines: {color: divider},
+		baselineColor: divider
 	};
 
 	return {
-		title: '単語数推移',
-		backgroundColor: paper,
-		titleTextStyle: {color: text},
+		backgroundColor: background,
 		colors: [link],
 		hAxis: Object.assign({
 			title: '日付',

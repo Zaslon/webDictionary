@@ -1,23 +1,19 @@
-/*
-Theme Name: dict.css
-Theme URI: NULL
-Description: 辞書用に変更
-Author: Zaslon
-Author URI: https://zaslon.info
+/* イジェール語オンライン辞書のスタイルシート
+   （マークアップは header.php・footer.php・dict.php・example.php・legend.php・chart.php・offline.php・view.php）
 
-色と書体は zaslon.info 本体（zaslon-site の css/style.css）に合わせてある。
-色は本体と同じ変数名・同じ値で持たせているので、
-どちらかの色を変えたときは、もう一方の同じ名前の値も合わせること。
+   見た目は zaslon.info 本体（zaslon-site の css/style.css）に合わせてある。
+   部品の見た目は design-system.css（ZasDesignSystem の書き出しから _css/build.mjs で作る生成物）が持つ。
+   design-system.css はカスケードレイヤーに入っているので、レイヤーに入れていないこのファイルが
+   どの指定よりも優先される。ここでは部品（.dads-* / .sw-*）の見た目を上書きせず、
+   配置（余白・並び・幅）と、部品の無い要素（単語欄・例文・ページ送り・凡例の地の文等）だけを書く。
 
-本体から受け継いでいる考え方:
-- 灰色の地色(--page-bg)の上に、明るい紙面(--paper)を左右1px罫(--paper-edge)で立てる
-- ボタン・タグ・チップの類はすべて 地色--chip / 枠1px --border / 角丸3px、hoverで--chip-hover
-- 装飾色は持たず、--text の文字と灰色の罫だけで構成する（本文中のリンクの青 --link だけが例外）
-- 本文はNoto Sans JP系のゴシック、サイト名だけGeorgia系の明朝。地の文の行間は1.85、一覧は1.6
-*/
+   - 色は役割のトークン（--sw-color-*）だけを使う。原色（--color-primitive-* 等）は参照しない。
+     役割のトークンはダークモードでも値が切り替わるので、ここにダーク用の指定は要らない。
+   - 寸法は rem で書き、px の値は calc(16 / 16 * 1rem) の形にする（文字の倍率に比例させるため）。
+   - 768px は ZasDesignSystem の tokens.md の breakpoint-split。header.php・script.js と同じ値。
+   - ヘッダ・フッタ・見出しの規則は本体の css/style.css の写し。本体を変えたらここも合わせること。 */
 
-
-/* 全体の設定 */
+/* ============ 書体 ============ */
 
 @font-face {
 	font-family: 'Endrata';
@@ -50,601 +46,240 @@ Author URI: https://zaslon.info
 	font-family: 'Endrata';
 }
 
-/* 例文一覧ページの表示切り替え。検索フォームと同じ位置に置く */
-.fontSwitch {
-	text-align: left;
-	padding: 0 10px 0.2em;
-}
-
-/* 色はここだけ変えれば全体に反映される。
-   色を1つ足すときは、下の「ダークモード」の2か所にも同じ名前で暗い色を書くこと。 */
-:root {
-	color-scheme: light;
-	--page-bg:    #E5E5E0;   /* 紙面の外側 */
-	--paper:      #F6F6F8;   /* 紙面 */
-	--paper-edge: #aaa;      /* 紙面の左右の罫 */
-	--text:       #111;
-	--text-soft:  #444;      /* 更新日・単語数など、少し落とした文字 */
-	--muted:      #777;      /* 語ID・出典など補助情報 */
-	--rule:       #999;      /* 見出しの罫・縦棒（凡例） */
-	--rule-light: #ddd;      /* 一覧の区切り線 */
-	--border:     #ccc;      /* 枠線（ボタン・入力欄・チップ） */
-	--chip:       #EEE;      /* ボタン・タグの地色 */
-	--chip-hover: #CCC;      /* 同・hover */
-	--tint:       #F0EFEB;   /* 引用のごく薄い地色（凡例） */
-	--link:       #1a5fb4;   /* 見出し語・関連語などへのリンク */
-	--input-bg:   #fff;      /* 入力欄の地色 */
-	--code-bg:    #EAEAE6;   /* インラインコードの地色（凡例） */
-	--th-bg:      #DDD;      /* 表の見出し行（凡例） */
-	--row-alt:    #F4F3F0;   /* 表の偶数行の縞（凡例） */
-	--quote-border: #E2E0DA; /* 引用の枠（太い左辺以外）（凡例） */
-	--focus:      #555;      /* キーボード操作時の輪郭 */
-
-	/* 明暗の切り替えボタンの大きさ。h1が空ける場所もこの値から決めるので、
-	   大きさを変えるならここだけ直せばよい（狭い画面用の値は末尾のmedia queryにある） */
-	--toggle-size: 40px;
-	--toggle-gap: 6px;       /* ボタンの上下に空ける余白 */
-	--toggle-right: 12px;    /* 同・右 */
-}
-
-/* ============ ダークモード ============
-   zaslon.info 本体と同じ仕組みで切り替える。ヘッダ右上のボタン（header.php）で選ぶと
-   <html> に data-theme="dark" / "light" が付き、選んだ内容は localStorage のキー 'theme' に残る。
-   キー名・値・属性名は本体（zaslon-site の common/header.php）と同じにしてあり、
-   同じドメインに置いているので、サイト全体で1つの設定として共有される。変えないこと。
-   ・何も選んでいなければOSの設定に従う（下の @media）
-   ・保存済みの選択は script.js が画面を描く前に <html> へ付けるので、
-     明るい画面が一瞬見えることはない。
-   同じ色の並びを2か所に書いているのは、JavaScriptが動かない環境でも
-   OSの設定だけで暗くなるようにするため。片方だけ直さないこと。 */
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) {
-		color-scheme: dark;
-		--page-bg:    #131417;
-		--paper:      #1C1E22;
-		--paper-edge: #3A3D43;
-		--text:       #E8E6E2;
-		--text-soft:  #C2BFBA;
-		--muted:      #8E8B86;
-		--rule:       #6D7076;
-		--rule-light: #35383D;
-		--border:     #4A4D53;
-		--chip:       #2A2D32;
-		--chip-hover: #3B3F45;
-		--tint:       #24262A;
-		--link:       #85B4F0;
-		--input-bg:   #17191C;
-		--code-bg:    #2B2E33;
-		--th-bg:      #33363C;
-		--row-alt:    #232529;
-		--quote-border: #3B3E44;
-		--focus:      #9AA0A8;
-	}
-}
-:root[data-theme="dark"] {
-	color-scheme: dark;
-	--page-bg:    #131417;
-	--paper:      #1C1E22;
-	--paper-edge: #3A3D43;
-	--text:       #E8E6E2;
-	--text-soft:  #C2BFBA;
-	--muted:      #8E8B86;
-	--rule:       #6D7076;
-	--rule-light: #35383D;
-	--border:     #4A4D53;
-	--chip:       #2A2D32;
-	--chip-hover: #3B3F45;
-	--tint:       #24262A;
-	--link:       #85B4F0;
-	--input-bg:   #17191C;
-	--code-bg:    #2B2E33;
-	--th-bg:      #33363C;
-	--row-alt:    #232529;
-	--quote-border: #3B3E44;
-	--focus:      #9AA0A8;
-}
-
-a {
-	color: var(--text);
-	}
-
-/* キーボード操作時に今どこにいるかが分かるように（マウス操作では出ない） */
-:focus-visible {
-	outline: 2px solid var(--focus);
-	outline-offset: 2px;
-}
-
-/* 書体・字の大きさ・行間は本体（zaslon-site の css/style.css）と同じにする。
-   行間1.85は地の文に合わせた値なので、一覧のように行を詰めたいところは
-   本体の .post-list と同じく1.6に戻している（下のwordEntry・menu・navigation）。 */
-body{
-	color:var(--text);
-	height: 100%;
-	margin : auto;
-	padding : 0;
-	line-height : 1.85;
-	font-size : 100%;
-	max-height:100%;
-	background-color : var(--page-bg);
-	font-family:"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
-	overflow-x:auto;
-	overflow-y:auto;
+/* ============ 基本 ============ */
+* { box-sizing: border-box; }
+html {
 	-webkit-text-size-adjust: 100%;
-	text-align: justify;
-	}
+	scrollbar-color: var(--sw-color-scrollbar-thumb) var(--sw-color-scrollbar-track);
+}
+/* ヘッダと本文の最大幅。本体（1200）はサイドバーとの 2 段で埋める幅で、サイドバーの無い辞書では右が空き、
+   語法などの段落も 1 行 60 字前後と長すぎる。そこで既定は 1 行 50 字程度に収まる幅にし、
+   グラフと幅の広い表のあるページ（header.php の $pageWide）だけ本体と同じ幅にする。 */
+body { --dict-page-width: calc(880 / 16 * 1rem); }
+body.page-wide { --dict-page-width: calc(1200 / 16 * 1rem); }
 
-/* 狭い画面での字の大きさ・字送り。切り替えの768pxも本体に合わせてある
-   （この下のレイアウトの切り替えは、辞書独自の500px） */
-@media screen and (max-width: 768px) {
-	body {
-		font-size: 108%;
-		line-height: 1.8;
-		letter-spacing: 0.02em;
+body {
+	margin: 0;
+	background-color: var(--sw-color-background);
+	color: var(--sw-color-text);
+	font-family: var(--font-family-sans);
+	font-size: calc(16 / 16 * 1rem);
+	line-height: 1.7;
+	letter-spacing: 0.02em;
+	overflow-wrap: anywhere;     /* 長い語や URL で画面が横にスクロールしないように */
+}
+
+img { max-width: 100%; height: auto; }
+
+/* キーボードで本文へ飛ぶリンク。フォーカスしたときだけ出す。見た目は DADS のフォーカス表示に合わせる。 */
+.skip-link {
+	position: absolute; top: calc(8 / 16 * 1rem); left: calc(8 / 16 * 1rem); z-index: 30;
+	padding: calc(8 / 16 * 1rem) calc(16 / 16 * 1rem);
+	transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+/* DADS のフォーカス表示（黒の外枠と黄の内側）。部品を持たない要素だけに付ける。 */
+.skip-link:focus-visible,
+ul.navigation a:focus-visible,
+.legend table:focus-visible {
+	outline: calc(4 / 16 * 1rem) solid var(--color-neutral-black);
+	outline-offset: calc(2 / 16 * 1rem);
+	box-shadow: 0 0 0 calc(2 / 16 * 1rem) var(--color-primitive-yellow-300);
+}
+.skip-link:focus-visible {
+	background-color: var(--color-primitive-yellow-300);
+	color: var(--color-neutral-black);
+}
+
+/* ============ ヘッダ（最大幅を除き本体の css/style.css と同じ） ============ */
+.site-header {
+	border-bottom: 1px solid var(--sw-color-border);
+}
+.site-header__bar,
+.site-nav {
+	max-width: var(--dict-page-width);
+	margin: 0 auto;
+	padding: 0 calc(16 / 16 * 1rem);
+}
+.site-header__bar {
+	display: flex; align-items: center; gap: calc(8 / 16 * 1rem);
+	padding-top: calc(16 / 16 * 1rem);
+	padding-bottom: calc(16 / 16 * 1rem);
+}
+.site-brand { flex: 1; min-width: 0; }
+.site-title {
+	margin: 0;
+	/* tokens.md の text-display。Noto Serif Display は日本語の字形を持たないので Noto Serif JP を後ろに置く */
+	font-family: "Noto Serif Display", "Noto Serif JP", Georgia, "Times New Roman", serif;
+	font-size: calc(48 / 16 * 1rem); font-weight: 400; line-height: 1.4; letter-spacing: 0;
+	/* 辞書のサイト名は和文で長く、狭い画面で語の途中（「オ／ンライン」）で折り返すため、空白で折り返させる */
+	word-break: keep-all;
+}
+.site-title a:any-link { color: var(--sw-color-text); text-decoration: none; }
+.site-title a:hover { text-decoration: underline; text-decoration-thickness: calc(1 / 16 * 1rem); }
+.site-tagline {
+	margin: 0;
+	color: var(--sw-color-text-secondary);
+	line-height: 1.5;
+}
+.site-header__theme { flex-shrink: 0; }
+/* 絵と文言は「押すとなる明暗」の分だけを出す（script.js が hidden を付け替える）。
+   部品の絵は display を持つので、hidden だけでは消えない。 */
+.site-header__theme [hidden] { display: none; }
+
+/* 水平メニューとハンバーガーメニューボタンは、header.php のスクリプトが付ける data-nav で出し分ける。
+   JavaScript が動かない環境では data-nav が付かず、水平メニューだけを出す（ドロワーは開けないため）。 */
+.site-header[data-nav="drawer"] .site-nav { display: none; }
+.site-header:not([data-nav="drawer"]) .site-header__menu-button { display: none; }
+.site-header:not([data-nav]) .dads-horizontal-menu { overflow-x: auto; }
+/* 水平メニューはヘッダの下罫と二重にならないよう、メニュー側の罫を下罫として使う */
+.site-header[data-nav="bar"] { border-bottom: none; }
+
+@media (max-width: 767.98px) {
+	.site-header__bar { padding-top: calc(8 / 16 * 1rem); padding-bottom: calc(8 / 16 * 1rem); }
+	/* 本体（28）より小さいのは、サイト名が和文で長く、本体の大きさでは狭い画面で 2 行を超えるため */
+	.site-title { font-size: calc(24 / 16 * 1rem); line-height: 1.3; }
+	.site-tagline { font-size: calc(14 / 16 * 1rem); }
+	/* 狭い画面では明暗の切り替えを絵だけのボタンにする。文言は読み上げ用に残す。 */
+	.site-header__theme-label {
+		position: absolute; width: 1px; height: 1px; overflow: hidden;
+		clip-path: inset(50%); white-space: nowrap;
 	}
 }
 
+/* ============ レイアウト ============ */
+.content {
+	max-width: var(--dict-page-width);
+	margin: 0 auto;
+	padding: calc(32 / 16 * 1rem) calc(16 / 16 * 1rem) calc(64 / 16 * 1rem);
+}
+.content p { margin: 0 0 calc(16 / 16 * 1rem); }
+
+@media (max-width: 767.98px) {
+	.content { padding-top: calc(24 / 16 * 1rem); }
+}
+
+/* ============ ページの見出し（本体の .content h1 と同じ） ============
+   左の縦棒の太さで階層を示し、下に罫を引く。縦棒はキーカラー（_css/build.mjs で灰色に置き換えている）。 */
+.content h1 {
+	margin: 0 0 calc(16 / 16 * 1rem);
+	padding: 0 0 calc(4 / 16 * 1rem) calc(12 / 16 * 1rem);
+	border-left: calc(10 / 16 * 1rem) solid var(--sw-color-accent-fill);
+	border-bottom: 1px solid var(--sw-color-border);
+	font-size: calc(28 / 16 * 1rem); line-height: 1.5; letter-spacing: 0.01em;
+}
+.entry-header { margin-bottom: calc(24 / 16 * 1rem); }
+.entry-header h1 { margin-bottom: 0; }
+
+/* ============ 更新日・件数 ============
+   検索フォーム等の部品は左端から 1 行に並べる前提の寸法なので、右寄せにすると左寄せの部品と段違いになる。 */
 .dictVer {
-	margin: 0.3em 10px;
-	text-align:right;
-	margin-right:5px;
-	margin-left:auto;
-	font-size:80%;
-	line-height:1.7;
-	max-height:100%;
-	color: var(--text-soft);
+	display: flex; flex-wrap: wrap;
+	gap: 0 calc(16 / 16 * 1rem);
+	margin-bottom: calc(16 / 16 * 1rem);
+	color: var(--sw-color-text-secondary);
+	font-size: calc(14 / 16 * 1rem); line-height: 1.5;
+	font-variant-numeric: tabular-nums;
 }
+.content .dictVer p { margin: 0; }
+/* 更新日・件数は、本体の記事の日付（.sw-article-meta）と同じく直上の罫に付く添え書きとして扱い、
+   罫から 8 だけ離す。記事では日付が h1 の直下にあるが、辞書は h1 を持たないページ（検索・凡例）では
+   メニューの罫の直下に来るので、本文の上の余白の方を詰める。 */
+.content:has(> .dictVer:first-child) { padding-top: calc(8 / 16 * 1rem); }
+.entry-header:has(+ .dictVer) { margin-bottom: calc(8 / 16 * 1rem); }
 
-.dictVer p{
-	width:100%;
-	text-align:right;
-}
-
-.etymology {
-	color: var(--muted);
-}
-
-#wordchart{
-	width: 100%;
-	height: 300px;
-}
-
-.buttonAndLabel{
-	display: inline-block;
-}
-
-/* ラジオ・チェックボックスを装飾色を持たない --text の色で塗る */
-input[type="checkbox"],
-input[type="radio"]{
-	accent-color: var(--text);
-}
-
-input[type="text"]{
-	border-radius: 3px;
-	background-color: var(--input-bg);
-	border: 1px solid var(--border);
-}
-
-input[type="submit"],
-button{
-	background-color: var(--chip);
-	border: 1px solid var(--border);
-	border-radius: 3px;
-	color: inherit;
-}
-
-/* ---- 検索フォーム（dict.php） ---- */
-
-.searchBar {
-	position: relative;   /* 虫眼鏡の位置の基準 */
-	display: flex;
-	gap: 6px;
-	max-width: 32em;
-}
-
-#keyBox {
-	flex: 1 1 auto;
-	min-width: 0;
-	margin: 0;
-	padding: 0.3em 0.6em 0.3em 2em;
-}
-
-/* 検索ボタンを隠すと検索欄であることの手掛かりが消えるため、入力欄の左に虫眼鏡を置く。
-   色を --muted に追従させるため、絵はmaskで抜いて地色で塗る */
-.searchBar::before {
-	content: "";
-	position: absolute;
-	left: 0.6em;
-	top: 50%;
-	width: 1em;
-	height: 1em;
-	transform: translateY(-50%);
-	background-color: var(--muted);
-	pointer-events: none;
-	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 21 21'/%3E%3C/svg%3E") center / contain no-repeat;
-	        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10.5' cy='10.5' r='6.5'/%3E%3Cpath d='M15.5 15.5 21 21'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-
-#btn {
-	flex: 0 0 auto;
-	margin: 0;
-	padding: 0.3em 1.2em;
-	cursor: pointer;
+/* ============ 検索フォーム（dict.php） ============ */
+.searchForm {
+	max-width: calc(640 / 16 * 1rem);
+	margin-bottom: calc(24 / 16 * 1rem);
 }
 
 /* JavaScriptが動けば入力と条件の変更だけで結果が変わる（livesearch.js）ので、ボタンは要らない。
-   Enterでの送信（submitイベント）は、ボタンを隠してもブラウザが行う */
-.js-enabled #btn {
-	display: none;
-}
+   Enterでの送信（submitイベント）は、ボタンを隠してもブラウザが行う。
+   ボタンの段と段の間隔が残らないよう、検索ボックスを 1 段にする */
+.js-enabled #btn { display: none; }
+.js-enabled .searchForm .sw-search-box { grid-template-columns: minmax(0, 1fr); column-gap: 0; }
 
-/* 条件はまとまり（対象・方式・チェックボックス）ごとに折り返さない塊にし、塊単位で折り返す */
+/* 条件はまとまり（対象・方式・チェックボックス）ごとに積む。見出し（対象・方式）の幅は部品が揃える */
 .searchOptions {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 0.5em 1.6em;
-	margin-top: 0.6em;
-	font-size: 90%;
-	line-height: 1.6;
+	display: grid;
+	gap: calc(12 / 16 * 1rem);
+	margin-top: calc(16 / 16 * 1rem);
 }
-
-.optionGroup {
-	display: flex;
-	align-items: center;
-	gap: 0.5em;
-	white-space: nowrap;
-}
-
-.optionLabel {
-	color: var(--muted);
-	font-size: 90%;
-}
-
 .optionChecks {
-	gap: 0.2em 1.2em;
+	display: flex; flex-wrap: wrap;
+	gap: calc(4 / 16 * 1rem) calc(24 / 16 * 1rem);
+}
+/* 広い画面では対象と方式を横に並べ、チェックボックスはその下の行に置く。
+   768px 未満では部品の選択肢が行の残りを等分して伸びるので、横に並べず積んだままにする。
+   入り切らない幅では方式が次の行へ送られ、見出しの最小幅で選択肢の左端が揃う。 */
+@media (min-width: 768px) {
+	.searchOptions {
+		display: flex; flex-wrap: wrap;
+		gap: calc(12 / 16 * 1rem) calc(32 / 16 * 1rem);
+	}
+	.searchOptions > .sw-radio-group { flex: 0 1 auto; }
+	.searchOptions > .optionChecks { flex-basis: 100%; }
 }
 
-.optionChecks input {
-	width: 1.05em;
-	height: 1.05em;
-	margin: 0 0.35em 0 0;
-	vertical-align: -0.15em;
-}
+/* 例文一覧ページの表示切り替え。検索フォームと同じ位置に置く */
+.fontSwitch { margin-bottom: calc(24 / 16 * 1rem); }
 
-/* 同じ name のラジオを1本のつながったボタンに見せる。
-   ラジオ自体は透明にして残し、Tab・矢印キーでの操作と読み上げはそのまま効かせる */
-.segmented {
-	position: relative;
-	display: inline-grid;
-	grid-auto-flow: column;
-	background-color: var(--chip);
-	border: 1px solid var(--border);
-	border-radius: 3px;
-}
-
-.segmented input {
-	position: absolute;
-	opacity: 0;
-	width: 1px;
-	height: 1px;
-	margin: 0;
-	pointer-events: none;
-}
-
-.segmented label {
-	padding: 0.15em 0.9em;
-	text-align: center;
-	cursor: pointer;
-}
-
-.segmented label ~ label {
-	border-left: 1px solid var(--border);
-}
-
-.segmented label:first-of-type { border-radius: 2px 0 0 2px; }
-.segmented label:last-of-type  { border-radius: 0 2px 2px 0; }
-
-.segmented label:hover {
-	background-color: var(--chip-hover);
-}
-
-/* 選択中は紙面と文字の色を入れ替える。新しい色を足さずに、明暗どちらでも一目で分かる */
-.segmented input:checked + label {
-	background-color: var(--text);
-	color: var(--paper);
-}
-
-.segmented input:focus-visible + label {
-	position: relative;
-	outline: 2px solid var(--focus);
-	outline-offset: 2px;
-}
-
-/* ハイコントラスト表示では背景色が捨てられ、選択中が見分けられなくなるため、システムの色で塗る */
-@media (forced-colors: active) {
-	.segmented input:checked + label {
-		forced-color-adjust: none;
-		background-color: Highlight;
-		color: HighlightText;
-	}
-}
-
-input[type="submit"]:hover,
-button:hover{
-	background-color: var(--chip-hover);
-}
-
-#menu {
-	margin:0 10px;
-	font-size:125%;
-	max-height:100%;
-	text-align:center;
-	border-top:1px var(--border) solid;
-	border-bottom:1px var(--border) solid;
-	list-style:none;
-	}
-
-#menu li{
-	margin:0 10px;
-	display:inline-block;
-	line-height:1.6;
-	}
-
-#menu a{
-	text-decoration:none;
-	}
-
-#menu a:hover{
-	text-decoration:underline;
-	}
-
-p {
-	text-align:left;
-	margin:auto;
-	max-height:100%;
-	}
-
-p.result{
-	margin-top: 10px;
-}
-
-/* 他のボタン・タグと同じチップの見た目にする。続けて出たときに枠が繋がらないよう下を空ける */
-p.suggest{
-	background-color:var(--chip);
-	border: 1px solid var(--border);
-	border-radius: 3px;
-	margin-bottom: 0.3em;
-}
-
-#main p{
-	padding: 0 10px;
-}
-
-form {
-	text-align: left;
-	padding: 10px;
-	padding-top: 0;
-	padding-bottom: 0.4em;
-	}
-
-form p{
-	display:inline;
-	}
-
-ul.navigation {
-	font-size: 120%;
-	max-height:100%;
-	list-style-type: none;
-	text-align: left;
-	margin-left: 10px;
-	margin-right: 10px;
-	margin-top: 0;
-	margin-bottom: 0;
-	padding: 0;
-	display: inline-block;
-	}
-
-ul.navigation li {
-	background-color: var(--chip);
-	float: left;
-	min-width: 50px;
-	letter-spacing: 0;
-	line-height: 1.6;
-	border: 1px solid var(--border);
-	border-radius: 3px;
-	margin: 5px;
-	text-align: center;
-	}
-
-li.currentPage {
-	color: var(--muted) !important;
-	border-color: var(--chip) !important;
-	}
-
-ul.navigation li a{
-	text-decoration: none;
-	display: block;
-	}
-
-ul.navigation li a:hover{
-	background-color: var(--chip-hover);
-	}
-
-/* 省略記号は押せないので、番号と同じ行・高さに置いたままチップの見た目だけを外す。
-   枠は透明で残し、高さを番号と揃える */
-ul.navigation li.navigationGap {
-	background-color: transparent;
-	border-color: transparent;
-	color: var(--muted);
-	min-width: 1.5em;
-	}
+/* ============ 検索結果 ============ */
 
 /* インクリメンタルサーチ（livesearch.js）の問い合わせ中。
    すぐ返る問い合わせで明滅しないよう、薄くするときだけ遅らせる（戻すときはすぐ） */
-#results {
-	transition: opacity 0.1s ease;
-	}
-
+#results { transition: opacity 0.1s ease; }
 #results[aria-busy="true"] {
 	opacity: 0.5;
 	transition: opacity 0.2s ease 0.25s;
-	}
+}
 
 /* 通信できずに結果を更新できなかったときの注意書き。結果は残っているので控えめにする */
-#main p.searchStatus {
-	color: var(--muted);
-	font-size: 0.9em;
-	margin-top: 10px;
-	}
-
-/* サイト名は本体の .site-title と同じ明朝系にする。
-   ただし大きさは本体（60px）に揃えず200%のまま。本体のサイト名と違って和文で長く、
-   60pxだと折り返してしまうため。 */
-h1 {
-	margin:0;
-	margin-left:10px;
-	/* 右上の明暗の切り替えボタンの場所を空けておく。
-	   高さを空けないと、ボタンの下端がこの下のメニューの罫に被る */
-	min-height:calc(var(--toggle-size) + var(--toggle-gap) * 2);
-	padding-right:calc(var(--toggle-size) + var(--toggle-right));
-	font-family:Georgia,"Times New Roman",serif;
-	font-size:200%;
-	max-height:100%;
-	line-height:160%;
+.content p.searchStatus {
+	color: var(--sw-color-text-secondary);
+	font-size: calc(14 / 16 * 1rem);
 }
 
-h1 a{text-decoration:none;}
-
-.all {
-	word-break:break-all;
-	border-right:1px solid var(--paper-edge);
-	border-left:1px solid var(--paper-edge);
-	border-bottom:1px solid var(--border);
-	background-color : var(--paper);
-	width : 95%;
-	margin: auto;
-	}
-
-#header {
-	position: relative;   /* 明暗の切り替えボタンの位置の基準 */
-	padding-left: 10px;
-	padding-right: 10px;
-	padding-top : 0;
-	padding-bottom : 0;
-	margin-bottom:5px;
-	}
-
-/* ---- 明暗の切り替えボタン（ヘッダ右上） ----
-   本体（zaslon-site）と同じ「地色--chip・枠1px・角丸3px」のチップにする。
-   中の絵は月＝これから暗くする / 太陽＝これから明るくする。今の表示と逆の絵を出す。
-   JavaScriptが無い環境では切り替えられないので、header.php 側でhiddenにして置き、script.jsが外す。 */
-.theme-toggle {
-	position: absolute; top: var(--toggle-gap); right: var(--toggle-right);
-	display: inline-flex; align-items: center; justify-content: center;
-	width: var(--toggle-size); height: var(--toggle-size); padding: 0;
-	background-color: var(--chip); color: var(--text);
-	border: 1px solid var(--border); border-radius: 3px;
-	cursor: pointer;
+/* 件数（本体の検索結果の件数 .search-count と同じ） */
+.content p.result {
+	margin: calc(16 / 16 * 1rem) 0;
+	color: var(--sw-color-text-secondary);
 }
-/* display を指定した要素は hidden 属性だけでは消えないので明示する */
-.theme-toggle[hidden] { display: none; }
-.theme-toggle svg { width: 20px; height: 20px; display: block; }
-/* 既定（明るい表示）では月だけ、暗い表示では太陽だけを出す。
-   出し分けの条件は上のダークモードの色と同じ書き方に揃えてある。 */
-.theme-toggle .icon-sun  { display: none; }
-.theme-toggle .icon-moon { display: block; }
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme="light"]) .theme-toggle .icon-sun  { display: block; }
-	:root:not([data-theme="light"]) .theme-toggle .icon-moon { display: none; }
+
+/* 「もしかして」。結果の一覧とは別の案内なので、面で囲って区別する */
+.content p.suggest {
+	margin: 0 0 calc(8 / 16 * 1rem);
+	padding: calc(12 / 16 * 1rem) calc(16 / 16 * 1rem);
+	border: 1px solid var(--sw-color-border); border-radius: var(--sw-radius-card);
+	background-color: var(--sw-color-surface);
 }
-:root[data-theme="dark"] .theme-toggle .icon-sun  { display: block; }
-:root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
-#footer {
-	margin:0 10px;
-	border-top:1px solid var(--border);
-	clear:both;
-	color: var(--muted);
-	}
-
-#footer p {
-	text-align:center;
-	font-size:0.85rem;
-	line-height:1.5;
-	}
-
-#main {
-	padding-bottom:5px;
-	padding-left:10px;
-	padding-right: 10px;
-	padding-top : 10px;
-	clear:both;
-	}
-
-/* 入力欄・ボタンの書体と大きさを地の文に揃える（本体と同じ扱い）。
-   スマホで入力欄に触れたときに画面が拡大されるのも防げる */
-select, textarea, input, button { font: inherit; }
-
-input{
-	color: inherit;
-	margin-right:0.2em;
-	}
-
-/* ラジオ・チェックボックスの色は、:root の color-scheme に従ってブラウザが暗くする */
-
+/* ---- 単語欄（view.php の renderEntry） ---- */
 ul.wordEntry {
-	padding: 10px;
-	padding-top: 0 ;
+	margin: 0;
+	padding: calc(24 / 16 * 1rem) 0;
 	list-style: none;
-	border-bottom: var(--rule-light) 1px solid;
-	max-height:100%;
+	border-bottom: 1px solid var(--sw-color-divider);
 }
-
-/* 見出し語・訳語・関連語は一覧なので行を詰める */
-ul.wordEntry li {
-	margin-bottom: 0.2em;
+ul.wordEntry > li {
+	margin-bottom: calc(8 / 16 * 1rem);
 	line-height: 1.6;
 }
+ul.wordEntry > li:last-child { margin-bottom: 0; }
+/* 語源・語法・用例は地の文なので、行間を本文に戻す */
+ul.wordEntry > li.wordContents,
+ul.wordEntry > li.wordExamples { line-height: 1.7; }
 
-/* 語源・語法・用例は地の文なので、行間をbodyに戻す */
-ul.wordEntry li.wordContents {
-	line-height: 1.85;
-}
-
-/* 見出し語・関連語・使用単語などへのリンクは、本体の本文中リンクと同じ青にする。
-   メニュー・ページ送りは地の文と同じ色のまま（下線とチップで区別できるため）。 */
-ul.wordEntry a,
-div.exampleEntry a,
-p.suggest a {
-	color: var(--link);
-}
-
-span.wordTitle,
-span.wordContentTitle,
-span.wordRelation {
-	background-color: var(--chip);
-	border: var(--border) 1px solid;
-	border-radius: 3px;
-	padding: 0 0.2em 0 0.2em;
-	margin-right:1em;
-}
-
-span.wordId {
-	margin: 0 1em 0 0.2em ;
-	border: none !important;
-	color: var(--muted);
-	font-size: 50%;
-	max-height:100%;
-	font-weight: normal;
-}
-
-span.wordId a {
-	color: inherit;
+/* 訳語の番号付きの並び */
+ul.wordEntry ol {
+	margin: calc(4 / 16 * 1rem) 0 calc(8 / 16 * 1rem);
+	padding-left: calc(32 / 16 * 1rem);
 }
 
 li.wordForm {
-	font-size: 160%;
-	max-height:100%;
+	font-size: calc(28 / 16 * 1rem); line-height: 1.4;
 	font-weight: bold;
 }
 
@@ -652,33 +287,51 @@ li.wordForm {
    .idyer-font .wordForm の書体指定をここで打ち消す */
 span.wordPronunciation {
 	margin-left: 0.4em;
-	font-family:'Doulos SIL',"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+	font-family: 'Doulos SIL', var(--font-family-sans);
 	font-size: 70%;
 	font-weight: normal;
-	color: var(--text-soft);
+	color: var(--sw-color-text-secondary);
 }
 
-/* 例文 */
+/* 品詞・項目名・関係・例文のタグの見出し。押せないので枠だけの小さな札にする（本体のリンクのタグと見分ける） */
+span.wordTitle,
+span.wordContentTitle,
+span.wordRelation,
+span.exampleTag {
+	display: inline-block;
+	padding: 0 calc(8 / 16 * 1rem);
+	border: 1px solid var(--sw-color-border); border-radius: var(--sw-radius-chip);
+	color: var(--sw-color-text-secondary);
+	font-size: calc(14 / 16 * 1rem); font-weight: normal; line-height: 1.6;
+}
+span.wordRelation { margin-right: calc(8 / 16 * 1rem); }
+span.exampleTag { margin-right: calc(4 / 16 * 1rem); }
 
+/* 語ID。見出し語の大きさに引きずられないよう、文字の大きさは固定値で持つ */
+span.wordId {
+	margin: 0 calc(8 / 16 * 1rem);
+	color: var(--sw-color-text-secondary);
+	font-size: calc(12 / 16 * 1rem); font-weight: normal;
+	font-variant-numeric: tabular-nums;
+}
+span.wordId a:any-link { color: inherit; }
+
+.etymology { color: var(--sw-color-text-secondary); }
+
+/* ---- 例文 ---- */
 div.example {
-	margin: 0.3em 0 0.8em 1em;
+	margin: calc(8 / 16 * 1rem) 0 calc(16 / 16 * 1rem) calc(16 / 16 * 1rem);
 }
 
-/* 例文一覧ページ。1件を単語1件と同じ見出しの立て方で区切る */
+/* 例文一覧ページ。1件を単語1件と同じ区切り方で並べる */
 div.exampleEntry {
-	padding: 10px;
-	padding-top: 0.8em;
-	border-bottom: var(--rule-light) 1px solid;
+	padding: calc(24 / 16 * 1rem) 0;
+	border-bottom: 1px solid var(--sw-color-divider);
 }
-
-div.exampleEntry div.example {
-	margin: 0;
-}
-
+div.exampleEntry div.example { margin: 0; }
 div.exampleEntry div.exampleSentence {
-	font-size: 140%;
-	line-height: 1.4;
-	margin-bottom: 0.2em;
+	font-size: calc(22 / 16 * 1rem); line-height: 1.5;
+	margin-bottom: calc(4 / 16 * 1rem);
 }
 
 /* 見出しになる例文の下にぶら下げる */
@@ -687,256 +340,175 @@ div.exampleEntry div.exampleSupplement,
 div.exampleEntry div.exampleTags,
 div.exampleEntry div.exampleWords,
 div.exampleEntry div.exampleOffer {
-	margin: 0 0 0.2em 1em;
+	margin: 0 0 calc(4 / 16 * 1rem) calc(16 / 16 * 1rem);
 }
 
-div.exampleSentence {
-	font-weight: bold;
-}
+div.exampleSentence { font-weight: bold; }
 
 div.exampleSupplement,
 div.exampleWords,
 div.exampleOffer {
-	font-size: 85%;
+	font-size: calc(14 / 16 * 1rem);
 }
 
 div.exampleOffer,
 span.exampleLabel {
-	color: var(--muted);
+	color: var(--sw-color-text-secondary);
 }
+span.exampleLabel { margin-right: calc(8 / 16 * 1rem); }
 
-span.exampleLabel {
-	margin-right: 0.5em;
+/* ---- ページ送り ----
+   番号を並べる形は DADS のページナビゲーション（前へ・次へ）に無いので、
+   ボタン（アウトライン型）と同じ寸法と色の規則で番号の箱を作る。 */
+ul.navigation {
+	display: flex; flex-wrap: wrap; gap: calc(8 / 16 * 1rem);
+	margin: calc(32 / 16 * 1rem) 0 0; padding: 0;
+	list-style: none;
+	font-variant-numeric: tabular-nums;
 }
-
-span.exampleTag {
-	background-color: var(--chip);
-	border: var(--border) 1px solid;
-	border-radius: 3px;
-	padding: 0 0.2em 0 0.2em;
-	margin-right: 0.5em;
-	font-size: 85%;
+ul.navigation:empty { display: none; }
+ul.navigation li {
+	display: grid; place-items: center;
+	min-width: calc(44 / 16 * 1rem); min-height: calc(44 / 16 * 1rem);
+	line-height: 1;
 }
-
-/* 凡例。中身は辞書データのMarkdownを本体（zaslon-site）のレンダラに通したHTMLなので、
-   見た目も本体の記事本文（css/style.css の見出し・表・コード・引用）と同じ規則を写す。
-   辞書の他のページに影響しないよう、すべて .legend の下に閉じておく。 */
-.legend {
-	padding: 10px;
-	padding-top: 0;
+ul.navigation a:any-link {
+	display: grid; place-items: center;
+	width: 100%; min-height: calc(44 / 16 * 1rem);
+	padding: 0 calc(12 / 16 * 1rem);
+	border: 1px solid currentcolor; border-radius: var(--sw-radius-control);
+	color: var(--sw-color-link);
+	text-decoration: none;
 }
-
-/* 見出しは左の縦棒の太さで階層を示す（h1=10px / h2=5px / h3以下=下罫のみ）。
-   下の余白より上の余白を大きく取り、見出しが次の本文に属して見えるようにする。
-   凡例本文の先頭は「# 凡例」なので、サイト名のh1（上のh1）と重ならないようここで上書きする。 */
-.legend h1 {
-	margin: 0 0 0.7em;
-	padding: 0 0 0.15em 0.5em;
-	border: solid var(--rule); border-width: 0 0 1px 10px;
-	font-size: 1.7rem; line-height: 1.4;
-	min-height: 0;
-	font-family: inherit;
+@media (hover: hover) {
+	ul.navigation a:hover {
+		background-color: var(--sw-color-surface);
+		color: var(--sw-color-link-hover);
+		text-decoration: underline; text-underline-offset: calc(3 / 16 * 1rem);
+	}
 }
-
-.legend h2 {
-	margin: 2em 0 0.6em;
-	padding: 0 0 0.15em 0.5em;
-	border: solid var(--rule); border-width: 0 0 1px 5px;
-	font-size: 1.35rem; line-height: 1.4;
-}
-
-.legend h3 {
-	margin: 1.7em 0 0.5em;
-	padding: 0 0 0.15em 0.5em;
-	border: solid var(--rule); border-width: 0 0 1px;
-	font-size: 1.15rem; line-height: 1.4;
-}
-
-.legend h4,
-.legend h5,
-.legend h6 {
-	margin: 1.5em 0 0.4em;
-	padding: 0 0 0.1em 0.5em;
-	border: solid var(--rule); border-width: 0 0 1px;
-	font-size: 1.05rem; line-height: 1.4;
-}
-
-/* 先頭の見出しの上の余白は要らない */
-.legend > :first-child {
-	margin-top: 0;
-}
-
-/* 地の文。#main p の左右の余白は入れ物側で持つので、こちらもidから書いて打ち消す */
-#main .legend p {
-	margin: 1em 0;
-	padding: 0;
-}
-
-.legend ul,
-.legend ol {
-	margin: 1em 0;
-	padding-left: 1.5em;
-}
-
-.legend a {
-	color: var(--link);
-}
-
-/* 幅の広い表は表自体を横スクロールさせる（display:block）。
-   ただし width:fit-content を併せないと枠線が本文幅いっぱいに伸びてしまう。 */
-.legend table {
-	display: block; overflow-x: auto;
-	width: fit-content; max-width: 100%; margin: 1.6em auto;
-	border-collapse: collapse;
-	border: 1px solid var(--rule);
-	text-align: left; line-height: 1.6;
-}
-
-.legend th,
-.legend td {
-	padding: 0.4em 0.9em;
-	border: 1px solid var(--rule);
-}
-
-.legend th {
+ul.navigation a:active { color: var(--sw-color-link-active); }
+li.currentPage {
+	border-radius: var(--sw-radius-control);
+	/* 検索条件のラジオグループの選択中と同じ塗り。selected-background は地の文と同じ明度帯で、白い文字が読めない */
+	background-color: var(--sw-color-accent-fill);
+	color: var(--sw-color-on-accent-fill);
 	font-weight: bold;
-	background: var(--th-bg);
+}
+/* 省略記号は押せないので、番号と同じ高さに置いたまま箱を付けない */
+ul.navigation li.navigationGap {
+	min-width: calc(24 / 16 * 1rem);
+	color: var(--sw-color-text-secondary);
+}
+/* 強制カラーでは背景色が捨てられ、今のページが見分けられなくなるため、システムの色で塗る */
+@media (forced-colors: active) {
+	li.currentPage {
+		forced-color-adjust: none;
+		background-color: Highlight;
+		color: HighlightText;
+	}
 }
 
-/* 行数の多い表を横に目で追えるように。縞は「あるとわずかに助かる」程度の濃さに留める */
-.legend tbody tr:nth-child(even) {
-	background: var(--row-alt);
+/* ============ 凡例（legend.php） ============
+   中身は辞書データのMarkdownを本体（zaslon-site）のレンダラに通したHTMLなので、
+   見た目も本体の記事本文（css/style.css の .entry）と同じ規則を写す。
+   本体が無い環境では辞書側の簡易な変換（markdown.php）が素の HTML を出すため、素の要素にも同じ形を付ける。
+   辞書の他のページに影響しないよう、すべて .legend の下に閉じておく。 */
+.legend h2 {
+	margin: calc(48 / 16 * 1rem) 0 calc(16 / 16 * 1rem);
+	padding: 0 0 calc(4 / 16 * 1rem) calc(12 / 16 * 1rem);
+	border-left: calc(5 / 16 * 1rem) solid var(--sw-color-accent-fill);
+	border-bottom: 1px solid var(--sw-color-border);
+	font-size: calc(20 / 16 * 1rem); line-height: 1.5;
+}
+.legend h3 {
+	margin: calc(32 / 16 * 1rem) 0 calc(8 / 16 * 1rem);
+	padding: 0 0 calc(4 / 16 * 1rem) calc(8 / 16 * 1rem);
+	border-bottom: 1px solid var(--sw-color-border);
+	font-size: calc(18 / 16 * 1rem); line-height: 1.6;
+}
+.legend :is(h4, h5, h6) {
+	margin: calc(24 / 16 * 1rem) 0 calc(8 / 16 * 1rem);
+	padding: 0 0 calc(2 / 16 * 1rem) calc(8 / 16 * 1rem);
+	border-bottom: 1px solid var(--sw-color-border);
+	font-size: calc(16 / 16 * 1rem); line-height: 1.7;
+}
+.legend > :first-child { margin-top: 0; }
+
+.legend > p { text-align: justify; }
+.legend :is(ul, ol) { margin: 0 0 calc(16 / 16 * 1rem); padding-left: calc(24 / 16 * 1rem); }
+.legend li > :is(ul, ol) { margin-bottom: 0; }
+.legend hr {
+	height: 0; margin: calc(32 / 16 * 1rem) 0;
+	border: none; border-top: 1px solid var(--sw-color-border);
 }
 
-.legend code {
-	font-family: "Courier New", Courier, monospace;
-	letter-spacing: 0;
-	background: var(--code-bg);
-	border-radius: 3px;
+.legend .dads-blockquote { margin-top: calc(24 / 16 * 1rem); margin-bottom: calc(24 / 16 * 1rem); }
+.legend .sw-code-block { margin: calc(24 / 16 * 1rem) 0; }
+
+/* 幅の広い表は、この枠の中だけで横にスクロールさせる（本体の .table-scroll と同じ） */
+.legend .table-scroll { margin: calc(24 / 16 * 1rem) 0; overflow-x: auto; }
+.legend .table-scroll > .dads-table { width: max-content; max-width: none; }
+
+.legend figure:not(.dads-table) { margin: calc(24 / 16 * 1rem) 0; text-align: center; }
+
+/* 辞書側の簡易な変換が出す素の要素（本体のレンダラなら部品のクラスが付くので、こちらは効かない） */
+.legend table:not(.dads-table__table) {
+	display: block; overflow-x: auto;
+	width: fit-content; max-width: 100%; margin: calc(24 / 16 * 1rem) 0;
+	border-collapse: collapse;
+	line-height: 1.6;
+}
+.legend table:not(.dads-table__table) :is(th, td) {
+	padding: calc(8 / 16 * 1rem) calc(12 / 16 * 1rem);
+	border: 1px solid var(--sw-color-border);
+	text-align: left;
+}
+.legend table:not(.dads-table__table) th { background-color: var(--sw-color-surface); }
+.legend blockquote:not(.dads-blockquote) {
+	margin: calc(24 / 16 * 1rem) 0;
+	padding: calc(8 / 16 * 1rem) calc(16 / 16 * 1rem);
+	border-left: calc(4 / 16 * 1rem) solid var(--sw-color-border);
+	color: var(--sw-color-text-secondary);
+}
+.legend blockquote > :last-child { margin-bottom: 0; }
+.legend :not(pre) > code:not(.sw-code) {
 	padding: 0.1em 0.35em;
-	font-size: 0.92em;
+	border-radius: var(--sw-radius-chip);
+	background-color: var(--sw-color-code-background);
+	font-family: var(--font-family-mono);
+	font-size: 0.92em; letter-spacing: 0;
 }
-
-.legend pre {
-	padding: 1em;
-	background: var(--chip);
-	border: 1px solid var(--border);
-	border-radius: 3px;
+.legend pre:not(.sw-code-block__code) {
+	padding: calc(16 / 16 * 1rem);
+	border-radius: var(--sw-radius-card);
+	background-color: var(--sw-color-code-background);
 	line-height: 1.55;
 	overflow-x: auto;
 }
+.legend pre:not(.sw-code-block__code) code { padding: 0; background: none; }
 
-.legend pre code {
-	background: none;
-	border: none;
-	padding: 0;
-	font-size: 1em;
+/* ============ 単語数推移（chart.php） ============ */
+#wordchart {
+	width: 100%;
+	height: calc(360 / 16 * 1rem);
 }
 
-.legend blockquote {
-	margin: 1.6em 0;
-	padding: 0.9em 1.3em;
-	background: var(--tint);
-	border: 1px solid var(--quote-border); border-left: 5px solid var(--border);
-	color: var(--text-soft);
-}
-
-/* 引用の中身は上下に余白を作らない（枠の内側の余白だけで見せる） */
-.legend blockquote > :first-child { margin-top: 0; }
-.legend blockquote > :last-child { margin-bottom: 0; }
-
-.legend figure {
-	margin: 1.5em 0;
+/* ============ フッタ（本体の css/style.css と同じ） ============ */
+.site-footer {
+	border-top: 1px solid var(--sw-color-border);
+	padding: calc(24 / 16 * 1rem) calc(16 / 16 * 1rem);
+	color: var(--sw-color-text-secondary);
 	text-align: center;
 }
+.site-footer p { margin: 0; font-size: calc(14 / 16 * 1rem); }
 
-.legend img {
-	max-width: 100%;
-	height: auto;
-}
-
-@media screen and (max-width: 500px) {
-	#header,
-	#main {
-	padding-left:0.3em;
-	padding-right:0.3em;
-	}
-
-	#footer {
-	margin:0 0.3em;
-	}
-
-	h1{
-	font-size:150%;
-	margin-bottom:0;
-	}
-
-	#menu {
-	font-size:100%;
-	}
-
-	.all{
-	width:100%;
-	border-right:none;
-	border-left:none;
-	}
-
-	.searchBar {
-	max-width: none;
-	}
-
-	/* 狭い画面では条件のまとまりを1行ずつ積み、見出し（対象・方式）の幅を揃えて縦に並べる。
-	   2択のボタンは行の残りを等分する */
-	.searchOptions {
-	flex-direction: column;
-	align-items: stretch;
-	gap: 0.45em;
-	}
-
-	.optionLabel {
-	flex: 0 0 2.6em;
-	}
-
-	.segmented {
-	flex: 1 1 auto;
-	grid-auto-columns: 1fr;
-	}
-
-	.segmented label {
-	padding-left: 0.4em;
-	padding-right: 0.4em;
-	}
-
-	.optionChecks {
-	flex-wrap: wrap;
-	white-space: normal;
-	}
-
-	.optionChecks .buttonAndLabel {
-	white-space: nowrap;
-	}
-
-	/* 明暗の切り替えボタンもタップ領域を44pxにする。
-	   h1が空ける場所も一緒に広がるので、ここを直すだけでよい */
-	:root {
-	--toggle-size: 44px;
-	--toggle-gap: 8px;
-	--toggle-right: 8px;
-	}
-
-	/* 凡例の地の文の要素は、画面が狭いぶん余白を詰める（本体の記事本文と同じ） */
-	.legend th,
-	.legend td {
-	padding: 0.35em 0.7em;
-	}
-
-	.legend blockquote {
-	margin: 1.3em 0;
-	padding: 0.8em 1em;
-	}
-
-	.legend pre {
-	padding: 0.8em;
-	}
-
+/* ============ 狭い画面 ============ */
+@media (max-width: 767.98px) {
+	li.wordForm { font-size: calc(24 / 16 * 1rem); }
+	div.exampleEntry div.exampleSentence { font-size: calc(20 / 16 * 1rem); }
+	div.example { margin-left: calc(8 / 16 * 1rem); }
+	/* タッチ操作の画面では、操作範囲を ZasDesignSystem の size-target-touch（48）以上にする */
+	ul.navigation li,
+	ul.navigation a:any-link { min-width: calc(48 / 16 * 1rem); min-height: calc(48 / 16 * 1rem); }
 }
