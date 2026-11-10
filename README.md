@@ -1,540 +1,74 @@
 # webDictionary
-イジェール語オンライン辞書
-
-## このリポジトリについて
-このリポジトリはイジェール語のオンライン辞書システムを管理するものです。
-
-## ファイル構成
-このオンライン辞書は`親ディレクトリ/dict/`内に置くことを想定している。
-
-| ファイル | 役割 |
-| --- | --- |
-| `dict.php` | 検索ページ（初回表示と直リンク）。パラメータの解釈と組み立てのみを行う |
-| `results.php` | 検索結果の断片（`dict.php` の `#results` の中身）だけを返す。`livesearch.js` が使う |
-| `example.php` | 例文の一覧ページ |
-| `legend.php` | 凡例のページ。中身は辞書データの `legend`（Markdown）を読む |
-| `chart.php` | 単語数推移のグラフページ |
-| `offline.php` | 通信できないときに Service Worker が出すページ |
-| `config.php` | サイト共通設定（サイト名・説明文・サイトURL・カード画像・アプリの表示・アクセス解析ID・コピーライト・ページ間メニュー） |
-| `func.php` | 設定読み込み、文字列処理、HKS順ソート、データ読み込み、キャッシュ |
-| `markdown.php` | 簡易なMarkdown変換。凡例用。本体（zaslon-site）が無い環境でだけ使う |
-| `pwa.php` | ホーム画面に追加したとき（PWA）の設定。マニフェストとService Workerの中身を組み立てる |
-| `manifest.php` | ホーム画面に追加したときの名前・アイコン・開き方（マニフェスト） |
-| `sw.php` | Service Workerを返す。版と対象URLを付けて `sw.js` を出す |
-| `search.php` | 検索と接辞サジェスト |
-| `view.php` | 検索結果のHTML出力 |
-| `header.php` / `footer.php` | 全ページ共通のレイアウト（ヘッダ・メニュー・フッタ） |
-| `design-system.css` | ZasDesignSystem の部品とトークン。`_css/build.mjs` の生成物で、手で編集しない |
-| `dict.css` | 辞書のスタイル。配置と、部品の無い要素（単語欄・例文・ページ送り・凡例）だけを書く |
-| `_css/build.mjs` / `_css/design-system.full.css` | `design-system.css` の生成スクリプトと生成元（ZasDesignSystem の書き出し）。サーバには送らない |
-| `script.js` | 明暗（ライト／ダーク）の切り替え、メニューのドロワー、起動時の画面の色 |
-| `dict.js` | イジェール文字表示の切り替え |
-| `pronunciation.js` | 発音記号の自動生成 |
-| `livesearch.js` | インクリメンタルサーチ（ページ内で検索結果を差し替える） |
-| `pwa.js` | Service Workerの登録 |
-| `sw.js` | Service Workerの動きの定義。ブラウザは `sw.php` 経由で読む |
-| `vendor/akrantiain.min.js` | akrantiain（第三者製）をブラウザ用にまとめたもの |
-| `vendor/DoulosSIL-Regular.woff2` | 発音記号の書体（第三者製）。配布物をそのまま置く |
-| `vendor/LICENSE-*.txt` | 上記の第三者製ソフトウェア・フォントと、`design-system.css`（デジタル庁デザインシステム）・明暗ボタンの絵（Material Symbols）のライセンス全文 |
-| `wordchart.js` | 単語数推移のグラフの描画 |
-| `idyer.json` | 辞書データ（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)で管理） |
-| `affixTable.csv` | 接辞テーブル。[0]対象品詞、[1]形態、[2]説明、[3]特殊処理、[4]派生後の品詞 |
-| `logger/dictLog.csv` | 単語数の記録。グラフの元データ。正はサーバ側で、リポジトリの物は表示確認用の控え |
-| `logger/idyer_logger.php` | 単語数を記録するスクリプト。cronから定期実行する |
-| `tests/run.php` | テスト |
-| `辞書チェック.bat` / `_local/router.php` | 手元での表示確認（下記「手元での確認」）。サーバには送らない |
-| `../favicon.ico` `../icon-512.png` `../apple-touch-icon.png` | サイトアイコン（親サイトに設置） |
-
-`Endrata` フォント（`*.woff` / `*.ttf`）は意図的にリポジトリに含めていないため、
-クローンした環境では「イジェール文字表示」は既定のフォントで表示される。
-
-## 接辞サジェスト（affixTable.csv）
-検索語が見出し語の派生形である場合に「もしかして」を出す機能で、`search.php` が担当する。
-派生の規則は [派生](https://zaslon.info/idyerin/%e6%b4%be%e7%94%9f/)・[助詞(後置詞)と格](https://zaslon.info/idyerin/%e5%8a%a9%e8%a9%9e%e5%be%8c%e7%bd%ae%e8%a9%9e/)・[記述詞](https://zaslon.info/idyerin/%e8%a8%98%e8%bf%b0%e8%a9%9e/)に従う。
-
-イジェール語では、語幹＋`-e` が動詞、語幹＋`-(i)n` が記述詞、名詞は語幹そのもの、という形で品詞が決まる。
-このため接辞の付き方は次の規則で決まり、`derivationStems()` と `makeDerivations()` がこれを実装している。
-
-* 接尾辞は**語幹**に付く（動詞の `-e` や記述詞の `-(i)n` を置き換える形になる）。
-* 接頭辞は**語形**の頭に付く。ただし品詞を変える接頭辞は、品詞を決める語尾を置き換えるため語幹に付く。
-* 接辞のカッコ内の母音は、接辞が付く語幹が子音で終わる場合にだけ現れる。
-* 接頭辞の後ろの要素は連濁する。`[3]` が `NO_VOICING` の接辞（`mir-`）だけは連濁しない。
-
-`[4]` の派生後の品詞は、空欄ならその形からは更に派生しないことを表す（名詞の格がこれにあたる）。
-
-接辞は複数重ねられるため、`findDerivationPaths()` が接辞を1段ずつ重ねながら検索語に辿り着く道筋を
-`DERIVATION_MAX_DEPTH` 段まで探す（`mirkereskef` なら「`kere` の 再帰自動詞形 の 対格にあたる名詞派生 の 主格」）。
-組み合わせが際限なく増えないよう、次の枝は辿らない。
-
-* 途中の形が検索語の中に現れないもの。接辞は語の前後にしか付かないため、途中の形は必ず検索語の中に連続した部分文字列として残る
-* 派生後の品詞が空の接辞。名詞の格のように、そこで語形が閉じる
-* 既に見出し語として載っている形。その見出し語から直接辿った道筋と重なる
-
-同じ見出し語について複数の解釈が見つかった場合は、最も浅い解釈だけを出す。
-検索語が複数あるときは、それぞれの語について辿る。
-
-## インクリメンタルサーチ（livesearch.js・results.php）
-検索ページでは、入力や条件の変更に応じてページを遷移させずに検索結果だけを差し替える。
-
-* 検索語は最後の入力から300ms待ってから問い合わせる。IMEで変換している間は問い合わせず、確定したときに問い合わせる。
-  「検索」ボタンとEnterは待たずにすぐ問い合わせる
-* 検索対象・一致の仕方・連濁のチェックを変えたときはすぐ問い合わせる。
-  「イジェール文字表示」は書体を変えるだけ（`dict.js`）なので問い合わせず、URLの `Idf` だけを合わせる
-* 結果の中の、検索ページへのリンク（関連語・もしかして・語源・使用単語・ページ送り）もページ内で差し替える。
-  Ctrl・Shift・中クリックなどで開いたときと、例文一覧など他のページへのリンクは普段どおり遷移する
-* 同じ条件になる操作（Enterの連打など）では問い合わせない。速く打っても、古い応答が新しい結果を上書きすることはない
-
-### URLと履歴
-差し替えるたびに、URLを今の条件のクエリにする。並びは `func.php` の `makeLink()` と同じ
-（`keyBox, type, mode, page, [Idf], [voicing], [id]`）で、検索語が空ならクエリを付けない。
-このURLも、リンクの `href`（`dict.php?...`、`&id=...` を含む）も、そのまま開けば `dict.php` がサーバ側で同じ結果を出すので、
-共有・再読み込み・新しいタブで開くといった操作は今までどおり使える。
-
-* 入力している間は1件の履歴にまとめる（最初の結果で1件積み、続きはその1件を書き換える）。
-  「検索」ボタンかEnter、またはリンクで区切られる
-* 結果の中のリンクは、押すたびに1件積む
-* リンクや戻る/進むでは、そのURLの結果を取り直し、フォームもURLの条件に戻す。
-  フォームに無い条件の読み替え（`fwd` → 部分一致、`trans` → 見出し語・訳語検索）は `dict.php` と同じ。
-  「イジェール文字表示」のチェックだけは `dict.js` の保存済みの設定に従うため、URLからは戻さない
-* リンクで開いた後にフォームを触ると、条件はフォームから作り直す。`id` はこのとき外れる（フォーム送信と同じ）
-
-GA4 の拡張計測（ブラウザの履歴イベントによるページ変更）が有効だと、URLを書き換えるたびに page_view が数えられる。
-コードでは手当てしていないので、要らなければGAの管理画面で切ること。
-
-### 結果の断片（results.php）
-`results.php` は `dict.php` と同じクエリを受け、`#results` の中身だけ（`<html>` などは付けない）を返す。
-どちらも `search.php` の `readSearchRequest()` / `runSearch()` と `view.php` の `renderSearchResults()` を通すため、
-ページ内で差し替えた結果と直リンクで開いた結果は同じHTMLになる（`tests/run.php` で突き合わせている）。
-断片のURLが検索結果に載らないよう `X-Robots-Tag: noindex` を付け、辞書の更新をすぐ拾えるよう `Cache-Control: no-cache` にしている。
-辞書の読み込みに失敗したときは、内部の情報（辞書のパスなど）を出さずに500を返す。
-
-### 通信できないとき・JavaScriptが無いとき
-* 入力や条件の変更で問い合わせられなかったときは、表示中の結果を残して「通信できないため検索結果を更新できませんでした。」を出す。URLは変えない
-* リンクで問い合わせられなかったときは通常の遷移に切り替え、Service Worker の控えか `offline.php` に任せる
-* JavaScriptが無効なときや、必要な機能（`fetch`・`AbortController`・`history.pushState`）が無いブラウザでは何もせず、
-  今までどおりフォームのGET送信で動く
-
-### 作り
-フォーム（`#searchForm`）・結果（`#results`）・状態表示（`#searchStatus`）の3つのビューは、
-ブラウザのイベントを `dict:input` / `dict:optionchange` / `dict:fontchange` / `dict:submit` / `dict:navigate` に翻訳して
-泡立てるだけで判断をしない。ルート（`div.all`）で受ける Mediator が待ち時間・問い合わせ・履歴を受け持つ。
-結果を差し替え終えると `#results` から `dict:resultsupdated` を出す（`pronunciation.js` が受ける）。
-
-## ページ送り
-検索結果のページ送りは、総ページ数が10以上のとき間を省略記号（…）にする。JavaScriptの有無に関わらず同じ表示で、
-番号の並びは `view.php` の `navigationPages()` だけが決める。
-
-* 先頭の3ページ・今のページとその前後1ページ・最後の3ページを出し、間が空く所に省略記号を1つ置く
-* 重なる所や隣り合う所には省略記号を出さない。1ページだけ抜ける所（`3, …, 5`）は省略記号にする
-* 例：総ページ数20で10ページ目なら `1 2 3 … 9 10 11 … 18 19 20`
-* 数は `view.php` の定数 `PAGE_NAVIGATION_COLLAPSE_FROM`（省略し始める総ページ数）・
-  `PAGE_NAVIGATION_EDGE`（先頭・末尾に出す数）・`PAGE_NAVIGATION_AROUND`（今のページの前後に出す数）で決まる
-
-例文一覧（`example.php`）のページ送りは省略しない。
-
-## 共通設定（config.php）
-サイト名・説明文・zaslon.info本体のURL・カード画像・ホーム画面に追加したときの表示（`app_*`）・
-アクセス解析ID・コピーライト表記・ページ間メニューは `config.php` に集約している。値は `func.php` の `dictConfig()` で読み込んで使い回す。
-zaslon-site本体の `common/config.php` / `site_config()` に対応するファイルで、
-本体と揃える必要がある値（`site_url`・`ga_id`・コピーライトの表記形式）は本体側と一致させること。
-
-ページ間メニュー（検索仕様・検索・例文一覧・凡例・単語数推移・ホームへ戻る）は
-`func.php` の `buildPageMenu($currentPageKey)` が `config.php` の `pages` から組み立てる。
-本体と同じく今いるページの項目も残し、`aria-current="page"` で示す。
-辞書の中のページは `pages` に、文法書側の記事など辞書の外へのリンクは `menu_before` / `menu_after` に書く。
-`pages` の `dict` はヘッダのサイト名のリンク先にも使う。
-
-## アクセス解析
-`header.php` が `config.php` の `ga_id` を使って zaslon.info 本体と同じGA4プロパティに計測タグを出す
-（本体の `common/header.php` / `ga_measurement_id()` と同じ仕組み）。
-`ga_exclude_hosts` に載っているホスト（`localhost` 等、手元のXAMPPでの確認用）では出力されない。
-`ga_id` を空にすれば全体で計測タグ自体を出さない。
-
-## SNSカード・正規URL（OGP）
-`header.php` が zaslon-site本体（`common/header.php`）と同じ形でOGPタグと `canonical` を出す。
-URLは `func.php` の `canonicalUrl()` / `absoluteUrl()` が `config.php` の `site_url` と今開いているページのパスから組み立てるため、辞書のどのページを貼っても そのページのURLになる
-（検索条件でカードが変わらないよう、クエリは含めない）。
-カードは正方形の小さいカード（`summary`）で、画像は `config.php` の `og_image`。
-説明文は `site_tagline` で、`meta name="description"` と `og:description` の両方に出る。
-
-## 検索エンジンに載せるページ
-検索エンジンに載せるのはクエリの無いページ（`dict.php`・`example.php`・`legend.php`・`chart.php`）だけにする。
-サイトマップにもこれらだけが載る（zaslon-site の `index.php` の `sitemap_dict_urls()`）。
-
-* クエリの付いた `dict.php`（検索結果）と `example.php`（2ページ目以降など）は `<meta name="robots" content="noindex" />` を出す。
-  検索条件の付いたURLは語ごとに際限なく増え、`canonical` だけでは中身の違うページとして個別に載せられることがあるため
-* `noindex` のページには `canonical` を出さない（別のURLを指す `canonical` と並べると食い違った指示になる）。
-  `header.php` の `$pageNoIndex` で切り替える
-* 検索結果の断片 `results.php` は `X-Robots-Tag: noindex` を返す
-* `robots.txt` では巡回を止めない。止めると検索エンジンが `noindex` を読めず、URLだけが載ることがある
-
-## アイコン
-ファビコン・アイコン・カード画像は、辞書側に持たず zaslon.info 本体のサイト直下（`/favicon.ico`・
-`/icon-512.png`・`/apple-touch-icon.png`）を共用する。同じドメインの `/dict/` に置く前提のため、
-`header.php` からはルートからの絶対パスで指す。
-辞書だけを別の場所（`localhost/webDictionary/` 等）で開くとアイコンは表示されないが、表示内容には影響しない。
-
-## ホーム画面への追加（PWA）
-スマホのホーム画面に追加して、ブラウザの枠なしでアプリのように開ける。
-必要なのは**マニフェスト**（アプリの名前・アイコン・開き方）と**Service Worker**（通信の受け持ち）の2つで、
-`header.php` がマニフェストへのリンクを、`footer.php` が `pwa.js`（Service Workerの登録）をどのページにも出す。
-
-追加したときの表示は `config.php` の `app_name`（アイコンの下に出る短い名前）・`app_theme_color`・
-`app_theme_color_dark`・`app_icons`・`app_icon_maskable_scale` で決まる。アイコンはOGPと同じく本体のサイト直下の物を共用するため、
-辞書だけを別の場所に置いた環境では追加できない（表示には影響しない）。
-
-### ホーム画面のアイコン
-マニフェストには同じ画像を `purpose` 違いで2つ載せる。
-
-* `any` … 画像をそのまま四角く使う従来の見せ方
-* `maskable` … Androidなどが丸背景に収める見せ方。OS側が安全円の外側を切り落とすため、
-  絵柄はこちらの方が大きく見える。**これが取れないと `any` の見せ方（四角の中に小さく収まる）に戻る**
-
-`config.php` の `app_icon_maskable_scale` を `1.0` より大きくすると、`maskable` 側だけ中心を軸に
-その倍率までズームした版（`icon-maskable.php` がGDで生成、`cache/` に取っておく）に差し替える。
-`1.0` のときや、GDが無い・元画像を読めない環境では元の画像をそのまま渡す。
-これは生成できない状況で404を返すと `maskable` のアイコンごと失われるのを避けるためで、
-倍率を上げるときは `icon-maskable.php` をサーバに置くこと。
-
-### 置き場所（manifest.php・sw.php）
-マニフェストもService Workerも、静的なファイルではなくPHPで返している。
-どちらも**辞書の置き場所そのもの**を書く必要があるためで、`pwa.php` の `appBasePath()` が
-今開いているURLから組み立てる。本体の中の `/dict/` でも、リポジトリ単体の `/webDictionary/` でも同じ物が動く。
-
-* `manifest.php` … 開くページ（`start_url`）は検索ページ、受け持ち（`scope`）は辞書のディレクトリ。
-  アイコンの長押しで出るショートカット（凡例・例文一覧・単語数推移）は、メニューと同じく `config.php` の `pages` から作る
-* `sw.php` … 動きの定義は `sw.js` にあり、版（キャッシュ名）と取っておくファイルの一覧だけをPHPで付ける。
-  版には `programUpdatedAt()`（プログラムの更新時刻）を使うため、CSSやJSを更新すればキャッシュも作り直される
-
-辞書の外（本体の文法書など）へのリンクを開くとアプリの受け持ちから出るため、ブラウザ側で開く。
-
-### 通信できないとき（sw.js）
-* ページ（HTML）は**通信を優先**する。辞書は更新され、検索もサーバ側で行うため、
-  キャッシュを返すのは通信できないときだけにする。同じURLで開いたことがあるページはそのまま出て、
-  無ければ `offline.php` を出す
-* CSS・JS・書体は**キャッシュを優先**する。`assetUrl()` の版付きURL（`?v=更新時刻`）で来るため、
-  更新されれば別のURLになり、古い物を返し続けることはない
-* 取っておくページ数には上限（`PAGE_CACHE_LIMIT`）を置き、超えた分は古い物から捨てる
-* ページ遷移以外で読まれたページ（開発者ツールがソースを表示し直すときなど）や `manifest.php` のような、
-  ページでも静的ファイルでもない物には手を出さず、Service Worker が無いときと同じくブラウザに任せる
-* 検索結果の断片（`results.php`）には手を出さず、毎回サーバに問い合わせる。控えも取らない
-  （通信できないときの動きは「インクリメンタルサーチ」の節）
-* 他所のサーバ（アクセス解析・グラフ）と辞書の外のページには手を出さない
-
-なお、単語の検索はサーバ側で行うため、オフラインで新しく引くことはできない。
-
-## イジェール文字表示
-検索ページと例文一覧ページの「イジェール文字表示」は `dict.js` が担当する。
-ページをまたいで設定を共有するため、状態は `localStorage`（キー `idyerFont`）に持ち、
-`<html>` に `idyer-font` クラスを付けてフォントを切り替える。
-表示前にフォントを確定させるため、`dict.js` は `<head>` で同期読み込みする。
-
-設定の優先順位は次の通り。
-
-1. `localStorage` に保存済みの設定
-2. URLの `Idf` パラメータ（保存済みの設定が無いときだけ見る。以後のページに引き継ぐため保存する）
-3. どちらも無ければ既定のフォント
-
-なお、CSSやJSを更新してもブラウザが古いものを使い続けないよう、
-`func.php` の `assetUrl()` で `dict.css?v=更新時刻` の形にしている。
-
-## 手元での確認
-`辞書チェック.bat` を開くと PHP の組み込みサーバが立ち上がり、ブラウザで `http://127.0.0.1:8081/dict/dict.php` が開く。
-止めるときはそのウィンドウで Ctrl+C。
-
-- 辞書データ `idyer.json` をこのフォルダに置いておくこと（リポジトリには無い）
-- PHP は PATH → `C:\php` → `C:\xampp\php` の順に探す。環境変数 `PHP_EXE` で指定もできる。
-  `mbstring` が読まれていなければ、PHP の `ext` フォルダから足して起動する
-- 本番と同じ `/dict/` のURLで開けるよう、`_local/router.php` が `/dict/` 以下をこのフォルダのファイルに対応させる
-- 隣に `zaslon-site` があればそれをドキュメントルートにし、サイト直下のアイコンも本番と同じく表示される。
-  ただし凡例は本体のレンダラではなく辞書側の簡易な変換で出る（本体のフォルダの中に辞書が無いため）
-- 待ち受けは `127.0.0.1` だけ（LAN からは見えない）。ポートは 8081 で、本体の `ブログチェック.bat`（8080）と同時に動かせる
-
-## 見た目（デザインシステム・明暗）
-見た目は zaslon.info 本体（[zaslon-site](https://zaslon.info/)）と同じく、ZasDesignSystem（デジタル庁デザインシステムが基）に従う。
-ヘッダ（サイト名・明暗ボタン・水平メニュー／ドロワー）・フッタ・ページ見出しは本体の `common/header.php` / `css/style.css` と同じマークアップと規則で、
-検索欄（検索ボックス）・検索条件（ラジオグループ・チェックボックス）は ZasDesignSystem の部品をそのまま使う。
-
-### CSS の構成
-| ファイル | 中身 | 編集 |
-| --- | --- | --- |
-| `design-system.css` | 部品の見た目と、色・文字・寸法のトークン（ライト／ダーク） | しない（生成物） |
-| `dict.css` | 配置（余白・並び・幅）と、部品の無い要素（単語欄・例文・ページ送り・凡例の地の文） | する |
-
-`design-system.css` はカスケードレイヤーに入っており、レイヤーに入れていない `dict.css` が常に優先される。
-`dict.css` では部品（`.dads-*` / `.sw-*`）の見た目を上書きせず、色は役割のトークン（`--sw-color-*`）だけを使う。
-トークンがライト／ダークで値を切り替えるので、`dict.css` にダーク用の指定は無い。
-
-### design-system.css の作り直し
-`_css/design-system.full.css`（ZasDesignSystem の `local-design-system/web/design-system.css` の写し）から、
-辞書で使う部品だけを残して作る。デプロイはビルドしないので、生成物もコミットする。
-
-```
-node _css/build.mjs
-```
-
-- 使っている部品は、辞書直下の `*.php` / `*.js` / `*.css` に書かれた `dads-*` / `sw-*` のクラス名で判定する。
-  クラス名を文字列の連結で組み立てると見つけられず、その部品の CSS が消える
-- 凡例は本体の `common/markdown.php` が HTML にするため、そこで付くクラスは `build.mjs` の `RENDERER_CLASSES` に並べてある。本体の側を変えたら合わせること
-- キーカラーを灰色に、リンクを青に置き換える表（`KEY_TO_GRAY`・`LINK`）は本体の `_css/build.mjs` と同じ値にすること。食い違うと辞書と本体で色が変わる
-- ZasDesignSystem を更新したら `_css/design-system.full.css` を差し替えて実行し直す。`_css/` はサーバには送らない（`deploy.yml` の除外）
-
-### 書体
-本文はトークンの `--font-family-sans`、サイト名は本体と同じ `"Noto Serif Display", "Noto Serif JP"` 系の明朝。
-サイト名は和文で長いため、狭い画面では本体（28px）より小さい 24px にし、空白の位置で折り返させる。
-イジェール文字の `Endrata` と発音記号の `Doulos SIL` だけは辞書固有なので、上の指定より優先される。
-
-### ダークモード
-切り替えは `script.js` が担当し、ヘッダ右上のボタン（`header.php`）で選ぶ。
-**辞書と本体は同じドメインに置いてあり、明暗はサイト全体で1つの設定として共有する。**
-そのため、次の3つは本体（`common/header.php` と `js/site.js`）と必ず同じにすること。
-片方だけ変えると、辞書と本体で設定が分かれてしまう。
-
-| 何 | 値 |
-| --- | --- |
-| `localStorage` のキー | `sw-theme`（旧版のキー `theme` も読む。ボタンで選び直すと消す） |
-| 保存する値 | `dark` / `light` |
-| `<html>` に付ける属性 | `data-theme="dark"` / `"light"` |
-
-- ボタンで選んでいなければ、OSの設定（`prefers-color-scheme`）に従う
-- 保存済みの選択は `header.php` の `<head>` 内のインラインスクリプトが画面を描く前に付けるので、
-  明るい画面が一瞬見えることはない。外部ファイルにすると、読み込みを待つ間に一度 OS の設定の色で描かれる
-- グラフ（`wordchart.js`）の色はCSSではなく描画時に決まるため、
-  トークン（`--sw-color-*`）を読んで描き、`data-theme` の変化を見張って描き直している
-
-### メニュー（水平メニュー／ドロワー）
-幅が 768px 未満のとき、または項目が1行に収まらないときは、ハンバーガーメニューボタンからドロワーで開く。
-描画前の判定は `header.php` のインラインスクリプト、以後の切り替えは `script.js` が行う。
-JavaScript が動かない環境（と `showModal` の無いブラウザ）では水平メニューだけを出し、はみ出す分は横にスクロールさせる。
-
-### 通知バー・ブラウザ枠・起動時の画面の色
-色は `config.php` の `app_theme_color`（明るい方）と `app_theme_color_dark`（暗い方）で、
-トークンの `color-background`（`--sw-color-background`）と揃える（本体の `theme-color` と同じ値）。
-
-- `header.php` は `theme-color` を `media="(prefers-color-scheme: light)"` と `dark` の2つ出す。
-  `media` を見ない古いブラウザは最初の1つ（明るい方）を使うため、並び順を入れ替えないこと
-- スクリプトが動けば、ページを開いた時点と明暗を切り替えたときに、両方の `theme-color` を今の表示の
-  `--sw-color-background` で上書きする（ZasDesignSystem の `implementation/web.md`「Android のナビゲーションバー」）。
-  アプリ内のボタンで選んだ表示と OS の設定が食い違っても、画面下端が白く浮かない
-- iOSの通知バーは `apple-mobile-web-app-status-bar-style` の3つの値からしか選べず、読み込み時に
-  一度しか見られない（後から書き換えても効かない）ため、出し分けられない。
-  iOS 15以降は `default` のとき上の `theme-color` が使われるため、それ以前でも文字が読める `default`（白地に黒文字）を出す
-- **起動時**（ホーム画面から開いてページが出るまでの画面）の色はマニフェストの
-  `theme_color` / `background_color` で決まり、**端末のダークモード設定に合わせる**。
-  マニフェストはページの外から読まれてCSSのメディアクエリが効かないため、端末の設定を次の2通りで受け取る
-  （`func.php` の `manifestTheme()`）。どちらも無ければ明るい方になる
-
-  | 経路 | 誰が使うか |
-  | --- | --- |
-  | `Sec-CH-Prefers-Color-Scheme` ヘッダ | Chromium系。`header.php` が `Accept-CH` で要求すると送ってくる |
-  | マニフェストのURLの `?theme=dark` | クライアントヒントを送らないiOS向け。`script.js` がリンクに付ける |
-
-  ブラウザがマニフェストを読むのは追加するときと、その後の更新確認のときなので、
-  追加後に端末の設定を変えても起動時の画面の色が変わるのは次に読み直されてから
-
-## 辞書順
-見出し語の並び順は[辞書順について](https://zaslon.info/idyerin/%E8%BE%9E%E6%9B%B8%E9%A0%86%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6/)の規則に従う。
-実装は `func.php` の `hksSortKey()` と `HKSCmpw()`、規則ごとのテストは `tests/run.php` にある。
-仕様書に載っている並び順の例も、そのままテストに入れてある。
-
-## 発音記号
-検索結果の見出し語の直後に `/miːla/` の形で併記する。値の決め方は次の通り。
-
-1. `idyer.json` の発音記号欄（`zpdicOnline.pronunciationTitle` の項目）に中身があれば、それをそのまま出す
-2. 無ければ、`idyer.json` の `snoj` にある[akrantiain](https://github.com/Ziphil/AkrantiainTypescript)の規則を
-   見出し語に適用して作る
-
-辞書データが発音記号を持つのは `AVG` → `aːveg` のような、綴りから機械的に導けない頭字語だけなので、
-それ以外は綴りから作る。発音記号欄が空文字列の単語も「無し」として扱う。
-
-akrantiainの実装はTypeScript版しか無く、規則も辞書データの中にあるため、変換はブラウザ側で行う。
-`vendor/akrantiain.min.js` が処理系、`pronunciation.js` が組み込み側で、`dict.php` がこの2つと `livesearch.js` を
-この順に `defer` で読み込む。規則は `view.php` の `renderPronunciationRules()` が
-`<script type="application/json" id="snojRules">` としてページに埋め込む。
-
-インクリメンタルサーチで結果を差し替えたときは、`livesearch.js` が出す `dict:resultsupdated` を受けて、
-差し替えた範囲の発音記号を埋め直す。規則は差し替えのたびに入れ替わるが、
-中身が同じ間は読み込んだ結果を使い回す（打つたびに規則を読み直さない）。
-
-`view.php` は、辞書データに発音記号を持つ単語には値をそのまま出し、持たない単語には
-`<span class="wordPronunciation" data-form="見出し語"></span>` を置く。
-`pronunciation.js` はこの `data-form` を持つ要素だけを埋めるので、辞書データ側の値が上書きされることはない。
-規則の読み込みや変換に失敗した単語は、発音記号を空欄のままにする。
-
-### vendor/akrantiain.min.js
-[npmのakrantiain](https://www.npmjs.com/package/akrantiain)をesbuildでまとめたもので、手で編集しない。
-作り直すときは次のようにする。
-
-```
-npm install akrantiain@1.2.1
-npx esbuild node_modules/akrantiain/dist/index.js --bundle --format=iife \
-  --global-name=AkrantiainLib --minify --target=es2017 --legal-comments=eof \
-  --outfile=vendor/akrantiain.min.js
-```
-
-同梱されるのは akrantiain 1.2.1 と、その依存の parsimmon 1.18.1 の2つ
-（akrantiain のもうひとつの依存 codemirror はエディタ用の色付け定義でしか使われないため取り込まれない）。
-どちらもMITライセンスで、**著作権表示と許諾条項の全文を複製物に含めること**が条件なので、
-バンドルし直したら次の2つを必ずやり直すこと。**片方だけではライセンス条件を満たさない。**
-
-- `npm install` で入った各パッケージのライセンス全文を `vendor/LICENSE-akrantiain.txt` と
-  `vendor/LICENSE-parsimmon.txt` に写す
-- 同じ全文を `vendor/akrantiain.min.js` の先頭コメントにも入れる
-  （このファイル単体で配信されるため、ファイル自身が全文を持っている必要がある）
-
-バージョンを上げたときは、依存が増えていないかを確かめ、増えていれば同じように全文を足す。
-
-### 書体（vendor/DoulosSIL-Regular.woff2）
-発音記号は `dict.css` の `span.wordPronunciation` で `Doulos SIL` にしてある。
-本文の書体はIPAの字を十分に持たないため、環境によって字が抜けたり別の書体で代替される。
-
-閲覧者の環境に無くても同じ見た目になるよう、
-[SIL公式配布](https://github.com/silnrsi/font-doulos/releases)の 7.000 の
-`web/DoulosSIL-Regular.woff2` を無改変で置き、`@font-face` で読む。
-`src` は `local()` を先に書いてあるので、端末に入っている環境では読み込まない。
-サブセット化はしていない（約310KB）。
-
-SIL Open Font License 1.1 で、**著作権表示とライセンス全文を複製物に含めること**が条件なので、
-差し替えるときは配布物の `OFL.txt` も `vendor/LICENSE-DoulosSIL.txt` に写し直すこと。
-同ライセンスは予約名（Reserved Font Name）の `Doulos` `SIL` を含む名前での改変版配布を禁じているため、
-フォント自体は加工せずそのまま置く。
-
-## 例文
-`idyer.json` の `examples` を読んで表示する（閲覧のみで、編集はしない）。
-辞書データ側では例文と単語がIDで結ばれているだけなので、
-`func.php` の `makeExampleIndex()` で表示にも検索にも使える索引に組み替えている。
-
-- 検索結果の見出し語には、その単語を使う例文を「例文」欄として並べる
-- `example.php` に全例文の一覧を出す。原文・訳文・補足・タグ・使用単語・出典を表示する
-- 例文の「使用単語」は、単語IDから見出し語への検索リンクにする
-- 全文検索（`type=all`）は例文の原文・訳文・補足・タグも対象にする。
-  ヒットした例文が紐づく単語が検索結果に出る
-
-`sentence` 以外の項目は辞書データ側で省略できるため、`makeExampleIndex()` で空を埋めて形を揃えている。
-
-## 凡例
-`legend.php` が `idyer.json` の `legend` を読んで表示する。
-以前は文法書側の記事（`/idyerin/辞書凡例/`）へのリンクだったが、
-凡例は辞書データと一体で管理されている（[辞書のリポジトリ](https://github.com/Zaslon/IdyerinDictionary)）ため、
-辞書データ側の記述をそのまま出す形にした。記事側とずれることが無くなる。
-
-`legend` はMarkdownで書かれている。対応記法はzaslon-site本体のREADMEの「Markdown対応記法」を参照
-（CommonMark + GFM ＋ サイト固有の拡張。辞書データ側の `zpdicOnline.enableMarkdown` はZpDIC側の
-**単語欄**の設定で、`legend` とは無関係）。
-
-### Markdownの変換
-記法を辞書側で作り直さず、文法書側の記事と同じ見た目にするため、変換は**本体のレンダラに任せる**。
-`view.php` の `legendMarkdownToHtml()` が本体の `common/markdown.php` を読み込み、
-`Zaslon\Markdown\to_html()` を直接呼ぶ。
-
-- 本体側の呼び出し口は `common/lib.php` の `markdown_to_html()` だが、**`lib.php` は読み込まないこと**。
-  同ファイルは辞書側の `func.php` と同じ `h()` を定義しているため、二重定義で落ちる
-- 本体の `markdown.php` は、保存させたいリンクの判定で本体の `site_config()` を呼ぶ。
-  `lib.php` を読めない代わりに、`view.php` が `function_exists()` で確かめてから
-  辞書側の `dictConfig()` を返す同名の関数を置いている（`site_url` の形式は本体と揃えてある）
-- 辞書はFTPで本体と別に置けるので、本体の `common/markdown.php` か `vendor/autoload.php` が
-  無ければ辞書側の `markdown.php` に落とす（下記）。変換中の例外も同じ扱いにする。
-  本体側もサイトマップを作るときに辞書の `config.php` を `is_file()` で確かめてから読んでおり
-  （zaslon-site の `index.php` の `sitemap_dict_urls()`）、これと対の関係になっている
-- 辞書データに `legend` が無い場合は、その旨だけを出す
-- 本体は生HTMLをそのまま通す設定なので、辞書データにHTMLを書けばそのまま出る（自分の辞書データなので許容する）
-
-見た目（`dict.css` の `.legend`）も、本体の `css/style.css` の記事本文（見出しの縦棒・表・
-インラインコード・引用）と同じ規則を写してある。表はこのページだけで使うため、
-色変数 `--rule` `--tint` `--code-bg` `--th-bg` `--row-alt` `--quote-border` も本体と同じ名前・同じ値で足した。
-
-### 本体が無い環境での変換（markdown.php）
-辞書のリポジトリ単体でも凡例を読める形で出せるよう、`markdown.php` に簡易な変換を置いてある。
-本体があるときは使われない。凡例で実際に使う記法だけを対象にした最小限の実装で、
-対応するのは次の記法に限る。
-
-| 対応する | 対応しない（素の文字のまま出る） |
-| --- | --- |
-| 見出し（`#`〜`######`）・段落 | 入れ子の箇条書き・引用・脚注 |
-| 箇条書き（`-` `*` `+`）・番号付き（`1.`） | 参照形式のリンク（`[表示名][ref]`）・画像 |
-| 表（GFM。区切り行が必須） | 下線式の見出し・セル内の `\|` |
-| 行内コード・```で囲んだコードブロック | 生HTML（本体と違い必ずエスケープする） |
-| 強調（`**` `*`）・取り消し線（`~~`）・区切り線 | 日本語の約物をまたぐ強調（本体はCJK対応の判定を入れている） |
-
-段落内の改行を `<br />` にする点は本体と揃えてある。現在の凡例のように上表の左側だけで書かれていれば、
-本体のレンダラと同じHTMLになる（実際の凡例で突き合わせて確認済み）。
-凡例で新しい記法を使い始めたときは、本体が無い環境での見え方も確かめること。
-
-本体側の関数名や置き場所が変われば辞書側の簡易な変換に落ちる（ページ自体は出る）ので、
-本体のMarkdown変換に手を入れるときはこのページの表示も確かめること。
-
-## キャッシュ
-辞書のソートは重いため、結果を `cache/` に保存して使い回している。
-`idyer.json` か `func.php` の更新時刻かサイズが変われば自動で作り直されるので、通常は触らなくてよい
-（並び順の規則を変えたときにも作り直されるよう、比較関数のあるファイルも無効化の対象にしている）。
-キャッシュが壊れていたり書き込めなかったりしても、その場でソートし直して動作する。
-手動で消す場合はディレクトリごと削除してよい（`cache/` はGit管理外）。
-
-## 単語数の記録
-`chart.php` のグラフの元データは `logger/dictLog.csv` で、`logger/idyer_logger.php` が追記する。
-`idyer.json` の単語数が前回の記録と変わっていれば「その日の日付, 単語数」を1行足し、
-変わっていなければ何もしない。cronで毎日1回まわす想定。
-
-```
-php logger/idyer_logger.php
-```
-
-`logger/` は `dictLog.csv` をブラウザから読むため公開ディレクトリに置いてあるので、
-Web経由で叩かれて勝手に追記されないよう、スクリプト側でCLI以外の実行を403で弾いている。
-
-## デプロイ
-GitHub Actions の「デプロイ」（`.github/workflows/deploy.yml`）を手動で起動すると、
-前回デプロイしたコミットからの差分だけを lftp（SFTP か FTPS）でサーバに送る。
-最後にデプロイしたコミットはサーバの辞書フォルダの `.deploy-state` に記録しており、
-外から読めないよう本体の `.htaccess` で塞いでいる。
-
-中身の比較はしないため、サーバ側を手で変えた分は検出・修正されない。
-初回や手動でサーバを最新にした直後は `mode=init` で一度実行し、現在のコミットを記録させること。
-
-サーバからは何も消さない。リポジトリから消したファイルもサーバには残る。
-代わりに、実行のたびにサーバのファイル一覧を取り、サーバにあってリポジトリ（のデプロイ対象）に
-無いファイルをログに一覧で出し、1件以上あれば警告を出す。不要な物は手で消すこと。
-
-次のものは送らない。
-
-| 対象 | 理由 | サーバにあるときの報告 |
-| --- | --- | --- |
-| `idyer.json` | 別リポジトリで管理しており、別途上げる | しない |
-| `logger/` | サーバの `dictLog.csv` は cron が追記する実データで、リポジトリの物は控え。`idyer_logger.php` を直したときは手で上げる | しない |
-| `Endrata-bold.woff` `Endrata-bold.ttf` | リポジトリに含めていないため、手で上げる | しない |
-| `cache/` | サーバ側で生成される | しない |
-| `tests/` `docs/` `README.md` `.github/` `.gitignore` | 辞書の表示には使わない。`tests/` は公開ディレクトリに置くと Web から実行できてしまう | する |
-
-リポジトリの外で管理するファイルをサーバに増やしたときは、`deploy.yml` の `server_managed` に足せば報告から外れる。
-
-リポジトリの Settings で `production` 環境を作り（master ブランチ限定）、次を設定する。
-
-| 種類 | 名前 | 内容 |
-| --- | --- | --- |
-| Secret | `DEPLOY_HOST` | 接続先ホスト |
-| Secret | `DEPLOY_USER` | ユーザー名 |
-| Secret | `DEPLOY_PASSWORD` | パスワード（SFTP を鍵で認証するなら不要） |
-| Secret | `DEPLOY_SSH_KEY` | SFTP の秘密鍵（パスワード認証なら不要） |
-| Secret | `DEPLOY_KNOWN_HOSTS` | SFTP のときのサーバの公開鍵（`ssh-keyscan` の出力） |
-| Variable | `DEPLOY_PATH` | サーバ上の辞書フォルダ（本体の `dict/` に当たる場所） |
-| Variable | `DEPLOY_PROTOCOL` | `sftp` か `ftps`。未設定なら `sftp` |
-| Variable | `DEPLOY_PORT` | 既定以外のポートを使うときだけ |
-
-`DEPLOY_PATH` は Secret にしないこと。Secret の値と同じ文字列はログ中ですべて伏せられるため、
-`/` などを入れるとログが読めなくなる。
-
-## テスト
+イジェール語オンライン辞書。本番は [zaslon.info/dict/](https://zaslon.info/dict/dict.php)。
+zaslon.info 本体（zaslon-site）の `dict/` に置く前提で動く。
+
+## 使い方
+### 手元での確認
+`辞書チェック.bat` を開くと PHP の組み込みサーバが立ち上がり、`http://127.0.0.1:8081/dict/dict.php` が開く。止めるときは Ctrl+C。
+
+- 辞書データ `idyer.json`（[別リポジトリ](https://github.com/Zaslon/IdyerinDictionary)）をこのフォルダに置くこと
+- PHP は PATH → `C:\php` → `C:\xampp\php` の順に探す。環境変数 `PHP_EXE` で指定可。`mbstring` が無ければ `ext` から足して起動する
+- 隣に `zaslon-site` があればそれをドキュメントルートにする（サイト直下のアイコンも出る）。凡例は辞書側の簡易変換で出る
+- 待ち受けは `127.0.0.1:8081` のみ。本体の `ブログチェック.bat`（8080）と同時に動かせる
+- `Endrata` フォントはリポジトリに無いため、イジェール文字表示は既定のフォントになる
+
+### テスト
 ```
 php tests/run.php
 ```
+凡例の Markdown 変換のテストは、本体の中の `dict/` に置いたときだけ動く。
 
-凡例のMarkdown変換だけは本体（zaslon-site）を必要とするため、
-本体の中の `dict/` に置いた状態で実行したときだけ、そのぶんのテストも一緒に動く。
-辞書のリポジトリ単体で実行した場合は、原文をそのまま出す側の動きだけを確かめる。
+### 単語数の記録
+`chart.php` のグラフの元データ `logger/dictLog.csv` に、単語数が変わっていれば「日付, 単語数」を追記する。cron で毎日1回まわす。
+```
+php logger/idyer_logger.php
+```
+`logger/` は公開ディレクトリにあるため、CLI 以外からの実行は 403 で弾く。
+
+### キャッシュ
+ソート結果を `cache/`（Git 管理外）に保存する。`idyer.json` と `func.php` の更新時刻・サイズが変われば作り直すので通常は触らなくてよい。手動で消すならディレクトリごと消してよい。
+
+## ファイル構成
+| ファイル | 役割 |
+| --- | --- |
+| `dict.php` | 検索ページ。パラメータの解釈と組み立てのみ |
+| `results.php` | 検索結果の断片（`#results` の中身）。`livesearch.js` が使う |
+| `example.php` / `legend.php` / `chart.php` | 例文一覧・凡例・単語数推移のページ |
+| `offline.php` | 通信できないときに Service Worker が出すページ |
+| `config.php` | サイト共通設定 |
+| `func.php` | 設定読み込み、文字列処理、辞書順ソート、データ読み込み、キャッシュ |
+| `search.php` | 検索と接辞サジェスト |
+| `view.php` | 検索結果の HTML 出力 |
+| `markdown.php` | 凡例用の簡易 Markdown 変換（本体が無い環境用） |
+| `header.php` / `footer.php` | 全ページ共通のレイアウト |
+| `pwa.php` / `manifest.php` / `sw.php` / `sw.js` / `pwa.js` / `icon-maskable.php` | PWA |
+| `design-system.css` | ZasDesignSystem の部品とトークン。生成物なので手で編集しない |
+| `dict.css` | 辞書のスタイル |
+| `_css/` | `design-system.css` の生成スクリプトと生成元。サーバには送らない |
+| `script.js` | 明暗切り替え、メニューのドロワー、画面の色 |
+| `dict.js` | イジェール文字表示の切り替え |
+| `pronunciation.js` | 発音記号の自動生成 |
+| `livesearch.js` | インクリメンタルサーチ |
+| `wordchart.js` | 単語数推移のグラフ |
+| `affixTable.csv` | 接辞テーブル（[docs/search.md](docs/search.md)） |
+| `vendor/` | 第三者製のスクリプト・書体と、ライセンス全文 |
+| `logger/` | 単語数の記録。`dictLog.csv` の正はサーバ側 |
+| `tests/run.php` | テスト |
+| `辞書チェック.bat` / `_local/router.php` | 手元での確認用 |
+
+サイトアイコン（`/favicon.ico` `/icon-512.png` `/apple-touch-icon.png`）は本体のサイト直下のものを共用する。
+
+## 詳細
+| 文書 | 内容 |
+| --- | --- |
+| [docs/search.md](docs/search.md) | 検索・接辞サジェスト・インクリメンタルサーチ・ページ送り・辞書順・例文 |
+| [docs/pronunciation.md](docs/pronunciation.md) | 発音記号と vendor の作り直し・ライセンス |
+| [docs/appearance.md](docs/appearance.md) | デザインシステム・CSS・明暗・メニュー・画面の色・イジェール文字表示 |
+| [docs/site.md](docs/site.md) | 共通設定・本体との連携（アクセス解析・OGP・検索エンジン・凡例） |
+| [docs/pwa.md](docs/pwa.md) | ホーム画面への追加・Service Worker |
+| [docs/deploy.md](docs/deploy.md) | デプロイ |
 
 ## 参照
-[文法書](https://zaslon.info/idyer/)
-
-[web辞書本番環境](https://zaslon.info/dict/dict.php)
-
-[辞書の内容データ](https://github.com/Zaslon/IdyerinDictionary)
+- [文法書](https://zaslon.info/idyer/)
+- [web辞書本番環境](https://zaslon.info/dict/dict.php)
+- [辞書の内容データ](https://github.com/Zaslon/IdyerinDictionary)
