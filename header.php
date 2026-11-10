@@ -157,7 +157,6 @@ $ogImage = absoluteUrl($config['og_image']);
 		</button>
 		<div class="site-brand">
 			<<?php echo $brandTag; ?> class="site-title"><a href="<?php echo h($config['pages']['dict']['path']); ?>"><?php echo h($config['site_title']); ?></a></<?php echo $brandTag; ?>>
-			<p class="site-tagline"><?php echo h($config['site_tagline']); ?></p>
 		</div>
 <?php
 //押した結果（これからなる明暗）を文言と絵で示す。どちらを出すかは script.js が今の表示に合わせる。

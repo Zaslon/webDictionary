@@ -118,11 +118,6 @@ ul.navigation a:focus-visible,
 }
 .site-title a:any-link { color: var(--sw-color-text); text-decoration: none; }
 .site-title a:hover { text-decoration: underline; text-decoration-thickness: calc(1 / 16 * 1rem); }
-.site-tagline {
-	margin: 0;
-	color: var(--sw-color-text-secondary);
-	line-height: 1.5;
-}
 .site-header__theme { flex-shrink: 0; }
 /* 絵と文言は「押すとなる明暗」の分だけを出す（script.js が hidden を付け替える）。
    部品の絵は display を持つので、hidden だけでは消えない。 */
@@ -140,7 +135,6 @@ ul.navigation a:focus-visible,
 	.site-header__bar { padding-top: calc(8 / 16 * 1rem); padding-bottom: calc(8 / 16 * 1rem); }
 	/* 本体（28）より小さいのは、サイト名が和文で長く、本体の大きさでは狭い画面で 2 行を超えるため */
 	.site-title { font-size: calc(24 / 16 * 1rem); line-height: 1.3; }
-	.site-tagline { font-size: calc(14 / 16 * 1rem); }
 	/* 狭い画面では明暗の切り替えを絵だけのボタンにする。文言は読み上げ用に残す。 */
 	.site-header__theme-label {
 		position: absolute; width: 1px; height: 1px; overflow: hidden;
