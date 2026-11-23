@@ -12,7 +12,7 @@ zaslon.info 本体と同じく ZasDesignSystem（デジタル庁デザインシ�
 `dict.css` では部品（`.dads-*` / `.sw-*`）の見た目を上書きせず、色は `--sw-color-*` トークンだけを使う（ダーク用の指定は不要）。
 
 ## design-system.css の作り直し
-`_css/design-system.full.css`（ZasDesignSystem の `local-design-system/web/design-system.css` の写し）から、使う部品だけを残して作る。デプロイ時にビルドしないので生成物もコミットする。
+`_css/design-system.full.css`（ZasDesignSystem の `design-system/web/design-system.css` の写し）から、使う部品だけを残して作る。デプロイ時にビルドしないので生成物もコミットする。
 ```
 node _css/build.mjs
 ```

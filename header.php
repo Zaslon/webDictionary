@@ -151,9 +151,7 @@ $ogImage = absoluteUrl($config['og_image']);
 ?>
 		<button class="dads-hamburger-menu-icon-button site-header__menu-button" type="button"
 		        aria-haspopup="dialog" aria-controls="site-drawer" data-js-drawer-open hidden>
-			<svg class="dads-hamburger-menu-icon-button__icon" width="44" height="44" viewBox="0 0 44 44" role="img" aria-label="Menu">
-				<path d="M11 15h22v2H11zM11 21h22v2H11zM11 27h22v2H11z" fill="currentcolor"/>
-			</svg>
+			<svg class="dads-hamburger-menu-icon-button__icon" width="44" height="44" role="img" aria-label="Menu" viewBox="-400 -1360 1760 1760" fill="currentcolor"><path d="M160-240q-17 0-28.5-11.5T120-280q0-17 11.5-28.5T160-320h640q17 0 28.5 11.5T840-280q0 17-11.5 28.5T800-240H160Zm0-200q-17 0-28.5-11.5T120-480q0-17 11.5-28.5T160-520h640q17 0 28.5 11.5T840-480q0 17-11.5 28.5T800-440H160Zm0-200q-17 0-28.5-11.5T120-680q0-17 11.5-28.5T160-720h640q17 0 28.5 11.5T840-680q0 17-11.5 28.5T800-640H160Z"/></svg>
 		</button>
 		<div class="site-brand">
 			<<?php echo $brandTag; ?> class="site-title"><a href="<?php echo h($config['pages']['dict']['path']); ?>"><?php echo h($config['site_title']); ?></a></<?php echo $brandTag; ?>>
@@ -164,12 +162,8 @@ $ogImage = absoluteUrl($config['og_image']);
 //vendor/LICENSE-material-symbols.txt）の写し。
 ?>
 		<button class="dads-button site-header__theme" type="button" data-type="text" data-size="md" data-js-theme-toggle hidden>
-			<svg class="dads-button__icon" data-js-theme-next="dark" width="24" height="24" viewBox="0 -960 960 960" fill="currentcolor" aria-hidden="true">
-				<path d="M481.15-140q-141.66 0-240.83-99.17-99.16-99.16-99.16-240.83 0-135.77 92.11-232.88 92.11-97.12 225.57-105.2 8.62 0 16.93.62 8.3.62 16.3 1.85-30.61 28.61-48.76 69.15-18.16 40.54-18.16 86.46 0 98.33 68.84 167.17Q562.82-424 661.15-424q46.54 0 86.77-18.15 40.23-18.16 68.46-48.77 1.23 8 1.85 16.31.61 8.3.61 16.92-7.69 133.46-104.8 225.57Q616.92-140 481.15-140Zm0-60q88 0 158-48.5t102-126.5q-20 5-40 8t-40 3q-123 0-209.5-86.5T365.15-660q0-20 3-40t8-40q-78 32-126.5 102t-48.5 158q0 116 82 198t198 82Zm-10-270Z"/>
-			</svg>
-			<svg class="dads-button__icon" data-js-theme-next="light" width="24" height="24" viewBox="0 -960 960 960" fill="currentcolor" aria-hidden="true" hidden>
-				<path d="M480-360q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm0 60q-74.92 0-127.46-52.54Q300-405.08 300-480q0-74.92 52.54-127.46Q405.08-660 480-660q74.92 0 127.46 52.54Q660-554.92 660-480q0 74.92-52.54 127.46Q554.92-300 480-300ZM200-450H50v-60h150v60Zm710 0H760v-60h150v60ZM450-760v-150h60v150h-60Zm0 710v-150h60v150h-60ZM262.92-656.92l-93.69-90.46 42.39-44.39 90.23 92.69-38.93 42.16Zm485.46 488.69-90.84-93.31 39.54-41.54 93.69 90.46-42.39 44.39Zm-91.46-528.85 90.46-93.69 44.39 42.39-92.69 90.23-42.16-38.93ZM168.23-211.62l93.31-90.84 40.77 39.54-90.08 94.07-44-42.77ZM480-480Z"/>
-			</svg>
+			<svg class="dads-button__icon" data-js-theme-next="dark" width="24" height="24" aria-hidden="true" viewBox="0 -960 960 960" fill="currentcolor"><path d="M480-120q-151 0-255.5-104.5T120-480q0-138 90-239.5T440-838q13-2 23 3.5t16 14.5q6 9 6.5 21t-7.5 23q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q11-7 22.5-6.5T819-479q10 5 15.5 15t3.5 24q-14 138-117.5 229T480-120Zm0-80q88 0 158-48.5T740-375q-20 5-40 8t-40 3q-123 0-209.5-86.5T364-660q0-20 3-40t8-40q-78 32-126.5 102T200-480q0 116 82 198t198 82Zm-10-270Z"/></svg>
+			<svg class="dads-button__icon" data-js-theme-next="light" width="24" height="24" aria-hidden="true" hidden viewBox="0 -960 960 960" fill="currentcolor"><path d="M565-395q35-35 35-85t-35-85q-35-35-85-35t-85 35q-35 35-35 85t35 85q35 35 85 35t85-35Zm-226.5 56.5Q280-397 280-480t58.5-141.5Q397-680 480-680t141.5 58.5Q680-563 680-480t-58.5 141.5Q563-280 480-280t-141.5-58.5ZM80-440q-17 0-28.5-11.5T40-480q0-17 11.5-28.5T80-520h80q17 0 28.5 11.5T200-480q0 17-11.5 28.5T160-440H80Zm720 0q-17 0-28.5-11.5T760-480q0-17 11.5-28.5T800-520h80q17 0 28.5 11.5T920-480q0 17-11.5 28.5T880-440h-80ZM451.5-771.5Q440-783 440-800v-80q0-17 11.5-28.5T480-920q17 0 28.5 11.5T520-880v80q0 17-11.5 28.5T480-760q-17 0-28.5-11.5Zm0 720Q440-63 440-80v-80q0-17 11.5-28.5T480-200q17 0 28.5 11.5T520-160v80q0 17-11.5 28.5T480-40q-17 0-28.5-11.5ZM226-678l-43-42q-12-11-11.5-28t11.5-29q12-12 29-12t28 12l42 43q11 12 11 28t-11 28q-11 12-27.5 11.5T226-678Zm494 495-42-43q-11-12-11-28.5t11-27.5q11-12 27.5-11.5T734-282l43 42q12 11 11.5 28T777-183q-12 12-29 12t-28-12Zm-42-495q-12-11-11.5-27.5T678-734l42-43q11-12 28-11.5t29 11.5q12 12 12 29t-12 28l-43 42q-12 11-28 11t-28-11ZM183-183q-12-12-12-29t12-28l43-42q12-11 28.5-11t27.5 11q12 11 11.5 27.5T282-226l-42 43q-11 12-28 11.5T183-183Zm297-297Z"/></svg>
 			<span class="site-header__theme-label" data-js-theme-next="dark">ダークモードにする</span>
 			<span class="site-header__theme-label" data-js-theme-next="light" hidden>ライトモードにする</span>
 		</button>
@@ -203,9 +197,7 @@ $ogImage = absoluteUrl($config['og_image']);
 	<h2 id="site-drawer-heading" class="dads-u-visually-hidden">メニュー</h2>
 	<div class="dads-drawer__header">
 		<button class="dads-hamburger-menu-button" type="button" data-js-drawer-close>
-			<svg class="dads-hamburger-menu-button__icon" width="24" height="24" viewBox="0 0 120 120" aria-hidden="true">
-				<path d="M32 95L25 88L53 60L25 32L32 25L60 53L88 25L95 32L67 60L95 88L88 95L60 67L32 95Z" fill="currentcolor"/>
-			</svg>
+			<svg class="dads-hamburger-menu-button__icon" width="24" height="24" aria-hidden="true" viewBox="0 -960 960 960" fill="currentcolor"><path d="M480-424 284-228q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536-480l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480-424Z"/></svg>
 			閉じる
 		</button>
 	</div>

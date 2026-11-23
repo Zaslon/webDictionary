@@ -40,7 +40,7 @@ require __DIR__ . '/header.php';
 			<div class="sw-search-box" data-size="md">
 				<div class="sw-search-box__fields">
 					<label class="sw-search-box__input">
-						<svg class="sw-search-box__input-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 20.5-6-6a7.4 7.4 0 0 0 1.9-5A7.4 7.4 0 0 0 9.5 2 7.5 7.5 0 1 0 14 15.5l6 6 1-1ZM3.5 9.5a6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6 6 6 0 0 1-6-6Z" fill="currentcolor"/></svg>
+						<svg class="sw-search-box__input-icon" width="24" height="24" aria-hidden="true" viewBox="0 -960 960 960" fill="currentcolor"><path d="M380-320q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l224 224q11 11 11 28t-11 28q-11 11-28 11t-28-11L532-372q-30 24-69 38t-83 14Zm0-80q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>
 						<span class="dads-u-visually-hidden">検索語</span>
 						<input class="sw-search-box__input-control" type="search" name="keyBox" id="keyBox" placeholder="検索語を入力" value="<?php echo h($request['keyBox']); ?>" autocomplete="off" enterkeyhint="search">
 					</label>

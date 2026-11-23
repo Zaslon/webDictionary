@@ -39,22 +39,22 @@ const usedClasses = new Set(siteText.match(/\b(?:dads|sw)-[a-zA-Z0-9_-]+/g));
 const exported = await readFile(SOURCE, 'utf8');
 
 // ---- キーカラーをグレーにする ----
-// ZasDesignSystem の書き出しはキーカラーが赤紫だが、本体は無彩色を基調にしている。辞書も本体に合わせる。
+// ZasDesignSystem の書き出しはキーカラーが青だが、本体は無彩色を基調にしている。辞書も本体に合わせる。
 // 灰色は各段階と相対輝度が同じ値にしてあるので、白・背景とのコントラスト比は書き出し時の検証結果のまま保たれる。
-// 赤紫の値はテーマの層にしか現れない（部品の CSS は変数で参照する）ので、値の文字列で置き換えてよい。
+// 青の値はテーマの層にしか現れない（部品の CSS は変数で参照する）ので、値の文字列で置き換えてよい。
 const KEY_TO_GRAY = {
-  '#FFE6F7': '#EDEDED', '#FBDAF1': '#E3E3E3', '#EAC2DE': '#CDCDCD', '#D8AACB': '#B8B8B8',
-  '#C590B6': '#A0A0A0', '#B074A0': '#878787', '#985387': '#6B6B6B', '#823B72': '#555555',
-  '#722D63': '#474747', '#69235A': '#3F3F3F', '#561549': '#303030', '#49013C': '#242424',
-  '#320029': '#171717',
+  '#E6EDFD': '#EDEDED', '#D8E3FF': '#E3E3E3', '#B9CDFF': '#CDCDCD', '#9AB6FF': '#B7B7B7',
+  '#7A9CFF': '#A0A0A0', '#597EFB': '#868686', '#4061DB': '#6B6B6B', '#2E49C1': '#565656',
+  '#2238B0': '#474747', '#1C2EA6': '#3F3F3F', '#141D94': '#323232', '#0C1371': '#242424',
+  '#060A50': '#171717',
 };
 // リンクだけは青にする。灰色のままだと地の文と色で見分けられないため。
 // 置き換え前の値で明暗を見分ける（ライトはキーの 700/600、ダークは 300/200 が入っている）。
 const LINK = [
-  ['--sw-color-link', '#823B72', '#1A5FB4'],
-  ['--sw-color-link-hover', '#985387', '#3A75C4'],
-  ['--sw-color-link', '#D8AACB', '#85B4F0'],
-  ['--sw-color-link-hover', '#EAC2DE', '#A9CBF5'],
+  ['--sw-color-link', '#2E49C1', '#1A5FB4'],
+  ['--sw-color-link-hover', '#4061DB', '#3A75C4'],
+  ['--sw-color-link', '#9AB6FF', '#85B4F0'],
+  ['--sw-color-link-hover', '#B9CDFF', '#A9CBF5'],
 ];
 let recolored = exported;
 for (const [name, from, to] of LINK) {
