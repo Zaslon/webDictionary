@@ -146,7 +146,8 @@ ul.navigation a:focus-visible,
 .content {
 	max-width: var(--dict-page-width);
 	margin: 0 auto;
-	padding: calc(32 / 16 * 1rem) calc(16 / 16 * 1rem) calc(64 / 16 * 1rem);
+	/* 下端はフッタの罫でも区切るため、区画の間（64）より一段小さくする */
+	padding: calc(32 / 16 * 1rem) calc(16 / 16 * 1rem);
 }
 .content p { margin: 0 0 calc(16 / 16 * 1rem); }
 
@@ -491,7 +492,7 @@ ul.navigation li.navigationGap {
 /* ============ フッタ（本体の css/style.css と同じ） ============ */
 .site-footer {
 	border-top: 1px solid var(--sw-color-border);
-	padding: calc(24 / 16 * 1rem) calc(16 / 16 * 1rem);
+	padding: calc(16 / 16 * 1rem);
 	color: var(--sw-color-text-secondary);
 	text-align: center;
 }
