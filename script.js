@@ -26,21 +26,19 @@
 		});
 	}
 
-	const themeButton = document.querySelector('[data-js-theme-toggle]');
+	// 水平メニューとドロワーに 1 つずつある
+	const themeButtons = document.querySelectorAll('[data-js-theme-toggle]');
 
 	// ボタンには押した結果（今と逆の明暗）を出す。
 	// 絵は <svg> で、SVGElement には hidden プロパティが無いため、属性を直接付け外しする。
 	function syncThemeButton() {
-		if (!themeButton) {
-			return;
-		}
 		const next = (currentTheme() === 'dark') ? 'light' : 'dark';
-		themeButton.querySelectorAll('[data-js-theme-next]').forEach(function (element) {
+		document.querySelectorAll('[data-js-theme-toggle] [data-js-theme-next]').forEach(function (element) {
 			element.toggleAttribute('hidden', element.getAttribute('data-js-theme-next') !== next);
 		});
 	}
 
-	if (themeButton) {
+	themeButtons.forEach(function (themeButton) {
 		themeButton.hidden = false;
 		themeButton.addEventListener('click', function () {
 			const next = (currentTheme() === 'dark') ? 'light' : 'dark';
@@ -52,7 +50,7 @@
 				// プライベートモードなどで保存できなくても、そのページ内の切り替えは効かせる
 			}
 		});
-	}
+	});
 
 	// data-theme をどこから書き換えても、ボタンとブラウザ枠の色を追従させる
 	new MutationObserver(function () {
@@ -142,11 +140,19 @@
 		});
 	}
 
-	// ResizeObserver は使わない。測るために data-nav を書き換えると自身の大きさが変わり、通知が循環する。
-	narrowQuery.addEventListener('change', updateNavMode);
-	window.addEventListener('resize', updateNavMode);
-	if (document.fonts && document.fonts.ready) {
-		document.fonts.ready.then(updateNavMode);
+	// サイト名の収め方は、ハンバーガーメニューボタンの有無で変わるため、メニューを決めてから測る
+	function updateHeader() {
+		updateNavMode();
+		if (window.fitSiteHeader) {
+			window.fitSiteHeader();
+		}
 	}
-	updateNavMode();
+
+	// ResizeObserver は使わない。測るために data-nav を書き換えると自身の大きさが変わり、通知が循環する。
+	narrowQuery.addEventListener('change', updateHeader);
+	window.addEventListener('resize', updateHeader);
+	if (document.fonts && document.fonts.ready) {
+		document.fonts.ready.then(updateHeader);
+	}
+	updateHeader();
 })();
