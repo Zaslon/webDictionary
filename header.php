@@ -182,7 +182,9 @@ $ogImage = absoluteUrl($config['og_image']);
 </header>
 <?php
 //水平メニューを 1 行に収められないとき（狭い画面を含む）は、同じ項目を同じ順でドロワーに並べる。
-//サイト名も、text-display の大きさで 1 行に収まらないときは data-title="compact" で詰めるときの大きさにする。
+//サイト名は 1 行に収める（ZasDesignSystem の tokens.md「text-display」）。収まるまで、明暗の切り替えを絵だけにする、
+//28 まで小さくする、明暗の切り替えをドロワーへ移す、18 まで小さくする、の順に試す。
+//script.js も幅が変わるたびに window.fitSiteHeader を呼ぶ。
 //以後の切り替えは script.js が行う。描画前に決めないと水平メニューが一瞬見えるので、ここでも判定する。
 //768 は ZasDesignSystem の tokens.md の breakpoint-split。dict.css と script.js の値もそろえること。
 ?>
@@ -192,10 +194,37 @@ $ogImage = absoluteUrl($config['og_image']);
   var list = header.querySelector('.dads-horizontal-menu');
   var narrow = window.matchMedia('(max-width: 767.98px)').matches;
   header.setAttribute('data-nav', narrow || list.scrollWidth > list.clientWidth ? 'drawer' : 'bar');
-  var title = header.querySelector('.site-title');
-  title.style.whiteSpace = 'nowrap';
-  if (!narrow && title.scrollWidth > title.clientWidth) header.setAttribute('data-title', 'compact');
-  title.style.whiteSpace = '';
+
+  window.fitSiteHeader = function () {
+    var title = header.querySelector('.site-title');
+    var button = header.querySelector('.site-header__theme');
+    // 切り替えボタンは script.js が hidden を外すまで隠れている。外した後の幅で決めるため、測る間だけ出す
+    var wasHidden = button.hidden;
+    button.hidden = false;
+    var states = [[null, null, 48], ['off', null, 48], ['off', null, 36], ['off', null, 28]];
+    var smaller = [22, 20, 18];
+    if (header.getAttribute('data-nav') === 'drawer') {
+      [48, 36, 28].concat(smaller).forEach(function (size) { states.push(['off', 'menu', size]); });
+    } else {
+      smaller.forEach(function (size) { states.push(['off', null, size]); });
+    }
+    function apply(state) {
+      if (state[0]) header.setAttribute('data-theme-label', state[0]); else header.removeAttribute('data-theme-label');
+      if (state[1]) header.setAttribute('data-theme-place', state[1]); else header.removeAttribute('data-theme-place');
+      title.style.fontSize = (state[2] / 16) + 'rem';
+      title.style.lineHeight = state[2] === 48 ? '1.4' : '1.3';
+    }
+    // 折り返した後の高さでは判定できないため、折り返しを止めて幅で測る
+    for (var i = 0; i < states.length; i++) {
+      apply(states[i]);
+      title.style.whiteSpace = 'nowrap';
+      var fits = title.scrollWidth <= title.clientWidth;
+      title.style.whiteSpace = '';
+      if (fits) break;
+    }
+    button.hidden = wasHidden;
+  };
+  window.fitSiteHeader();
 })();
 </script>
 <dialog id="site-drawer" class="dads-drawer" data-placement="left" aria-labelledby="site-drawer-heading">
@@ -215,6 +244,12 @@ $ogImage = absoluteUrl($config['og_image']);
 				</a>
 			</li>
 <?php endforeach; ?>
+			<li class="site-drawer__theme">
+				<button class="dads-menu-list__item" type="button" data-type="box" data-size="regular" data-js-theme-toggle>
+					<span class="dads-menu-list__label" data-js-theme-next="dark">ダークモードにする</span>
+					<span class="dads-menu-list__label" data-js-theme-next="light" hidden>ライトモードにする</span>
+				</button>
+			</li>
 		</ul>
 	</div>
 </dialog>

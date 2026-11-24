@@ -26,21 +26,19 @@
 		});
 	}
 
-	const themeButton = document.querySelector('[data-js-theme-toggle]');
+	// ヘッダとドロワーに 1 つずつある。どちらを出すかは header.php の fitSiteHeader が決める
+	const themeButtons = document.querySelectorAll('[data-js-theme-toggle]');
 
 	// ボタンには押した結果（今と逆の明暗）を出す。
 	// 絵は <svg> で、SVGElement には hidden プロパティが無いため、属性を直接付け外しする。
 	function syncThemeButton() {
-		if (!themeButton) {
-			return;
-		}
 		const next = (currentTheme() === 'dark') ? 'light' : 'dark';
-		themeButton.querySelectorAll('[data-js-theme-next]').forEach(function (element) {
+		document.querySelectorAll('[data-js-theme-toggle] [data-js-theme-next]').forEach(function (element) {
 			element.toggleAttribute('hidden', element.getAttribute('data-js-theme-next') !== next);
 		});
 	}
 
-	if (themeButton) {
+	themeButtons.forEach(function (themeButton) {
 		themeButton.hidden = false;
 		themeButton.addEventListener('click', function () {
 			const next = (currentTheme() === 'dark') ? 'light' : 'dark';
@@ -52,7 +50,7 @@
 				// プライベートモードなどで保存できなくても、そのページ内の切り替えは効かせる
 			}
 		});
-	}
+	});
 
 	// data-theme をどこから書き換えても、ボタンとブラウザ枠の色を追従させる
 	new MutationObserver(function () {
@@ -142,29 +140,12 @@
 		});
 	}
 
-	// サイト名が text-display（48）で 1 行に収まらないときは、詰めるときの大きさ（36）にする（ZasDesignSystem の tokens.md）。
-	// 折り返した後の高さでは判定できないため、一度 48 に戻し、折り返しを止めて幅を測る。
-	// 狭い画面は dict.css の別の大きさを使うので、詰めない。
-	function updateTitleSize() {
-		const title = header && header.querySelector('.site-title');
-		if (!title) {
-			return;
-		}
-		header.removeAttribute('data-title');
-		if (narrowQuery.matches) {
-			return;
-		}
-		title.style.whiteSpace = 'nowrap';
-		const overflows = title.scrollWidth > title.clientWidth;
-		title.style.whiteSpace = '';
-		if (overflows) {
-			header.setAttribute('data-title', 'compact');
-		}
-	}
-
+	// サイト名の収め方は、ハンバーガーメニューボタンの有無で変わるため、メニューを決めてから測る
 	function updateHeader() {
-		updateTitleSize();
 		updateNavMode();
+		if (window.fitSiteHeader) {
+			window.fitSiteHeader();
+		}
 	}
 
 	// ResizeObserver は使わない。測るために data-nav を書き換えると自身の大きさが変わり、通知が循環する。
