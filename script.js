@@ -26,7 +26,7 @@
 		});
 	}
 
-	// ヘッダとドロワーに 1 つずつある。どちらを出すかは header.php の fitSiteHeader が決める
+	// 水平メニューとドロワーに 1 つずつある
 	const themeButtons = document.querySelectorAll('[data-js-theme-toggle]');
 
 	// ボタンには押した結果（今と逆の明暗）を出す。

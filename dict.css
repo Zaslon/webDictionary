@@ -116,26 +116,22 @@ ul.navigation a:focus-visible,
 	/* 辞書のサイト名は和文で長く、狭い画面で語の途中（「オ／ンライン」）で折り返すため、空白で折り返させる */
 	word-break: keep-all;
 }
-/* サイト名を 1 行に収めるための段階（header.php の fitSiteHeader が付ける）。
-   data-theme-label="off"：明暗の切り替えを絵だけにする。data-theme-place="menu"：ドロワーの中へ移す。 */
-.site-header[data-theme-label="off"] .site-header__theme-label {
-	position: absolute; width: 1px; height: 1px; overflow: hidden;
-	clip-path: inset(50%); white-space: nowrap;
-}
-.site-header[data-theme-place="menu"] .site-header__theme { display: none; }
-.site-header:not([data-theme-place="menu"]) ~ .dads-drawer .site-drawer__theme { display: none; }
 .site-title a:any-link { color: var(--sw-color-text); text-decoration: none; }
 .site-title a:hover { text-decoration: underline; text-decoration-thickness: calc(1 / 16 * 1rem); }
-.site-header__theme { flex-shrink: 0; }
-/* 絵と文言は「押すとなる明暗」の分だけを出す（script.js が hidden を付け替える）。
-   部品の絵は display を持つので、hidden だけでは消えない。 */
-.site-header__theme [hidden] { display: none; }
+/* 明暗の切り替え（水平メニューとドロワーの末尾）。移動先ではなく操作なので、太字にせず移動先と見分ける。
+   絵と文言は「押すとなる明暗」の分だけを出す（script.js が hidden を付け替える）。 */
+html:not(.js-enabled) .site-theme-item { display: none; }
+.site-theme-toggle { font-weight: 400; }
+.site-theme-toggle__icon { flex-shrink: 0; }
+.site-theme-toggle [hidden] { display: none; }
 
 /* 水平メニューとハンバーガーメニューボタンは、header.php のスクリプトが付ける data-nav で出し分ける。
    JavaScript が動かない環境では data-nav が付かず、水平メニューだけを出す（ドロワーは開けないため）。 */
 .site-header[data-nav="drawer"] .site-nav { display: none; }
 .site-header:not([data-nav="drawer"]) .site-header__menu-button { display: none; }
 .site-header:not([data-nav]) .dads-horizontal-menu { overflow-x: auto; }
+/* 項目の中で折り返すと 1 行に収まって見え、ドロワーへ切り替える判定（scrollWidth）が効かない */
+.site-nav .dads-horizontal-menu__item-inner { white-space: nowrap; }
 /* 水平メニューはヘッダの下罫と二重にならないよう、メニュー側の罫を下罫として使う */
 .site-header[data-nav="bar"] { border-bottom: none; }
 
