@@ -116,6 +116,7 @@ ul.navigation a:focus-visible,
 	/* 辞書のサイト名は和文で長く、狭い画面で語の途中（「オ／ンライン」）で折り返すため、空白で折り返させる */
 	word-break: keep-all;
 }
+.site-header[data-title="compact"] .site-title { font-size: calc(36 / 16 * 1rem); line-height: 1.3; }
 .site-title a:any-link { color: var(--sw-color-text); text-decoration: none; }
 .site-title a:hover { text-decoration: underline; text-decoration-thickness: calc(1 / 16 * 1rem); }
 .site-header__theme { flex-shrink: 0; }

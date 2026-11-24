@@ -182,6 +182,7 @@ $ogImage = absoluteUrl($config['og_image']);
 </header>
 <?php
 //水平メニューを 1 行に収められないとき（狭い画面を含む）は、同じ項目を同じ順でドロワーに並べる。
+//サイト名も、text-display の大きさで 1 行に収まらないときは data-title="compact" で詰めるときの大きさにする。
 //以後の切り替えは script.js が行う。描画前に決めないと水平メニューが一瞬見えるので、ここでも判定する。
 //768 は ZasDesignSystem の tokens.md の breakpoint-split。dict.css と script.js の値もそろえること。
 ?>
@@ -191,6 +192,10 @@ $ogImage = absoluteUrl($config['og_image']);
   var list = header.querySelector('.dads-horizontal-menu');
   var narrow = window.matchMedia('(max-width: 767.98px)').matches;
   header.setAttribute('data-nav', narrow || list.scrollWidth > list.clientWidth ? 'drawer' : 'bar');
+  var title = header.querySelector('.site-title');
+  title.style.whiteSpace = 'nowrap';
+  if (!narrow && title.scrollWidth > title.clientWidth) header.setAttribute('data-title', 'compact');
+  title.style.whiteSpace = '';
 })();
 </script>
 <dialog id="site-drawer" class="dads-drawer" data-placement="left" aria-labelledby="site-drawer-heading">
