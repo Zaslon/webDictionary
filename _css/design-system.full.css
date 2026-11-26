@@ -8239,8 +8239,15 @@ html {
   text-underline-offset: calc(3 / 16 * 1rem);
 }
 
+/* 選択中の選択肢に接する外枠と区切り線を、塗りと同じ色で覆う。枠と区切り線は外枠や隣の選択肢の持ち物のため、
+   影を枠の太さだけ外へ広げて重ね、隣より前面に出す。 */
+.sw-radio-group__option:has(.sw-radio-group__input:checked) {
+  z-index: 1;
+}
+
 .sw-radio-group__input:checked + .sw-radio-group__label {
   background-color: var(--color-key-900);
+  box-shadow: 0 0 0 calc(1 / 16 * 1rem) var(--color-key-900);
   color: var(--color-neutral-white);
 }
 
@@ -8250,12 +8257,13 @@ html {
 
 .sw-radio-group__input:checked:disabled + .sw-radio-group__label {
   background-color: var(--color-neutral-solid-gray-300);
+  box-shadow: 0 0 0 calc(1 / 16 * 1rem) var(--color-neutral-solid-gray-300);
   color: var(--color-neutral-solid-gray-50);
 }
 
-/* フォーカスの枠が隣の選択肢に隠れないよう前面に出す。ラベルだけを出すと入力より上に来て、ホバーが効かなくなる。 */
+/* フォーカスの枠が隣の選択肢に隠れないよう、選択中の選択肢よりも前面に出す。ラベルだけを出すと入力より上に来て、ホバーが効かなくなる。 */
 .sw-radio-group__option:has(.sw-radio-group__input:focus-visible) {
-  z-index: 1;
+  z-index: 2;
 }
 
 .sw-radio-group__input:focus-visible + .sw-radio-group__label {
