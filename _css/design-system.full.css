@@ -8115,7 +8115,6 @@ html {
   display: inline-grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  border: calc(1 / 16 * 1rem) solid var(--color-neutral-solid-gray-500);
   border-radius: var(--sw-radius-control);
   corner-shape: squircle;
   background-color: var(--color-neutral-white);
@@ -8128,13 +8127,26 @@ html {
   }
 }
 
+/* 外枠と区切り線は、選択肢ごとの枠として描く。選択中の選択肢の枠を塗りと同じ色にでき、塗りと線が同じ規則で
+   画素に合わせて丸められるため、端数の表示倍率でも塗りが線からはみ出さない。区切り線は後ろの選択肢が持つ。
+   ダークでは塗りの色を選択中の選択肢の中だけで定義し直すため、線の色を隣の選択肢から参照させない。 */
 .sw-radio-group__option {
   position: relative;
   display: grid;
+  border: calc(1 / 16 * 1rem) solid var(--color-neutral-solid-gray-500);
+  border-inline-end: none;
+  corner-shape: squircle;
 }
 
-.sw-radio-group__option ~ .sw-radio-group__option {
-  border-inline-start: calc(1 / 16 * 1rem) solid var(--color-neutral-solid-gray-500);
+.sw-radio-group__option:first-child {
+  border-start-start-radius: var(--sw-radius-control);
+  border-end-start-radius: var(--sw-radius-control);
+}
+
+.sw-radio-group__option:last-child {
+  border-inline-end: calc(1 / 16 * 1rem) solid var(--color-neutral-solid-gray-500);
+  border-start-end-radius: var(--sw-radius-control);
+  border-end-end-radius: var(--sw-radius-control);
 }
 
 /* 入力を透明のまま選択肢全体に重ねる。矢印キーでの移動と読み上げをブラウザに任せられ、読み上げ中に画面を触っても位置が分かる。 */
@@ -8195,9 +8207,21 @@ html {
   grid-auto-columns: auto;
 }
 
-.sw-radio-group[data-orientation="vertical"] .sw-radio-group__option ~ .sw-radio-group__option {
-  border-inline-start: none;
-  border-block-start: calc(1 / 16 * 1rem) solid var(--color-neutral-solid-gray-500);
+.sw-radio-group[data-orientation="vertical"] .sw-radio-group__option {
+  border: calc(1 / 16 * 1rem) solid var(--color-neutral-solid-gray-500);
+  border-block-end: none;
+  border-radius: 0;
+}
+
+.sw-radio-group[data-orientation="vertical"] .sw-radio-group__option:first-child {
+  border-start-start-radius: var(--sw-radius-control);
+  border-start-end-radius: var(--sw-radius-control);
+}
+
+.sw-radio-group[data-orientation="vertical"] .sw-radio-group__option:last-child {
+  border-block-end: calc(1 / 16 * 1rem) solid var(--color-neutral-solid-gray-500);
+  border-end-start-radius: var(--sw-radius-control);
+  border-end-end-radius: var(--sw-radius-control);
 }
 
 .sw-radio-group[data-orientation="vertical"] .sw-radio-group__label {
@@ -8239,15 +8263,27 @@ html {
   text-underline-offset: calc(3 / 16 * 1rem);
 }
 
-/* 選択中の選択肢に接する外枠と区切り線を、塗りと同じ色で覆う。枠と区切り線は外枠や隣の選択肢の持ち物のため、
-   影を枠の太さだけ外へ広げて重ね、隣より前面に出す。 */
+/* 選択中の選択肢に接する線を塗りと同じ色にする。後ろの選択肢が持つ区切り線は、自分の後ろの線を同じ位置に重ねて覆う。 */
 .sw-radio-group__option:has(.sw-radio-group__input:checked) {
   z-index: 1;
+  border-color: var(--color-key-900);
+  background-color: var(--color-key-900);
+}
+
+.sw-radio-group__option:has(.sw-radio-group__input:checked):not(:last-child) {
+  margin-inline-end: calc(-1 / 16 * 1rem);
+  border-inline-end: calc(1 / 16 * 1rem) solid var(--color-key-900);
+}
+
+.sw-radio-group[data-orientation="vertical"] .sw-radio-group__option:has(.sw-radio-group__input:checked):not(:last-child) {
+  margin-inline-end: 0;
+  margin-block-end: calc(-1 / 16 * 1rem);
+  border-inline-end: calc(1 / 16 * 1rem) solid var(--color-key-900);
+  border-block-end: calc(1 / 16 * 1rem) solid var(--color-key-900);
 }
 
 .sw-radio-group__input:checked + .sw-radio-group__label {
   background-color: var(--color-key-900);
-  box-shadow: 0 0 0 calc(1 / 16 * 1rem) var(--color-key-900);
   color: var(--color-neutral-white);
 }
 
@@ -8255,9 +8291,14 @@ html {
   color: var(--color-neutral-solid-gray-300);
 }
 
+.sw-radio-group__option:has(.sw-radio-group__input:checked:disabled),
+.sw-radio-group[data-orientation="vertical"] .sw-radio-group__option:has(.sw-radio-group__input:checked:disabled):not(:last-child) {
+  border-color: var(--color-neutral-solid-gray-300);
+  background-color: var(--color-neutral-solid-gray-300);
+}
+
 .sw-radio-group__input:checked:disabled + .sw-radio-group__label {
   background-color: var(--color-neutral-solid-gray-300);
-  box-shadow: 0 0 0 calc(1 / 16 * 1rem) var(--color-neutral-solid-gray-300);
   color: var(--color-neutral-solid-gray-50);
 }
 
@@ -9393,7 +9434,7 @@ html {
 :root:not([data-theme="light"]) .dads-calendar__date[data-selected],
 :root:not([data-theme="light"]) .dads-form-control-label__status,
 :root:not([data-theme="light"]) .sw-badge,
-:root:not([data-theme="light"]) .sw-radio-group__input:checked + .sw-radio-group__label {
+:root:not([data-theme="light"]) .sw-radio-group__option:has(.sw-radio-group__input:checked) {
   --color-neutral-white: #FFFFFF;
   --color-neutral-solid-gray-50: #B3B3B3;
   --color-key-900: #4061DB;
@@ -9961,7 +10002,7 @@ html {
 :root[data-theme="dark"] .dads-calendar__date[data-selected],
 :root[data-theme="dark"] .dads-form-control-label__status,
 :root[data-theme="dark"] .sw-badge,
-:root[data-theme="dark"] .sw-radio-group__input:checked + .sw-radio-group__label {
+:root[data-theme="dark"] .sw-radio-group__option:has(.sw-radio-group__input:checked) {
   --color-neutral-white: #FFFFFF;
   --color-neutral-solid-gray-50: #B3B3B3;
   --color-key-900: #4061DB;
